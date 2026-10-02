@@ -3,8 +3,8 @@
 ## Run the project after cloning
 
 This repository contains Playwright API tests for Awesome AI. It does not
-start a local application server: tests call the public API at
-`https://awesome.byst.re` by default.
+start a local application server: tests call the API configured in `.env`.
+The example endpoint is `https://awesome.byst.re`.
 
 ### Prerequisites
 
@@ -17,6 +17,14 @@ From a terminal in the cloned repository, run:
 
 ```bash
 npm ci
+cp .env.example .env
+```
+
+In PowerShell, use `Copy-Item .env.example .env` to copy the file. Fill in
+`API_LOGIN_USERNAME` and `API_LOGIN_PASSWORD` in `.env` with your test account
+credentials, then run:
+
+```bash
 npm test
 ```
 
@@ -52,10 +60,23 @@ Swagger is publicly available as well, so it can be checked when needed: [https:
 
 ## Configuration
 
-The defaults use the supplied sign-in account. Override the endpoint or account
-for an approved environment with `API_BASE_URL`, `API_LOGIN_USERNAME`, and
-`API_LOGIN_PASSWORD`; copy `.env.example` as a starting point. Environment
-variables must be loaded by your shell or CI system.
+Set `API_BASE_URL`, `API_LOGIN_USERNAME`, and `API_LOGIN_PASSWORD` in the
+repository-root `.env`. Dotenv loads this file before configuration values are
+read, including when running from the Playwright IDE extension. Missing or blank
+values fail immediately with an error naming the variable.
+
+Existing shell or CI variables take precedence over `.env`. In CI, supply the
+credentials through your CI provider's secrets and expose them under the same
+environment variable names; a local `.env` file is not required.
+
+Only `.env.example`, with empty credential placeholders, is committed. `.env`
+and `.env.*` files are ignored, except `.env.example`. Playwright authentication
+state and generated reports/traces are also ignored because they can contain
+session tokens or credentials.
+
+This follows Playwright's guidance on
+[environment variables and dotenv](https://playwright.dev/docs/test-parameterize#env-files)
+and [keeping authentication state out of version control](https://playwright.dev/docs/auth).
 
 ## Login endpoint
 
