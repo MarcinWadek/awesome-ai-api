@@ -2,9 +2,9 @@
 
 ## Run the project after cloning
 
-This repository contains Playwright end-to-end tests for the Awesome AI API
-website. It does not start a local application server: the tests run against
-the public site at `https://awesome.byst.re`.
+This repository contains Playwright API tests for Awesome AI. It does not
+start a local application server: tests call the public API at
+`https://awesome.byst.re` by default.
 
 ### Prerequisites
 
@@ -17,19 +17,17 @@ From a terminal in the cloned repository, run:
 
 ```bash
 npm ci
-npx playwright install
-npx playwright test
+npm test
 ```
 
 `npm ci` installs the exact dependency versions recorded in
-`package-lock.json`. `npx playwright install` downloads the browser binaries
-used by the tests; it is normally needed only once per machine or after a
-Playwright upgrade.
+`package-lock.json`. The current suite uses Playwright's HTTP client only, so
+browser binaries are not required.
 
 To run a single test file, use:
 
 ```bash
-npx playwright test tests/example.spec.ts
+npx playwright test tests/api/users/signin.spec.ts
 ```
 
 After a run, open the HTML report with:
@@ -38,11 +36,10 @@ After a run, open the HTML report with:
 npx playwright show-report
 ```
 
-The default configuration runs the test suite in Chromium, Firefox, and
-WebKit. To run only one browser, for example Chromium:
+To run the API project explicitly:
 
 ```bash
-npx playwright test --project=chromium
+npm run test:api
 ```
 
 The API documentation is included in this project in the `docs/api-docs.json` file.
@@ -53,7 +50,19 @@ The backend source code is also publicly available one directory above, in the `
 
 Swagger is publicly available as well, so it can be checked when needed: [https://awesome.byst.re/swagger-ui/index.html](https://awesome.byst.re/swagger-ui/index.html).
 
-The login endpoint can be checked with `curl`.
+## Configuration
+
+The defaults use the supplied sign-in account. Override the endpoint or account
+for an approved environment with `API_BASE_URL`, `API_LOGIN_USERNAME`, and
+`API_LOGIN_PASSWORD`; copy `.env.example` as a starting point. Environment
+variables must be loaded by your shell or CI system.
+
+## Login endpoint
+
+The suite covers `POST /api/v1/users/signin` with test groups in HTTP-status
+order: `200`, `401`, and `422`. It checks JSON and no-store response headers,
+stable session-contract fields, and the live deployment's error envelopes. The
+endpoint can also be checked with `curl`.
 
 In Bash:
 

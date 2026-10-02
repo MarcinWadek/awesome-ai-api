@@ -1,7 +1,10 @@
 {
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.6.3"
+    "@types/node": "^26.6.4"
   },
-  "scripts": {}
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test --project=api"
+  }
 }
