@@ -98,3 +98,35 @@ In PowerShell, use `curl.exe` with `--%`:
 ```powershell
 curl.exe --% -X POST https://awesome.byst.re/api/v1/users/signin -H "Content-Type: application/json" -d "{\"username\":\"<username>\",\"password\":\"<password>\"}"
 ```
+
+## Registration tests
+
+The basic signup suite has four tests: successful registration and sign-in,
+missing required fields, duplicate username, and duplicate email.
+
+```bash
+npm run test:registration
+npm run typecheck
+```
+
+On Windows, use `npm.cmd` if PowerShell blocks the npm script wrapper.
+The tests use the existing `.env` configuration, run with two workers and zero
+retries. Created accounts remain in the environment; automatic cleanup is
+deferred for now. Registration traces are disabled to keep passwords and tokens
+out of traces.
+
+Use the Faker generator in `generators/registration.generator.ts`:
+
+```typescript
+const user = generateRegistrationData();
+const anotherUser = generateRegistrationData({ firstName: 'Anna' });
+```
+
+It generates realistic names that meet the API's minimum length, short ASCII
+passwords, unique usernames, and safe email addresses under `example.invalid`.
+Individual fields can be overridden for test cases. SSO, fixtures, and advanced
+boundary coverage are deferred until the framework needs them.
+
+Faker 10 requires Node 20.19+, 22.13+, or 24+ (verified with Node 24.21).
+No formatter or linter is currently configured. Use `git diff --check` to check
+whitespace. Earlier exploratory findings remain in `docs/signup-exploration.md`.

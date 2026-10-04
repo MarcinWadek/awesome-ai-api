@@ -10,5 +10,5 @@ export function expectNoStoreResponse(response: APIResponse): void {
 
 export function expectNonEmptyString(value: unknown): asserts value is string {
   expect(value).toEqual(expect.any(String));
-  expect(value.trim()).not.toBe('');
+  expect((value as string).trim()).not.toBe('');
 }
