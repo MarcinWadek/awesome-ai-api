@@ -142,6 +142,30 @@ their accounts.
 The fixture uses generated credentials, although startup configuration still
 requires the shared `.env` login credentials for the existing suite.
 
+The lazy `authenticatedPeer` fixture supplies a second independent account for
+prompt isolation checks. It uses the same lifecycle and cleanup as
+`authenticatedUser`; it is created only when a test requests it.
+
+## Traffic, product and prompt tests
+
+Eight dedicated endpoint specs add 24 core tests: six traffic reads, six product
+reads and twelve current-user chat/tool prompt tests. Coverage includes session
+pagination, product lookup errors, prompt persistence/isolation, null reset,
+oversized-input rejection and missing authentication on protected operations.
+Traffic tests target the configured deployment's legacy public access mode.
+
+Run the new batch with:
+
+```powershell
+npx.cmd playwright test tests/api/traffic tests/api/products tests/api/users/chat-system-prompt.get.spec.ts tests/api/users/chat-system-prompt.put.spec.ts tests/api/users/tool-system-prompt.get.spec.ts tests/api/users/tool-system-prompt.put.spec.ts --project=api --retries=0 --workers=2
+```
+
+Run `npm.cmd run typecheck` and the full API suite after the new tests pass.
+See [the API test plan](api-test-plan.md) and
+[exploratory findings](docs/eight-endpoint-exploration.md) for remaining input
+boundaries and the two known prompt parsing/type defects. Those defects are
+documented without skipped test placeholders.
+
 The `/users/me` spec covers the registered identity and rejection of missing,
 malformed, and signature-altered tokens. Run it with two workers and zero retries:
 

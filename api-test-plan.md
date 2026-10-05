@@ -13,7 +13,15 @@ Already covered in `tests/api`:
 | `POST /api/v1/users/signup` | Public | Done | Public registration flow. |
 | `POST /api/v1/users/signin` | Public | Done | Produces access and refresh tokens. |
 | `GET /api/v1/users/me` | Bearer | Done | Confirms authenticated fixture/client setup. |
+| `POST /api/v1/users/refresh`, `POST /api/v1/users/logout` | Public / Bearer | Done | Token rotation and revocation. |
+| `GET /api/v1/traffic/info`, `GET /api/v1/traffic/logs` | Public (legacy mode) | Done (core) | 6 tests: info, session topics, pagination/isolation and validation. |
+| `GET /api/v1/products`, `GET /api/v1/products/{id}` | Bearer | Done (core) | 6 tests: reads, validation, authentication and not-found. |
+| Chat/tool prompt GET and PUT | Bearer | Done (core) | 12 tests: defaults, updates/isolation, null reset, length validation and authentication. |
 | OpenAPI smoke checks | Public | Done | `api-docs` and Swagger UI checks exist. |
+
+Verification on 6 October 2026: all **24 new tests** passed in targeted batches
+(traffic 6, products 6, prompts 12), followed by the **50/50 passing full suite**
+with two workers and zero retries. Typechecking and `git diff --check` passed.
 
 ## Working Rules
 
@@ -53,14 +61,14 @@ Start with these, in order. This keeps early work small and builds reusable clie
 | --- | --- | ---: | --- |
 | 1 | `POST /api/v1/users/refresh` | 2 | Done. Reuses existing signin flow and validates token plumbing. |
 | 2 | `POST /api/v1/users/logout` | 2 | Done. Reuses auth fixture; pairs naturally with refresh token tests. |
-| 3 | `GET /api/v1/traffic/info` | 1 | Public, deterministic response. |
-| 4 | `GET /api/v1/traffic/logs` | 1 | Public paginated read; keep assertions structural. |
-| 5 | `GET /api/v1/products` | 2 | Authenticated read-only endpoint. |
-| 6 | `GET /api/v1/products/{id}` | 2 | Authenticated read plus straightforward `404`. |
-| 7 | `GET /api/v1/users/chat-system-prompt` | 2 | Authenticated current-user read. |
-| 8 | `PUT /api/v1/users/chat-system-prompt` | 2 | Authenticated current-user update with simple payload. |
-| 9 | `GET /api/v1/users/tool-system-prompt` | 2 | Same pattern as chat prompt. |
-| 10 | `PUT /api/v1/users/tool-system-prompt` | 2 | Same pattern as chat prompt update. |
+| 3 | `GET /api/v1/traffic/info` | 1 | Done (core). Public in legacy mode; session topic and validation. |
+| 4 | `GET /api/v1/traffic/logs` | 1 | Done (core). Public page structure and controlled session pagination. |
+| 5 | `GET /api/v1/products` | 2 | Done (core). Authenticated read-only endpoint. |
+| 6 | `GET /api/v1/products/{id}` | 2 | Done (core). Read, `400`, `401` and `404`. |
+| 7 | `GET /api/v1/users/chat-system-prompt` | 2 | Done (core). Current-user default and authentication. |
+| 8 | `PUT /api/v1/users/chat-system-prompt` | 2 | Done (core). Persistence/isolation, reset, length and authentication. |
+| 9 | `GET /api/v1/users/tool-system-prompt` | 2 | Done (core). Same pattern as chat read. |
+| 10 | `PUT /api/v1/users/tool-system-prompt` | 2 | Done (core). Same pattern as chat update; parsing/type defects remain open. |
 | 11 | `GET /api/v1/users` | 2 | Authenticated list endpoint; backend has no admin `@PreAuthorize`. |
 | 12 | `GET /api/v1/users/{username}` | 2 | Authenticated lookup plus `404`. |
 | 13 | `GET /api/v1/cart` | 2 | Authenticated current-user state; empty cart is easy to assert. |
@@ -93,7 +101,7 @@ Start with these, in order. This keeps early work small and builds reusable clie
 
 ## Backend-Informed Notes
 
-Security comes from `WebSecurityConfig`. Public endpoints include signin, signup, refresh, password reset, traffic endpoints, docs, and local email outbox endpoints. All other documented endpoints require bearer authentication.
+Security comes from `WebSecurityConfig`. Public endpoints include signin, signup, refresh, password reset and docs. Traffic endpoints are public only when legacy public access is enabled, as observed on the configured deployment. Check local email outbox authorization against the running profile. Other endpoints in the matrix require bearer authentication.
 
 Role checks are mostly method-level:
 
@@ -104,7 +112,7 @@ Role checks are mostly method-level:
 | User edit | `PUT /api/v1/users/{username}` allows admin or the same username. |
 | Right to be forgotten | Allows admin or the same username. |
 | Order admin list/status | `GET /api/v1/orders/admin` and `PUT /api/v1/orders/{id}/status` require `ROLE_ADMIN`. |
-| Traffic endpoints | Public according to backend security config. Keep tests structural and avoid brittle assumptions about logged traffic volume. |
+| Traffic endpoints | Public only with legacy public access; otherwise authentication/session requirements apply. Keep tests structural and avoid brittle assumptions about logged traffic volume. |
 | Ollama endpoints | Bearer auth plus streaming/external model dependency. Keep late in the plan. |
 
 Important implementation detail: some user endpoints combine existence checks inside `@PreAuthorize`, for example `PUT /api/v1/users/{username}` and `DELETE /api/v1/users/{username}/right-to-be-forgotten`. If a user does not exist, Spring Security may return `403` before controller logic can produce the documented `404`. Verify against the live app before locking expected status codes.
@@ -126,6 +134,25 @@ remain usable after logout, so fixture cleanup can use the original JWT.
 
 ## Endpoint Matrix
 
+### Exploration and automation of eight operations
+
+Exploratory checks completed on 6 October 2026 against `https://awesome.byst.re`.
+All eight happy paths worked. Both prompt PUT endpoints returned unexpected
+`401` for malformed JSON, object-valued fields and missing bodies with valid JWTs,
+and accepted numeric fields as strings with `200`. These remain open defects.
+
+Prompt resets, persistence and isolation worked; PUT echoes the stored reset
+value while GET returns the default. Traffic topics/log selection depend on
+session headers, and page sizes clamp to the configured maximum.
+
+Findings: [exploration](docs/eight-endpoint-exploration.md) and
+[bug report](docs/prompt-bug-report.md). Coverage details:
+[traffic](tests/api/traffic/api-test-plan.md),
+[products](tests/api/products/api-test-plan.md), and
+[users](tests/api/users/api-test-plan.md). Eight specs implement the agreed
+24-test core scope; all targeted batches passed, then the full suite passed 50/50.
+
+
 | Area | Endpoint | Auth | Role | Difficulty | Status | First Useful Coverage |
 | --- | --- | --- | --- | ---: | --- | --- |
 | Auth | `POST /api/v1/users/signup` | Public | n/a | 2 | Done | `201`, `400` validation, duplicate username/email. |
@@ -138,14 +165,14 @@ remain usable after logout, so fixture cleanup can use the original JWT.
 | Users | `PUT /api/v1/users/{username}` | Bearer | Owner/Admin | 3 | Not started | `200`, `400`, `401`, `403`, verified missing-user behavior. |
 | Users | `DELETE /api/v1/users/{username}` | Bearer | Admin | 4 | Not started | `204`, `401`, `403`, `404`. |
 | Users | `DELETE /api/v1/users/{username}/right-to-be-forgotten` | Bearer | Owner/Admin | 4 | Not started | `204`, `401`, `403`, verified missing-user behavior. |
-| Prompts | `GET /api/v1/users/chat-system-prompt` | Bearer | Any | 2 | Not started | `200`, `401`, response field. |
-| Prompts | `PUT /api/v1/users/chat-system-prompt` | Bearer | Any | 2 | Not started | `200`, `400`, `401`, persisted value. |
-| Prompts | `GET /api/v1/users/tool-system-prompt` | Bearer | Any | 2 | Not started | `200`, `401`, response field. |
-| Prompts | `PUT /api/v1/users/tool-system-prompt` | Bearer | Any | 2 | Not started | `200`, `400`, `401`, persisted value. |
+| Prompts | `GET /api/v1/users/chat-system-prompt` | Bearer | Any | 2 | Done (core) | 2 tests: `200` default, `401` missing auth. |
+| Prompts | `PUT /api/v1/users/chat-system-prompt` | Bearer | Any | 2 | Done (core); defects open | 4 tests: `200` persistence/isolation and null reset, `400` length, `401` auth. |
+| Prompts | `GET /api/v1/users/tool-system-prompt` | Bearer | Any | 2 | Done (core) | 2 tests: `200` default, `401` missing auth. |
+| Prompts | `PUT /api/v1/users/tool-system-prompt` | Bearer | Any | 2 | Done (core); defects open | 4 tests: `200` persistence/isolation and null reset, `400` length, `401` auth. |
 | Password | `POST /api/v1/users/password/forgot` | Public | n/a | 3 | Not started | `202`, validation, no user enumeration. |
 | Password | `POST /api/v1/users/password/reset` | Public | n/a | 4 | Not started | `200`, invalid token, password mismatch/validation. |
-| Products | `GET /api/v1/products` | Bearer | Any | 2 | Not started | `200`, `401`, array shape. |
-| Products | `GET /api/v1/products/{id}` | Bearer | Any | 2 | Not started | `200`, `401`, `404`. |
+| Products | `GET /api/v1/products` | Bearer | Any | 2 | Done (core) | 2 tests: `200` array shape, `401`. |
+| Products | `GET /api/v1/products/{id}` | Bearer | Any | 2 | Done (core) | 4 tests: `200`, `400` nonnumeric ID, `401`, `404`. |
 | Products | `POST /api/v1/products` | Bearer | Admin | 3 | Not started | `201`, `400`, `401`, `403`. |
 | Products | `PUT /api/v1/products/{id}` | Bearer | Admin | 3 | Not started | `200`, `400`, `401`, `403`, `404`. |
 | Products | `DELETE /api/v1/products/{id}` | Bearer | Admin | 3 | Not started | `204`, `401`, `403`, `404`. |
@@ -163,8 +190,8 @@ remain usable after logout, so fixture cleanup can use the original JWT.
 | Email | `POST /api/v1/email` | Bearer | Any | 4 | Not started | `200`, `400`, `401`; side effect only if stable. |
 | Email | `GET /api/v1/users/me/email-events` | Bearer | Any | 3 | Not started | `200`, `401`, events isolated to current user. |
 | QR | `POST /api/v1/qr/create` | Bearer | Any | 3 | Not started | `200` with `image/png`, `400`, `401`. |
-| Traffic | `GET /api/v1/traffic/info` | Public | n/a | 1 | Not started | `200`, stable fields. |
-| Traffic | `GET /api/v1/traffic/logs` | Public | n/a | 1 | Not started | `200`, pagination fields, filters. |
+| Traffic | `GET /api/v1/traffic/info` | Public (legacy mode) | n/a | 1 | Done (core) | 3 tests: `200` default/session topic, `400` invalid session. |
+| Traffic | `GET /api/v1/traffic/logs` | Public (legacy mode) | n/a | 1 | Done (core) | 3 tests: `200` public structure and session pagination/isolation, `400` negative page. |
 | Traffic | `GET /api/v1/traffic/logs/{correlationId}` | Public | n/a | 3 | Not started | `200` with known id or `404` with unknown id. |
 | Ollama | `GET /api/v1/ollama/chat/tools/definitions` | Bearer | Any | 2 | Not started | `200`, `401`, schema shape. |
 | Ollama | `POST /api/v1/ollama/generate` | Bearer | Any | 5 | Not started | `200` stream, `400`, `401`, `404` model. |
@@ -199,15 +226,13 @@ An endpoint is done when:
 - Newly added tests pass on their own.
 - The full suite passes after the new tests pass.
 
-## Practical Next Step
+## Completed Batch and Remaining Scope
 
-Implement the next batch in this exact order:
+Status: implemented and verified. **24 new tests** (traffic 6, products 6,
+prompts 12) bring the suite to **50 passing tests**. The lazy peer auth fixture
+owns its separate account cleanup. New clients initialize in setup; specs use
+`test.step`, ascending response groups, disabled traces and zero retries.
 
-1. `GET /api/v1/traffic/info`
-2. `GET /api/v1/traffic/logs`
-3. `GET /api/v1/products`
-4. `GET /api/v1/products/{id}`
-5. `GET /api/v1/users/chat-system-prompt`
-6. `PUT /api/v1/users/chat-system-prompt`
-
-This gives quick progress, adds read-only clients, and creates useful coverage before the suite moves into mutable product, cart, and order flows.
+Secondary boundaries, traffic filters/clamping/time inputs and prompt parsing/type
+defect automation remain deferred in the folder plans.
+The next unstarted operation in delivery order is `GET /api/v1/users`.
