@@ -128,8 +128,16 @@ token adds `Authorization: Bearer <token>` for that request only.
 
 Traces are disabled on the exported fixture test to keep passwords and tokens
 out of traces. Do not log or attach fixture values to reports, persist tokens,
-or override the trace setting in consuming specs. Created accounts remain in
-the environment, following the registration suite's current cleanup policy.
+or override the trace setting in consuming specs. After each consuming test,
+the fixture deletes its generated account and user-owned data through
+`DELETE /api/v1/users/{username}/right-to-be-forgotten`, using that user's JWT.
+Cleanup runs after the consuming test, including assertion failures, and requires
+HTTP 204. There is no retry or fallback if fixture setup fails before yielding
+the user and token.
+This fixture owns account deletion: consuming tests should not delete the account
+themselves or change its credentials. Interrupted processes or an unconfirmed
+signup response can leave accounts behind. Existing signup tests still retain
+their accounts.
 The fixture uses generated credentials, although startup configuration still
 requires the shared `.env` login credentials for the existing suite.
 

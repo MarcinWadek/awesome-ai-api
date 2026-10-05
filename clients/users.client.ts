@@ -8,4 +8,11 @@ export class UsersClient {
       headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
     });
   }
+
+  async forgetUser(username: string, token: string): Promise<APIResponse> {
+    return this.request.delete(
+      `/api/v1/users/${encodeURIComponent(username)}/right-to-be-forgotten`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+  }
 }

@@ -1,5 +1,6 @@
 import { expect, test as base } from '@playwright/test';
 import { AuthClient } from '../clients/auth.client';
+import { UsersClient } from '../clients/users.client';
 import { generateRegistrationData } from '../generators/registration.generator';
 import type { LoginResponse } from '../types/auth';
 import type { RegistrationRequest } from '../types/registration';
@@ -13,7 +14,6 @@ export const test = base.extend<{ authenticatedUser: AuthenticatedUser }>({
   authenticatedUser: async ({ request }, use) => {
     const authClient = new AuthClient(request);
     const user = generateRegistrationData();
-
     await base.step('Register a unique test user', async () => {
       const response = await authClient.signUp(user);
       expect(response.status()).toBe(201);
@@ -34,6 +34,11 @@ export const test = base.extend<{ authenticatedUser: AuthenticatedUser }>({
     });
 
     await use({ user, token });
+
+    await base.step('Delete the generated test user', async () => {
+      const response = await new UsersClient(request).forgetUser(user.username, token);
+      expect(response.status()).toBe(204);
+    });
   },
 });
 

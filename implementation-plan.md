@@ -30,7 +30,7 @@ Generate data with `generateRegistrationData()` before the setup steps.
 
 The fixture focuses on creating a usable account and sharing its token. Profile, role, response-header, and response-body contract assertions belong in endpoint tests.
 
-Yield `{ user, token }` after those setup steps, without an additional reporting step.
+Yield `{ user, token }` after those setup steps. After `await use(...)`, delete the generated account in one teardown step through `/right-to-be-forgotten` and require 204. Keep the lifecycle linear: register, sign in, use, delete. There is no login retry or cleanup fallback for setup failures.
 
 Use the existing `request` fixture and its configured base URL for signup/login. Do not attach JWT authorization globally or mutate request defaults: signup/login must omit Authorization, and negative endpoint tests need an unauthenticated request.
 
@@ -41,7 +41,7 @@ Do not call `/users/me` inside fixture setup. Keep the fixture reusable across e
 | File | Planned change |
 | --- | --- |
 | `fixtures/auth.fixture.ts` | Add the fixture contract, registration/login setup, and exported extended `test`/`expect`. Configure `trace: 'off'` on the exported test because setup sends generated passwords and receives tokens. |
-| `clients/users.client.ts` | Add `UsersClient.getMe(token?: string): Promise<APIResponse>`, sending a Bearer header only when a token is supplied. Keep response assertions in tests. |
+| `clients/users.client.ts` | Add `UsersClient.getMe(token?: string): Promise<APIResponse>`, sending a Bearer header only when a token is supplied, and `forgetUser(username, token)` for cleanup. Encode usernames in deletion paths. |
 | `types/users.ts` | Add `UserResponse` matching the documented `UserResponseDto`: numeric `id`, username, email, roles, nullable first name and last name. Reuse `LoginResponse['roles']` for the role type. |
 | `tests/api/users/me.spec.ts` | Add the endpoint tests below, importing the extended fixture test. |
 | `README.md` | Document fixture usage, return fields, lazy test scope, trace policy, and the command for the new spec. |
@@ -84,7 +84,7 @@ Avoid asserting exact authentication error wording; status, JSON shape, and a no
 
 ## Account lifecycle and configuration
 
-- Follow the current registration suite's policy: created test accounts remain in the environment. Automatic deletion is deferred. Each fixture invocation uses a unique username/email and the existing `example.invalid` email generator.
+- Delete accounts created by the fixture after each consuming test, including failed tests. Existing signup tests still retain their accounts. Each fixture invocation uses a unique username/email and the existing `example.invalid` email generator. Tests consuming this fixture should not delete the account themselves or change its credentials. Process interruption, unconfirmed signup responses, or failed cleanup can leave accounts behind; no administrator fallback is configured.
 - Keep credentials and tokens in memory. Do not log fixture values, attach them to reports, or persist authentication state. Use assertion messages that do not embed passwords or JWTs.
 - Run this state-creating spec with zero retries and two workers, consistent with the existing registration command. Set the spec's retries to zero as well so a full CI run cannot retry its account creation implicitly.
 - Reuse `API_BASE_URL`. The fixture itself does not use the configured shared login account. Existing configuration still requires `API_LOGIN_USERNAME` and `API_LOGIN_PASSWORD` at startup; removing that requirement is a separate configuration change.
@@ -111,4 +111,4 @@ If the new tests fail, diagnose and fix them, then rerun the new spec before run
 - Missing, malformed, and signature-altered tokens return 401.
 - Tests use `test.step` and ascending response-code groups.
 - Typecheck, the new spec, and the full suite pass, or any environment blocker is explicitly reported.
-- No application backend changes, token refresh tests, MFA setup, admin fixture, cleanup endpoint calls, or existing test migrations are included in this initial feature.
+- No application backend changes, token refresh tests, MFA setup, admin fixture, or existing test migrations are included. Self-deletion in fixture teardown was added as an approved follow-up.
