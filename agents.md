@@ -1,0 +1,3 @@
+- always run newly created tests to make sure they pass
+- once you confirmed that new tests passed run the whole suite to avoid regressions
+- order tests by response code ascending (200 -> 400 -> 401 -> 404)
