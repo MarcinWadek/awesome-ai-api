@@ -2,9 +2,9 @@
 
 ## Run the project after cloning
 
-This repository contains Playwright end-to-end tests for the Awesome AI API
-website. It does not start a local application server: the tests run against
-the public site at `https://awesome.byst.re`.
+This repository contains Playwright API tests for Awesome AI. It does not
+start a local application server: tests call the API configured in `.env`.
+The example endpoint is `https://awesome.byst.re`.
 
 ### Prerequisites
 
@@ -17,19 +17,25 @@ From a terminal in the cloned repository, run:
 
 ```bash
 npm ci
-npx playwright install
-npx playwright test
+cp .env.example .env
+```
+
+In PowerShell, use `Copy-Item .env.example .env` to copy the file. Fill in
+`API_LOGIN_USERNAME` and `API_LOGIN_PASSWORD` in `.env` with your test account
+credentials, then run:
+
+```bash
+npm test
 ```
 
 `npm ci` installs the exact dependency versions recorded in
-`package-lock.json`. `npx playwright install` downloads the browser binaries
-used by the tests; it is normally needed only once per machine or after a
-Playwright upgrade.
+`package-lock.json`. The current suite uses Playwright's HTTP client only, so
+browser binaries are not required.
 
 To run a single test file, use:
 
 ```bash
-npx playwright test tests/example.spec.ts
+npx playwright test tests/api/users/signin.spec.ts
 ```
 
 After a run, open the HTML report with:
@@ -38,11 +44,10 @@ After a run, open the HTML report with:
 npx playwright show-report
 ```
 
-The default configuration runs the test suite in Chromium, Firefox, and
-WebKit. To run only one browser, for example Chromium:
+To run the API project explicitly:
 
 ```bash
-npx playwright test --project=chromium
+npm run test:api
 ```
 
 The API documentation is included in this project in the `docs/api-docs.json` file.
@@ -53,7 +58,32 @@ The backend source code is also publicly available one directory above, in the `
 
 Swagger is publicly available as well, so it can be checked when needed: [https://awesome.byst.re/swagger-ui/index.html](https://awesome.byst.re/swagger-ui/index.html).
 
-The login endpoint can be checked with `curl`.
+## Configuration
+
+Set `API_BASE_URL`, `API_LOGIN_USERNAME`, and `API_LOGIN_PASSWORD` in the
+repository-root `.env`. Dotenv loads this file before configuration values are
+read, including when running from the Playwright IDE extension. Missing or blank
+values fail immediately with an error naming the variable.
+
+Existing shell or CI variables take precedence over `.env`. In CI, supply the
+credentials through your CI provider's secrets and expose them under the same
+environment variable names; a local `.env` file is not required.
+
+Only `.env.example`, with empty credential placeholders, is committed. `.env`
+and `.env.*` files are ignored, except `.env.example`. Playwright authentication
+state and generated reports/traces are also ignored because they can contain
+session tokens or credentials.
+
+This follows Playwright's guidance on
+[environment variables and dotenv](https://playwright.dev/docs/test-parameterize#env-files)
+and [keeping authentication state out of version control](https://playwright.dev/docs/auth).
+
+## Login endpoint
+
+The suite covers `POST /api/v1/users/signin` with test groups in HTTP-status
+order: `200`, `401`, and `422`. It checks JSON and no-store response headers,
+stable session-contract fields, and the live deployment's error envelopes. The
+endpoint can also be checked with `curl`.
 
 In Bash:
 
@@ -68,3 +98,35 @@ In PowerShell, use `curl.exe` with `--%`:
 ```powershell
 curl.exe --% -X POST https://awesome.byst.re/api/v1/users/signin -H "Content-Type: application/json" -d "{\"username\":\"<username>\",\"password\":\"<password>\"}"
 ```
+
+## Registration tests
+
+The basic signup suite has four tests: successful registration and sign-in,
+missing required fields, duplicate username, and duplicate email.
+
+```bash
+npm run test:registration
+npm run typecheck
+```
+
+On Windows, use `npm.cmd` if PowerShell blocks the npm script wrapper.
+The tests use the existing `.env` configuration, run with two workers and zero
+retries. Created accounts remain in the environment; automatic cleanup is
+deferred for now. Registration traces are disabled to keep passwords and tokens
+out of traces.
+
+Use the Faker generator in `generators/registration.generator.ts`:
+
+```typescript
+const user = generateRegistrationData();
+const anotherUser = generateRegistrationData({ firstName: 'Anna' });
+```
+
+It generates realistic names that meet the API's minimum length, short ASCII
+passwords, unique usernames, and safe email addresses under `example.invalid`.
+Individual fields can be overridden for test cases. SSO, fixtures, and advanced
+boundary coverage are deferred until the framework needs them.
+
+Faker 10 requires Node 20.19+, 22.13+, or 24+ (verified with Node 24.21).
+No formatter or linter is currently configured. Use `git diff --check` to check
+whitespace. Earlier exploratory findings remain in `docs/signup-exploration.md`.

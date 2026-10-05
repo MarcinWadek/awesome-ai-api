@@ -1,7 +1,15 @@
 {
   "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.6.3"
+    "@types/node": "^26.6.4",
+    "dotenv": "^18.0.5",
+    "typescript": "^7.0.2"
   },
-  "scripts": {}
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test --project=api",
+    "test:registration": "playwright test tests/api/users/signup.spec.ts --project=api --retries=0 --workers=2",
+    "typecheck": "tsc --noEmit"
+  }
 }
