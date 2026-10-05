@@ -8,9 +8,12 @@ import type { RegistrationRequest } from '../types/registration';
 export interface AuthenticatedUser {
   user: RegistrationRequest;
   token: string;
+  refreshToken: string;
 }
 
 export const test = base.extend<{ authenticatedUser: AuthenticatedUser }>({
+  // Fixture setup sends passwords and receives tokens; keep them out of traces.
+  trace: 'off',
   authenticatedUser: async ({ request }, use) => {
     const authClient = new AuthClient(request);
     const user = generateRegistrationData();
@@ -19,7 +22,7 @@ export const test = base.extend<{ authenticatedUser: AuthenticatedUser }>({
       expect(response.status()).toBe(201);
     });
 
-    const token = await base.step('Sign in as the registered user', async () => {
+    const { token, refreshToken } = await base.step('Sign in as the registered user', async () => {
       const response = await authClient.signIn({
         username: user.username,
         password: user.password,
@@ -30,10 +33,13 @@ export const test = base.extend<{ authenticatedUser: AuthenticatedUser }>({
       if (typeof body.token !== 'string' || !body.token.trim()) {
         throw new Error('Sign-in must return a nonempty access token');
       }
-      return body.token;
+      if (typeof body.refreshToken !== 'string' || !body.refreshToken.trim()) {
+        throw new Error('Sign-in must return a nonempty refresh token');
+      }
+      return { token: body.token, refreshToken: body.refreshToken };
     });
 
-    await use({ user, token });
+    await use({ user, token, refreshToken });
 
     await base.step('Delete the generated test user', async () => {
       const response = await new UsersClient(request).forgetUser(user.username, token);
@@ -41,8 +47,5 @@ export const test = base.extend<{ authenticatedUser: AuthenticatedUser }>({
     });
   },
 });
-
-// Fixture setup sends passwords and receives tokens; keep them out of traces.
-test.use({ trace: 'off' });
 
 export { expect };

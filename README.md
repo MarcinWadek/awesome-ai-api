@@ -103,10 +103,11 @@ curl.exe --% -X POST https://awesome.byst.re/api/v1/users/signin -H "Content-Typ
 
 Import `test` and `expect` from `fixtures/auth.fixture.ts` for tests that need a
 fresh registered account. The lazy, test-scoped `authenticatedUser` fixture
-registers a unique user and signs in, returning `{ user, token }`. `user` contains
-the generated registration details, including the password; `token` is the access
-JWT. Each consuming test gets its own account. Tests that do not request the
-fixture do not register or sign in.
+registers a unique user and signs in, returning `{ user, token, refreshToken }`.
+`user` contains the generated registration details, including the password;
+`token` is the access JWT; `refreshToken` is the session's refresh credential.
+Each consuming test gets its own account. Tests that do not request the fixture
+do not register or sign in.
 
 ```typescript
 import { test, expect } from '../../../fixtures/auth.fixture';
@@ -147,6 +148,20 @@ malformed, and signature-altered tokens. Run it with two workers and zero retrie
 ```powershell
 npx.cmd playwright test tests/api/users/me.spec.ts --project=api --retries=0 --workers=2
 ```
+
+## Refresh and logout tests
+
+The dedicated specs cover refresh-token rotation, usable access tokens, invalid
+input and token reuse, plus logout revocation across all of a user's sessions
+and unauthorized logout requests. They use isolated fixture accounts with
+automatic cleanup, disabled traces, zero retries, and ascending status groups.
+
+```powershell
+npx.cmd playwright test tests/api/users/refresh.spec.ts tests/api/users/logout.spec.ts --project=api --retries=0 --workers=2
+```
+
+The live deployment's replay behavior differs from the local backend's token
+family revocation logic; details are recorded in `api-test-plan.md`.
 
 ## Registration tests
 

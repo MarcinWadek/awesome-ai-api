@@ -2,3 +2,6 @@
 - once you confirmed that new tests passed run the whole suite to avoid regressions
 - order tests by response code ascending (200 -> 400 -> 401 -> 404)
 - implement test.step for better readability 
+- while creating a plan never assume anything. In case of doubts check documentation, explore application or ask me
+- initialize htttClients in test setup 
+- keep updating api-test-plan.md to reflect the current state of API (each folder will have its own api-test-plan.md file)

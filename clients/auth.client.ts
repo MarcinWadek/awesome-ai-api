@@ -1,5 +1,5 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
-import type { LoginRequest } from '../types/auth';
+import type { LoginRequest, RefreshTokenRequest } from '../types/auth';
 import type { RegistrationRequest } from '../types/registration';
 
 const signInPath = '/api/v1/users/signin';
@@ -19,6 +19,19 @@ export class AuthClient {
     return this.request.post(signInPath, {
       data: credentials,
       headers,
+    });
+  }
+
+  async refresh(
+    data: Partial<RefreshTokenRequest>,
+    headers?: Record<string, string>,
+  ): Promise<APIResponse> {
+    return this.request.post('/api/v1/users/refresh', { data, headers });
+  }
+
+  async logout(token?: string): Promise<APIResponse> {
+    return this.request.post('/api/v1/users/logout', {
+      headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
     });
   }
 }

@@ -19,3 +19,12 @@ export interface LoginResponse {
 export interface ApiErrorResponse {
   message: string;
 }
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  token: string;
+  refreshToken: string;
+}
