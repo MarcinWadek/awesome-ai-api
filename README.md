@@ -99,6 +99,47 @@ In PowerShell, use `curl.exe` with `--%`:
 curl.exe --% -X POST https://awesome.byst.re/api/v1/users/signin -H "Content-Type: application/json" -d "{\"username\":\"<username>\",\"password\":\"<password>\"}"
 ```
 
+## Authenticated user fixture
+
+Import `test` and `expect` from `fixtures/auth.fixture.ts` for tests that need a
+fresh registered account. The lazy, test-scoped `authenticatedUser` fixture
+registers a unique user and signs in, returning `{ user, token }`. `user` contains
+the generated registration details, including the password; `token` is the access
+JWT. Each consuming test gets its own account. Tests that do not request the
+fixture do not register or sign in.
+
+```typescript
+import { test, expect } from '../../../fixtures/auth.fixture';
+import { UsersClient } from '../../../clients/users.client';
+
+test('gets the registered account', async ({ request, authenticatedUser }) => {
+  const response = await test.step('Get the authenticated user', () =>
+    new UsersClient(request).getMe(authenticatedUser.token),
+  );
+  await test.step('Verify the registered identity', async () => {
+    expect(response.status()).toBe(200);
+    expect((await response.json()).username).toBe(authenticatedUser.user.username);
+  });
+});
+```
+
+`UsersClient.getMe()` omits Authorization when no token is supplied. Supplying a
+token adds `Authorization: Bearer <token>` for that request only.
+
+Traces are disabled on the exported fixture test to keep passwords and tokens
+out of traces. Do not log or attach fixture values to reports, persist tokens,
+or override the trace setting in consuming specs. Created accounts remain in
+the environment, following the registration suite's current cleanup policy.
+The fixture uses generated credentials, although startup configuration still
+requires the shared `.env` login credentials for the existing suite.
+
+The `/users/me` spec covers the registered identity and rejection of missing,
+malformed, and signature-altered tokens. Run it with two workers and zero retries:
+
+```powershell
+npx.cmd playwright test tests/api/users/me.spec.ts --project=api --retries=0 --workers=2
+```
+
 ## Registration tests
 
 The basic signup suite has four tests: successful registration and sign-in,
