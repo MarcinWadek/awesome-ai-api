@@ -33,4 +33,4 @@ Affected endpoints (numbers from the API test plan):
 
 **Actual:** PUT returns `200` with the value `"123"`; GET confirms that string was stored.
 
-Evidence: [exploratory assessment](eight-endpoint-exploration.md). Both bugs were reproduced across three runs.
+Evidence: [exploratory assessment](endpoints-exploration.md). Both bugs were reproduced across three runs.

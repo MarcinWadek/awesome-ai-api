@@ -145,7 +145,7 @@ Prompt resets, persistence and isolation worked; PUT echoes the stored reset
 value while GET returns the default. Traffic topics/log selection depend on
 session headers, and page sizes clamp to the configured maximum.
 
-Findings: [exploration](docs/eight-endpoint-exploration.md) and
+Findings: [exploration](docs/endpoints-exploration.md) and
 [bug report](docs/prompt-bug-report.md). Coverage details:
 [traffic](tests/api/traffic/api-test-plan.md),
 [products](tests/api/products/api-test-plan.md), and

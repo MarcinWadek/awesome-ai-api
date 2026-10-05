@@ -118,4 +118,3 @@ test.describe('PUT /api/v1/users/chat-system-prompt', () => {
     });
   });
 });
-

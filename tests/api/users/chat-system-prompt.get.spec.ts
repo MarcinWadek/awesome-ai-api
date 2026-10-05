@@ -38,4 +38,3 @@ test.describe('GET /api/v1/users/chat-system-prompt', () => {
     });
   });
 });
-

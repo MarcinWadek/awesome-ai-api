@@ -1,5 +1,9 @@
 # README
 
+Our process: [API testing workflow](docs/api-testing-workflow.md) — exploratory
+tests, exploration findings and implementation plan, then implementation and
+code review/improvement.
+
 ## Run the project after cloning
 
 This repository contains Playwright API tests for Awesome AI. It does not
@@ -162,7 +166,7 @@ npx.cmd playwright test tests/api/traffic tests/api/products tests/api/users/cha
 
 Run `npm.cmd run typecheck` and the full API suite after the new tests pass.
 See [the API test plan](api-test-plan.md) and
-[exploratory findings](docs/eight-endpoint-exploration.md) for remaining input
+[exploratory findings](docs/endpoints-exploration.md) for remaining input
 boundaries and the two known prompt parsing/type defects. Those defects are
 documented without skipped test placeholders.
 
