@@ -18,7 +18,7 @@ Follow the repository's API testing workflow from exploration through verificati
 ## Establish the contract and explore
 
 - Read applicable repository instructions, API documentation or OpenAPI contracts, available backend source, existing tests, clients, fixtures, and test commands.
-- Check the root `api-test-plan.md` and the plans in the affected test folders. Read existing exploration notes and bug reports when relevant.
+- Check the single root `api-test-plan.md`. Read existing exploration notes and bug reports when relevant; do not create folder-level test plans.
 - Base plans and assertions on evidence. When behavior is unclear, check documentation, explore the application further, or ask the user; do not invent expected behavior, environment details, or coverage counts.
 - Explore relevant live endpoints using curl (`curl.exe` in PowerShell) or Playwright's HTTP client. Verify the core happy path, authentication and relevant validation; investigate unusual behavior when evidence or the requested scope warrants it.
 - Use isolated data and clean up created accounts and other test resources. Reuse existing lifecycle fixtures when suitable.
@@ -27,7 +27,7 @@ Follow the repository's API testing workflow from exploration through verificati
 
 - Automatically save durable exploratory reports in `docs/exploration/`, creating the directory and its `README.md` index if missing. Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated endpoint or batch scope, for example `2026-10-04-users-signup.md` or `2026-10-06-users-cart.md`. Use the actual exploration date, not the documentation-edit date.
 - Include the environment, operations, contract sources, request conditions, expected versus observed status/body behavior, isolated setup and cleanup results, defects and untested areas. Provide reproducible request details for unusual findings without saving credentials, tokens or unrelated account data. Never invent missing evidence.
-- Add each report to the index with its date, scope and relative link; link it from the root and affected folder API test plans. For the same scope and day, extend the existing report; for a later exploration, create a new dated report and link prior evidence. Preserve historical findings and separate subsequent automation results from live observations.
+- Add each report to the index with its date, scope and relative link; link it from the root API test plan. For the same scope and day, extend the existing report; for a later exploration, create a new dated report and link prior evidence. Preserve historical findings and separate subsequent automation results from live observations.
 - Keep raw diagnostics and ad hoc runners in the gitignored `exploration-results/` directory. The Markdown report must remain useful without those temporary artifacts. Exploratory probes do not automatically become permanent regression tests.
 - Create separate bug reports with reproducible steps, expected results and their contract basis, and actual results. Link the supporting findings.
 - Distinguish documented expectations, observed behavior, and known defects. Do not silently make a defect the desired contract in a passing test.
@@ -39,8 +39,8 @@ Follow the repository's API testing workflow from exploration through verificati
 - Propose the automation scope and test count from exploration and existing coverage, focusing on crucial behavior without duplicating tests.
 - Define setup, assertions, cleanup, and required clients or fixtures for each planned case. Identify known defects and deferred coverage.
 - Review the scope before implementation. Honor an already agreed scope; when the user requests only planning or review, deliver that artifact before implementing changes.
-- Update the root `api-test-plan.md` and each affected test folder's `api-test-plan.md` with planned coverage and deferred cases. Create a folder plan where missing.
-- Add the implementation file to `docs/implementation/README.md` with its scope and relative link, and reference it from the affected API test plans. Update the same file as the implementation evolves instead of creating duplicate plans for one delivery.
+- Update the single root `api-test-plan.md` with planned coverage and deferred cases. Keep endpoint-specific detail in exploration reports and implementation records instead of folder-level test plans.
+- Add the implementation file to `docs/implementation/README.md` with its scope and relative link, and reference it from the root API test plan. Update the same file as the implementation evolves instead of creating duplicate plans for one delivery.
 
 ## Implement and verify
 
@@ -52,7 +52,7 @@ Follow the repository's API testing workflow from exploration through verificati
 - Run all newly created tests first. Diagnose failures and rerun them until they pass; only after they pass, run the whole suite to check for regressions.
 - Run the repository's typechecking command and `git diff --check`. Use discovered scripts and configuration rather than assuming commands or environment settings.
 - If execution is blocked by the environment, record the blocker and the checks that actually ran. Do not claim unexecuted checks passed.
-- Update root and affected folder API test plans with implemented coverage, verification results, known bugs, and remaining gaps. Do not mark planned cases implemented before they exist.
+- Update the root API test plan with implemented coverage, verification results, known bugs, and remaining gaps. Do not mark planned cases implemented before they exist.
 - Complete the implementation document with the delivered scope, actual verification results and material limitations. Mark a completed plan as a historical implementation record and link the maintained API test plans so original results are not mistaken for current suite status.
 
 ## Review and improve

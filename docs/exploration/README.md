@@ -10,6 +10,7 @@ findings do not guarantee the current deployment behaves identically.
 | 2026-10-05 | JWT access, authorization and refresh rotation | [JWT authentication](2026-10-05-auth-jwt.md) |
 | 2026-10-06 | Traffic, product reads and user prompts | [Traffic, products and prompts](2026-10-06-traffic-products-prompts.md) |
 | 2026-10-06 | User list/lookup and cart read/clear | [Users and cart](2026-10-06-users-cart.md) |
+| 2026-10-07 | Backend/mock source review, parallel dependencies and 59-test baseline rerun | [Parallel delivery review](2026-10-07-parallel-delivery.md) |
 
 Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated scope.
 For one operation, include its area and operation, such as
