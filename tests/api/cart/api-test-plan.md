@@ -1,7 +1,7 @@
 # Cart API test plan
 
 Contract and behavior were established through backend, saved/live OpenAPI and
-[live exploration](../../../docs/users-cart-exploration.md) on 6 October 2026.
+[live exploration](../../../docs/exploration/2026-10-06-users-cart.md) on 6 October 2026.
 The focused revision contains four tests. Targeted batch **9/9 passed**;
 the full suite passed **59/59** with two workers and zero retries.
 Typechecking and `git diff --check` passed.

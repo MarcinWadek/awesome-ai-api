@@ -10,7 +10,10 @@
 
 ## 2. Record exploration
 
-- Save concise, dated findings with the tested environment and observed behavior.
+- Save reports in [docs/exploration](exploration/README.md), named `YYYY-MM-DD-<scope>.md`, using the actual exploration date and a short endpoint or batch scope.
+- Record environment, operations, contract sources, request conditions, expected versus observed results, setup/cleanup, defects and untested areas. Include reproducible details without credentials or tokens.
+- Add the report to the exploration index and link it from the root and affected folder plans. Extend the same day's report for the same scope; create a new dated report for later exploration and link previous evidence.
+- Keep raw diagnostics and ad hoc runners in gitignored `exploration-results/`; the report is the durable evidence. Select only core cases for automation.
 - Create separate bug reports with reproduction steps, expected results and actual results.
 - Distinguish known bugs from desired behavior.
 

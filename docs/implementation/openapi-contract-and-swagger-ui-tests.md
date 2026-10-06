@@ -1,4 +1,9 @@
-# API Documentation Tests - Implementation Plan
+# Implementation plan: OpenAPI contract and Swagger UI tests
+
+Historical implementation record. Design details and verification counts below
+describe this delivery; consult [the current test plan](../../api-test-plan.md)
+and `tests/api/docs/` for the maintained coverage. Code paths in this record are
+relative to the repository root.
 
 **Status:** Implemented and validated
 **Date:** 5 October 2026

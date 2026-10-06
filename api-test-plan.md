@@ -148,7 +148,7 @@ Prompt resets, persistence and isolation worked; PUT echoes the stored reset
 value while GET returns the default. Traffic topics/log selection depend on
 session headers, and page sizes clamp to the configured maximum.
 
-Findings: [exploration](docs/endpoints-exploration.md) and
+Findings: [exploration](docs/exploration/2026-10-06-traffic-products-prompts.md) and
 [bug report](docs/prompt-bug-report.md). Coverage details:
 [traffic](tests/api/traffic/api-test-plan.md),
 [products](tests/api/products/api-test-plan.md), and
@@ -245,7 +245,7 @@ by existing auth/me tests. Dedicated cart item operations remain unstarted.
 Traffic secondary boundaries and prompt parsing/type defects remain deferred
 in their folder plans.
 
-See [exploration](docs/users-cart-exploration.md),
+See [exploration](docs/exploration/2026-10-06-users-cart.md),
 [users plan](tests/api/users/api-test-plan.md), and
 [cart plan](tests/api/cart/api-test-plan.md).
 The next unstarted operation in delivery order is `GET /api/v1/users/me/email-events`.

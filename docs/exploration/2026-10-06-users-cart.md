@@ -25,8 +25,8 @@ addition in the reviewed backend. Catalogue changes can still affect setup or to
 Item mutations are setup helpers, not completed endpoint coverage. Admin-specific
 reads, extra token variants and cart item validation remain deferred.
 
-Coverage: [root plan](../api-test-plan.md), [users](../tests/api/users/api-test-plan.md),
-[cart](../tests/api/cart/api-test-plan.md).
+Coverage: [root plan](../../api-test-plan.md), [users](../../tests/api/users/api-test-plan.md),
+[cart](../../tests/api/cart/api-test-plan.md).
 
 Original verification on 6 October 2026: all **16 tests passed** in the targeted run
 (22.3s), followed by **66/66** in the full suite (53.0s), using two workers and

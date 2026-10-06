@@ -20,7 +20,7 @@ Deferred: other reset inputs, accepting length boundary, extra token variants an
 password and email-event tests remain unstarted.
 
 User list/lookup now contains five focused tests after
-[exploration](../../../docs/users-cart-exploration.md) on 6 October 2026.
+[exploration](../../../docs/exploration/2026-10-06-users-cart.md) on 6 October 2026.
 Targeted revision batch **9/9 passed**; the full suite passed **59/59** with two workers and zero retries.
 Typechecking and `git diff --check` passed. Fixtures own account cleanup; clients initialize in beforeEach.
 Peer/admin reads and extra token variants are deferred; existing auth/me tests

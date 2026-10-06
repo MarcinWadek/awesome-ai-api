@@ -25,16 +25,22 @@ Follow the repository's API testing workflow from exploration through verificati
 
 ## Record findings
 
-- Save concise, dated exploratory findings with the tested environment, request conditions, and observed behavior.
+- Automatically save durable exploratory reports in `docs/exploration/`, creating the directory and its `README.md` index if missing. Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated endpoint or batch scope, for example `2026-10-04-users-signup.md` or `2026-10-06-users-cart.md`. Use the actual exploration date, not the documentation-edit date.
+- Include the environment, operations, contract sources, request conditions, expected versus observed status/body behavior, isolated setup and cleanup results, defects and untested areas. Provide reproducible request details for unusual findings without saving credentials, tokens or unrelated account data. Never invent missing evidence.
+- Add each report to the index with its date, scope and relative link; link it from the root and affected folder API test plans. For the same scope and day, extend the existing report; for a later exploration, create a new dated report and link prior evidence. Preserve historical findings and separate subsequent automation results from live observations.
+- Keep raw diagnostics and ad hoc runners in the gitignored `exploration-results/` directory. The Markdown report must remain useful without those temporary artifacts. Exploratory probes do not automatically become permanent regression tests.
 - Create separate bug reports with reproducible steps, expected results and their contract basis, and actual results. Link the supporting findings.
 - Distinguish documented expectations, observed behavior, and known defects. Do not silently make a defect the desired contract in a passing test.
 
 ## Prepare the implementation plan
 
+- Save the implementation plan as a Markdown file in `docs/implementation/`, creating the directory and its `README.md` index if missing. Use a descriptive lowercase, hyphen-separated filename that reflects the actual scope, such as `registered-user-auth-fixture-and-me-tests.md` or `users-list-lookup-and-cart-read-clear-tests.md`; avoid generic names such as `implementation-plan.md`.
+- Keep the file proportional to the work: a simple endpoint batch needs only a short scope, selected cases, setup/cleanup, required code changes and validation commands. Link exploration reports and API test plans rather than duplicating their findings or coverage tables. Creating documentation must not expand the test scope.
 - Propose the automation scope and test count from exploration and existing coverage, focusing on crucial behavior without duplicating tests.
 - Define setup, assertions, cleanup, and required clients or fixtures for each planned case. Identify known defects and deferred coverage.
 - Review the scope before implementation. Honor an already agreed scope; when the user requests only planning or review, deliver that artifact before implementing changes.
 - Update the root `api-test-plan.md` and each affected test folder's `api-test-plan.md` with planned coverage and deferred cases. Create a folder plan where missing.
+- Add the implementation file to `docs/implementation/README.md` with its scope and relative link, and reference it from the affected API test plans. Update the same file as the implementation evolves instead of creating duplicate plans for one delivery.
 
 ## Implement and verify
 
@@ -47,6 +53,7 @@ Follow the repository's API testing workflow from exploration through verificati
 - Run the repository's typechecking command and `git diff --check`. Use discovered scripts and configuration rather than assuming commands or environment settings.
 - If execution is blocked by the environment, record the blocker and the checks that actually ran. Do not claim unexecuted checks passed.
 - Update root and affected folder API test plans with implemented coverage, verification results, known bugs, and remaining gaps. Do not mark planned cases implemented before they exist.
+- Complete the implementation document with the delivered scope, actual verification results and material limitations. Mark a completed plan as a historical implementation record and link the maintained API test plans so original results are not mistaken for current suite status.
 
 ## Review and improve
 

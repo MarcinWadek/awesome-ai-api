@@ -1,5 +1,7 @@
 # README
 
+Exploratory evidence: [API exploration reports](docs/exploration/README.md).
+
 Our process: [API testing workflow](docs/api-testing-workflow.md) — exploratory
 tests, exploration findings, implementation planning, implementation and
 verification, code review/improvement, then a summary.
@@ -166,7 +168,7 @@ npx.cmd playwright test tests/api/traffic tests/api/products tests/api/users/cha
 
 Run `npm.cmd run typecheck` and the full API suite after the new tests pass.
 See [the API test plan](api-test-plan.md) and
-[exploratory findings](docs/endpoints-exploration.md) for remaining input
+[exploratory findings](docs/exploration/2026-10-06-traffic-products-prompts.md) for remaining input
 boundaries and the two known prompt parsing/type defects. Those defects are
 documented without skipped test placeholders.
 
@@ -221,4 +223,4 @@ boundary coverage are deferred until the framework needs them.
 
 Faker 10 requires Node 20.19+, 22.13+, or 24+ (verified with Node 24.21).
 No formatter or linter is currently configured. Use `git diff --check` to check
-whitespace. Earlier exploratory findings remain in `docs/signup-exploration.md`.
+whitespace. Earlier exploratory findings remain in `docs/exploration/2026-10-04-users-signup.md`.
