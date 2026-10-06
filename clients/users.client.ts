@@ -4,6 +4,18 @@ import type { ChatSystemPrompt, ToolSystemPrompt } from '../types/prompts';
 export class UsersClient {
   constructor(private readonly request: APIRequestContext) {}
 
+  async getUsers(token?: string): Promise<APIResponse> {
+    return this.request.get('/api/v1/users', {
+      headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  async getUser(username: string, token?: string): Promise<APIResponse> {
+    return this.request.get(`/api/v1/users/${encodeURIComponent(username)}`, {
+      headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
+    });
+  }
+
   async getMe(token?: string): Promise<APIResponse> {
     return this.request.get('/api/v1/users/me', {
       headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },

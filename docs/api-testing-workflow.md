@@ -2,33 +2,48 @@
 
 ## 1. Start with exploratory tests
 
-Check the contract, backend source and current test coverage, then explore the
-live endpoints. Verify happy paths, authentication, validation and unusual
-behavior. Use isolated data and clean up created accounts. Do not assume behavior;
-check documentation, explore further or ask when unclear.
+- Check the contract, backend source and current test coverage.
+- Explore live endpoints using curl (`curl.exe` in PowerShell) or Playwright's HTTP client.
+- Verify happy paths, authentication, validation and unusual behavior.
+- Use isolated data and clean up created accounts.
+- Check documentation, explore further or ask when behavior is unclear.
 
-## 2. Record exploration and prepare the implementation plan
+## 2. Record exploration
 
-Save concise exploration findings and separate bug reports with reproduction
-steps, expected results and actual results. Then propose the automation scope,
-test count, setup, assertions and required clients/fixtures. Review the scope
-before implementation and focus on crucial behavior. Keep the root and folder
-API test plans current; distinguish known bugs from desired behavior.
+- Save concise, dated findings with the tested environment and observed behavior.
+- Create separate bug reports with reproduction steps, expected results and actual results.
+- Distinguish known bugs from desired behavior.
 
-## 3. Implement and verify
+## 3. Prepare the implementation plan
 
-Create one spec per endpoint operation. Initialize HTTP clients in setup, use
-Given/When/Then `test.step` labels and order cases by response code ascending.
-Run newly created tests first. Once they pass, run the whole suite, typechecking
-and whitespace checks. Record coverage, results and deferred cases in the plans.
+- Propose the automation scope and test count, focusing on crucial behavior.
+- Define setup, assertions and required clients/fixtures using the exploratory findings.
+- Review the scope before implementation.
+- Update the root and folder API test plans with planned coverage and deferred cases.
 
-## 4. Review and improve
+## 4. Implement and verify
 
-Review correctness, assertions, reliability, cleanup and documentation. Separate
-defects, formatting cleanup and optional enhancements. Propose improvements
-before implementing them when the request is for review only; apply the agreed
-changes and verify them. Run any new tests first, then the whole suite.
+- Create one spec per endpoint operation.
+- Initialize HTTP clients in setup.
+- Use Given/When/Then `test.step` labels.
+- Order cases by response code ascending.
+- Run newly created tests first; once they pass, run the whole suite.
+- Run typechecking and whitespace checks.
+- Update the plans with implemented coverage, results and remaining gaps.
 
-Keep plans focused on current coverage and next work, exploration documents on
-dated observations, and bug reports on reproduction. Remove duplicated detail
-and update links when files are renamed.
+## 5. Review and improve
+
+- Review correctness, assertions, reliability, cleanup and documentation.
+- Separate defects, formatting cleanup and optional enhancements.
+- Propose improvements before implementing them when the request is for review only.
+- Apply agreed changes and verify them.
+- Run any new tests first, then the whole suite.
+- Remove duplicated documentation and update links when files are renamed.
+
+## 6. Summarize
+
+- Report what was implemented and how many tests were added.
+- Report test results and other verification outcomes.
+- List known bugs, deferred coverage and remaining limitations.
+- Link to the relevant plans, findings and bug reports.
+- State the next task, if one has been agreed.

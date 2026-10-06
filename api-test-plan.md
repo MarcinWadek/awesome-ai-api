@@ -1,6 +1,6 @@
 # API Test Plan
 
-This plan is based on `api-docs.json` and a quick backend code review in
+This plan is based on `docs/api-docs.json` and a quick backend code review in
 `../test-secure-backend`. Its main purpose is to keep the API suite easy to
 grow, easy to review, and ordered so the simplest endpoints come first.
 
@@ -17,11 +17,14 @@ Already covered in `tests/api`:
 | `GET /api/v1/traffic/info`, `GET /api/v1/traffic/logs` | Public (legacy mode) | Done (core) | 6 tests: info, session topics, pagination/isolation and validation. |
 | `GET /api/v1/products`, `GET /api/v1/products/{id}` | Bearer | Done (core) | 6 tests: reads, validation, authentication and not-found. |
 | Chat/tool prompt GET and PUT | Bearer | Done (core) | 12 tests: defaults, updates/isolation, null reset, length validation and authentication. |
+| `GET /api/v1/users`, `GET /api/v1/users/{username}` | Bearer | Done (core) | 5 tests: registered profile reads, missing authentication and absent username. |
+| `GET /api/v1/cart`, `DELETE /api/v1/cart` | Bearer | Done (core) | 4 tests: empty cart, populated clear and missing authentication. |
 | OpenAPI smoke checks | Public | Done | `api-docs` and Swagger UI checks exist. |
 
-Verification on 6 October 2026: all **24 new tests** passed in targeted batches
-(traffic 6, products 6, prompts 12), followed by the **50/50 passing full suite**
-with two workers and zero retries. Typechecking and `git diff --check` passed.
+Focused revision on 6 October 2026: **9/9 user/cart tests passed**; full-suite
+verification passed **59/59** with two workers and zero retries.
+Typechecking and `git diff --check` passed. The earlier traffic/products/prompts
+batch added 24 tests and passed the then-current 50-test suite.
 
 ## Working Rules
 
@@ -30,7 +33,7 @@ with two workers and zero retries. Typechecking and `git diff --check` passed.
 - Initialize HTTP clients in test setup, following `tests/api/users/me.spec.ts`.
 - Use `given` for setup, `when` for the tested action, and `then` for assertions.
 - In each spec, order tests by expected response code ascending: `200`, `201`, `202`, `204`, then `400`, `401`, `403`, `404`, `409`, `422`, `429`.
-- When an endpoint behavior is unclear, check `api-docs.json`, backend code, or the live app before adding the test.
+- When an endpoint behavior is unclear, check `docs/api-docs.json`, backend code, or the live app before adding the test.
 - Run newly created tests first. After they pass, run the whole suite to catch regressions.
 
 Suggested file naming:
@@ -69,10 +72,10 @@ Start with these, in order. This keeps early work small and builds reusable clie
 | 8 | `PUT /api/v1/users/chat-system-prompt` | 2 | Done (core). Persistence/isolation, reset, length and authentication. |
 | 9 | `GET /api/v1/users/tool-system-prompt` | 2 | Done (core). Same pattern as chat read. |
 | 10 | `PUT /api/v1/users/tool-system-prompt` | 2 | Done (core). Same pattern as chat update; parsing/type defects remain open. |
-| 11 | `GET /api/v1/users` | 2 | Authenticated list endpoint; backend has no admin `@PreAuthorize`. |
-| 12 | `GET /api/v1/users/{username}` | 2 | Authenticated lookup plus `404`. |
-| 13 | `GET /api/v1/cart` | 2 | Authenticated current-user state; empty cart is easy to assert. |
-| 14 | `DELETE /api/v1/cart` | 2 | Idempotent-looking cleanup endpoint returning `204`. |
+| 11 | `GET /api/v1/users` | 2 | Done (core). 2 tests: client list and missing authentication. |
+| 12 | `GET /api/v1/users/{username}` | 2 | Done (core). 3 tests: registered profile, missing authentication and `404`. |
+| 13 | `GET /api/v1/cart` | 2 | Done (core). 2 tests: empty cart with zero totals and missing authentication. |
+| 14 | `DELETE /api/v1/cart` | 2 | Done (core). 2 tests: populated clear and missing authentication. |
 | 15 | `GET /api/v1/users/me/email-events` | 3 | Needs email/password-reset action if asserting non-empty results. |
 | 16 | `POST /api/v1/users/password/forgot` | 3 | Public, but async email side effect and `202` behavior need care. |
 | 17 | `POST /api/v1/users/password/reset` | 4 | Requires acquiring a valid reset token or local outbox support. |
@@ -160,8 +163,8 @@ Findings: [exploration](docs/endpoints-exploration.md) and
 | Auth | `POST /api/v1/users/refresh` | Public | n/a | 2 | Done | `200`, `400`, invalid/reused refresh token. |
 | Auth | `POST /api/v1/users/logout` | Bearer | Any | 2 | Done | `200`, `401`, refresh token no longer usable. |
 | Users | `GET /api/v1/users/me` | Bearer | Any | 2 | Done | `200`, `401`. |
-| Users | `GET /api/v1/users` | Bearer | Any | 2 | Not started | `200`, `401`, response array shape. |
-| Users | `GET /api/v1/users/{username}` | Bearer | Any | 2 | Not started | `200`, `401`, `404`. |
+| Users | `GET /api/v1/users` | Bearer | Any | 2 | Done (core) | 2 tests: `200` array with registered profile; `401` missing auth. |
+| Users | `GET /api/v1/users/{username}` | Bearer | Any | 2 | Done (core) | 3 tests: `200` registered profile, `401` missing auth, `404` absent username. |
 | Users | `PUT /api/v1/users/{username}` | Bearer | Owner/Admin | 3 | Not started | `200`, `400`, `401`, `403`, verified missing-user behavior. |
 | Users | `DELETE /api/v1/users/{username}` | Bearer | Admin | 4 | Not started | `204`, `401`, `403`, `404`. |
 | Users | `DELETE /api/v1/users/{username}/right-to-be-forgotten` | Bearer | Owner/Admin | 4 | Not started | `204`, `401`, `403`, verified missing-user behavior. |
@@ -176,8 +179,8 @@ Findings: [exploration](docs/endpoints-exploration.md) and
 | Products | `POST /api/v1/products` | Bearer | Admin | 3 | Not started | `201`, `400`, `401`, `403`. |
 | Products | `PUT /api/v1/products/{id}` | Bearer | Admin | 3 | Not started | `200`, `400`, `401`, `403`, `404`. |
 | Products | `DELETE /api/v1/products/{id}` | Bearer | Admin | 3 | Not started | `204`, `401`, `403`, `404`. |
-| Cart | `GET /api/v1/cart` | Bearer | Any | 2 | Not started | `200`, `401`, empty cart shape. |
-| Cart | `DELETE /api/v1/cart` | Bearer | Any | 2 | Not started | `204`, `401`. |
+| Cart | `GET /api/v1/cart` | Bearer | Any | 2 | Done (core) | 2 tests: `200` empty cart/zero totals; `401` missing auth. |
+| Cart | `DELETE /api/v1/cart` | Bearer | Any | 2 | Done (core) | 2 tests: `204` populated clear verified by GET; `401` missing auth. |
 | Cart | `POST /api/v1/cart/items` | Bearer | Any | 3 | Not started | `200`, `400`, `401`, `404`. |
 | Cart | `PUT /api/v1/cart/items/{productId}` | Bearer | Any | 3 | Not started | `200`, `400`, `401`, `404`. |
 | Cart | `DELETE /api/v1/cart/items/{productId}` | Bearer | Any | 3 | Not started | `200`, `401`, `404`. |
@@ -226,13 +229,23 @@ An endpoint is done when:
 - Newly added tests pass on their own.
 - The full suite passes after the new tests pass.
 
-## Completed Batch and Remaining Scope
+## Completed Batches and Remaining Scope
 
-Status: implemented and verified. **24 new tests** (traffic 6, products 6,
-prompts 12) bring the suite to **50 passing tests**. The lazy peer auth fixture
-owns its separate account cleanup. New clients initialize in setup; specs use
-`test.step`, ascending response groups, disabled traces and zero retries.
+Operations 11-14 now contain **9 focused tests** (user list 2, username lookup 3,
+cart GET 2, cart DELETE 2), reduced from 16. Targeted verification passed **9/9**
+on 6 October 2026; the full suite passed **59/59** with two workers and zero retries.
+Typechecking and `git diff --check` passed.
+Clients initialize in setup; specs use test.step, ascending status groups,
+disabled traces and zero retries. Fixtures own account and cart cleanup.
+Only populated clearing needs a catalogue product with at least one unit in stock.
 
-Secondary boundaries, traffic filters/clamping/time inputs and prompt parsing/type
-defect automation remain deferred in the folder plans.
-The next unstarted operation in delivery order is `GET /api/v1/users`.
+Deferred: peer reads/cart isolation, populated cart GET totals, repeated empty
+clearing and extra JWT variants. Shared authentication variants remain covered
+by existing auth/me tests. Dedicated cart item operations remain unstarted.
+Traffic secondary boundaries and prompt parsing/type defects remain deferred
+in their folder plans.
+
+See [exploration](docs/users-cart-exploration.md),
+[users plan](tests/api/users/api-test-plan.md), and
+[cart plan](tests/api/cart/api-test-plan.md).
+The next unstarted operation in delivery order is `GET /api/v1/users/me/email-events`.

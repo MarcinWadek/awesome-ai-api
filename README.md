@@ -1,8 +1,8 @@
 # README
 
 Our process: [API testing workflow](docs/api-testing-workflow.md) — exploratory
-tests, exploration findings and implementation plan, then implementation and
-code review/improvement.
+tests, exploration findings, implementation planning, implementation and
+verification, code review/improvement, then a summary.
 
 ## Run the project after cloning
 
