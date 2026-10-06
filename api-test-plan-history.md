@@ -3,6 +3,8 @@
 Detailed plan archived on 7 October 2026 after simplifying the working document.
 Use [api-test-plan.md](api-test-plan.md) for current next actions. The snapshot below
 preserves coverage, findings and validation history; its workstream labels are historical.
+Folder-plan instructions below describe the former workflow. Only the root plan
+is maintained now; links to the removed plans have been replaced with this archive's matrix.
 
 This plan combines `docs/api-docs.json`, existing Playwright tests and helpers,
 backend source in `../test-secure-backend`, and deterministic scenarios in
@@ -539,10 +541,8 @@ value while GET returns the default. Traffic topics/log selection depend on
 session headers, and page sizes clamp to the configured maximum.
 
 Findings: [exploration](docs/exploration/2026-10-06-traffic-products-prompts.md) and
-[bug report](docs/prompt-bug-report.md). Coverage details:
-[traffic](tests/api/traffic/api-test-plan.md),
-[products](tests/api/products/api-test-plan.md), and
-[users](tests/api/users/api-test-plan.md). Eight specs implement the agreed
+[bug report](docs/prompt-bug-report.md). Coverage details are preserved in the
+[endpoint matrix](#endpoint-matrix). Eight specs implement the agreed
 24-test core scope; all targeted batches passed, then the full suite passed 50/50.
 
 
@@ -658,9 +658,8 @@ by existing auth/me tests. Dedicated cart item operations remain unstarted.
 Traffic secondary boundaries and prompt parsing/type defects remain deferred
 in their folder plans.
 
-See [exploration](docs/exploration/2026-10-06-users-cart.md),
-[users plan](tests/api/users/api-test-plan.md), and
-[cart plan](tests/api/cart/api-test-plan.md).
+See [exploration](docs/exploration/2026-10-06-users-cart.md) and the
+[endpoint matrix](#endpoint-matrix).
 These operations remain complete; there is no single mandatory next endpoint.
 Use the independent starts and prerequisite gates below.
 

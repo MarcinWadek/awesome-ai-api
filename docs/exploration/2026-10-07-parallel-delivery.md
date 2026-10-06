@@ -13,11 +13,11 @@ Maintained plan: [root API plan](../../api-test-plan.md). Delivery document:
 
 | Area | Source paths relative to its repository | Existing API evidence |
 | --- | --- | --- |
-| Security/users | Backend `src/main/java/com/awesome/testing/security/WebSecurityConfig.java`; `controller/users/UserEditController.java`, `UserDeleteController.java`, `UserRightToBeForgottenController.java`; `service/UserService.java`; `fakedata/SetupUsers.java` | `fixtures/auth.fixture.ts`, AuthClient/UsersClient, users specs and [users plan](../../tests/api/users/api-test-plan.md) |
-| Products/inventory | Backend `controller/ProductController.java`, `AdminInventoryController.java`; `service/ProductService.java`, `InventoryService.java`; product DTOs; `fakedata/SetupData.java`, `SetupProducts.java`, `SetupOrders.java`; `src/main/resources/bootstrap/products.json` and DB migrations V1/V4 | ProductsClient, product read specs and [products plan](../../tests/api/products/api-test-plan.md) |
-| Commerce | Backend `controller/cart/CartItemsController.java`, `controller/OrderController.java`; `service/CartService.java`, `OrderService.java`; cart/address/order DTOs; order/cart/inventory entities and FK migrations | CartClient and [cart read/clear exploration](2026-10-06-users-cart.md), cart specs/[plan](../../tests/api/cart/api-test-plan.md) |
+| Security/users | Backend `src/main/java/com/awesome/testing/security/WebSecurityConfig.java`; `controller/users/UserEditController.java`, `UserDeleteController.java`, `UserRightToBeForgottenController.java`; `service/UserService.java`; `fakedata/SetupUsers.java` | `fixtures/auth.fixture.ts`, AuthClient/UsersClient, users specs and [users specs](../../tests/api/users) |
+| Products/inventory | Backend `controller/ProductController.java`, `AdminInventoryController.java`; `service/ProductService.java`, `InventoryService.java`; product DTOs; `fakedata/SetupData.java`, `SetupProducts.java`, `SetupOrders.java`; `src/main/resources/bootstrap/products.json` and DB migrations V1/V4 | ProductsClient, product read specs and [product read specs](../../tests/api/products) |
+| Commerce | Backend `controller/cart/CartItemsController.java`, `controller/OrderController.java`; `service/CartService.java`, `OrderService.java`; cart/address/order DTOs; order/cart/inventory entities and FK migrations | CartClient and [cart read/clear exploration](2026-10-06-users-cart.md), [cart specs](../../tests/api/cart) |
 | Password/mail | Backend `controller/users/PasswordResetController.java`, `UserEmailEventController.java`; `controller/EmailController.java`, `controller/email/LocalEmailOutboxController.java`; `service/password/PasswordResetService.java`, `LocalEmailOutbox.java`; `service/EmailService.java`, `service/email/EmailEventService.java`, `service/delay/RandomDelayGenerator.java`; profile YAML and PasswordResetProperties | Saved OpenAPI; no password/email-event operation specs currently exist |
-| Traffic | Backend `controller/TrafficController.java`; `traffic/TrafficSession.java`, `TrafficLoggingFilter.java`, `TrafficCapturePolicy.java`; application/server configuration | TrafficClient and controlled-session `logs.get.spec.ts`; [traffic plan](../../tests/api/traffic/api-test-plan.md) |
+| Traffic | Backend `controller/TrafficController.java`; `traffic/TrafficSession.java`, `TrafficLoggingFilter.java`, `TrafficCapturePolicy.java`; application/server configuration | TrafficClient and controlled-session `logs.get.spec.ts`; [traffic specs](../../tests/api/traffic) |
 | QR | Backend `controller/QrController.java`, `service/QrService.java`, `dto/qr/CreateQrDto.java`; common suite Accept configuration | Saved OpenAPI; no QR client/spec currently exists |
 | Backend LLM | Backend `controller/OllamaController.java`; `service/ollama/OllamaService.java`, `OllamaFunctionCallingService.java`, `OllamaRequestHandler.java`; product function handlers/registry; `service/prompt/PromptInjector.java`; `controller/exception/OllamaExceptionHandler.java`; request DTOs/profile upstream URLs | Saved OpenAPI; no Ollama client/stream helper/spec currently exists |
 | Mock LLM | Mock `src/main/java/com/awesome/testing/ollama/controller/*`; `service/GenerateService.java`, `ChatService.java`, `ChatToolsService.java`; scenario repositories; `util/TokenStreamUtils.java`; `src/main/resources/scenarios/{generate-scenarios,chat-dialog-scenarios,chat-scenarios}.json`; application.properties and README | Existing mock controller tests inspected for supporting contract context; not executed in this documentation task |
@@ -25,7 +25,8 @@ Maintained plan: [root API plan](../../api-test-plan.md). Delivery document:
 Java backend paths without a full prefix in the table are under
 `src/main/java/com/awesome/testing/`. Cross-checked operation names, roles and
 response codes with `docs/api-docs.json`, all existing clients, fixture lifecycle,
-endpoint folder plans and prior exploration/implementation records.
+the former endpoint plans and prior exploration/implementation records.
+Coverage is now maintained only in the root API test plan.
 
 ## Findings and implications
 

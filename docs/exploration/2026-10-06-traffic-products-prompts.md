@@ -26,4 +26,4 @@ Only selected metadata/comparison results were saved. Our own Bearer token was
 absent from session-filtered logs; this was not a full credential/PII audit.
 
 Subsequent automation added 24 core tests; full suite **50/50 passed**.
-Current coverage and gaps: [root plan](../../api-test-plan.md) and its folder plans.
+Current coverage and gaps: [root API test plan](../../api-test-plan.md).
