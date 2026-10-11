@@ -139,3 +139,25 @@ Verification after removal:
 - Typecheck and staged/unstaged `git diff --check`: passed.
 - Raw evidence: gitignored `exploration-results/full-suite-after-auth-test-removal.log`;
   npm exit code **0**.
+
+## Test readability refactor
+
+On **11 October 2026**, refactored the four Ollama specs into readable scenario
+steps. The same **11 API tests** retain HTTP-code ordering, authenticated fixture
+setup and the existing stream, schema, tool-flow and catalogue assertions.
+
+- `support/ollama.helpers.ts` collects and validates streams and loads tool
+  definitions/catalogue context using clients initialized in test setup.
+- `support/assertions/ollama.ts` groups reconstructed answer checks and JSON
+  error assertions; `support/assertions/ollama-tools.ts` groups product-tool
+  schemas, execution phases and result validation.
+- The representative tool definition for the anonymous request moved to shared
+  scenario data. No additional auth or SSE tests were added.
+
+Verification, two workers, zero retries, `https://awesome.byst.re`:
+
+- Affected Ollama batch: **11/11 passed**, 16.1s.
+- Full suite after the affected tests passed: **70/70 passed**, 54.8s.
+- Typecheck and staged/unstaged `git diff --check`: passed.
+- Raw evidence: gitignored `exploration-results/ollama-readability-tests.log`
+  and `ollama-readability-full-suite.log`; npm exit codes **0**.

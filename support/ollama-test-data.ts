@@ -1,4 +1,12 @@
-import type { ChatRequest, GenerateRequest } from '../types/ollama';
+import type { ChatRequest, GenerateRequest, ToolDefinition } from '../types/ollama';
+
+export const listProductsToolDefinition = {
+  type: 'function',
+  function: {
+    name: 'list_products',
+    parameters: { type: 'object', properties: { category: { type: 'string' } } },
+  },
+} satisfies ToolDefinition;
 
 // Expected prose belongs to these deterministic mock scenarios, not to a real-model contract.
 const model = 'qwen3.5:2b';

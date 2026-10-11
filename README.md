@@ -187,8 +187,11 @@ Four endpoint specs cover tool definitions and generate/chat/tool SSE responses:
 11 API tests for authenticated success, essential validation, and missing JWTs.
 They reuse `authenticatedUser` through `fixtures/ollama.fixture.ts`, which
 initializes `OllamaClient` in fixture setup. Inputs and expected mock prose live
-in `support/ollama-test-data.ts`. The endpoint tests use a shared helper to read
-multiline SSE events and preserve text fragments.
+in `support/ollama-test-data.ts`. Specs keep Given/When/Then steps visible:
+[Ollama helpers](support/ollama.helpers.ts) collect streams and prepare catalogue
+context, while [answer assertions](support/assertions/ollama.ts) and
+[product-tool assertions](support/assertions/ollama-tools.ts) validate the details.
+The shared SSE reader handles multiline events and preserves text fragments.
 
 ```powershell
 npm.cmd run test:api -- tests/api/ollama --workers=2 --retries=0

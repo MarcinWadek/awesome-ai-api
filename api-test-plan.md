@@ -8,6 +8,11 @@ Ollama completed: [11 October live exploration](docs/exploration/2026-10-11-olla
 [11 API tests delivered](docs/implementation/ollama-streaming-tests.md).
 Known limitation: [mock final answer disagrees with catalogue](docs/ollama-mock-bug-report.md).
 
+Ollama readability refactor: setup and stream collection moved to
+`support/ollama.helpers.ts`; answer/error assertions and product-tool checks live
+in `support/assertions/ollama.ts` and `support/assertions/ollama-tools.ts`.
+The 11 cases and their assertion scope are retained. Validation completed.
+
 ## Baseline
 
 Already Done (core coverage):
@@ -25,9 +30,9 @@ Already Done (core coverage):
 Current suite: **70 API tests**, including **11 Ollama tests**. Standalone SSE
 parser tests and the three additional auth-fixture tests were removed at the
 user's request.
-Latest validation after removing the auth-fixture tests: **70/70 passed on
-11 October 2026**, 56.9s, two workers, zero retries, `https://awesome.byst.re`.
-Last Ollama batch: **11/11 passed on 11 October 2026**, 16.3s, two workers,
+Latest validation after the Ollama readability refactor: **70/70 passed on
+11 October 2026**, 54.8s, two workers, zero retries, `https://awesome.byst.re`.
+Last Ollama batch: **11/11 passed on 11 October 2026**, 16.1s, two workers,
 zero retries, `https://awesome.byst.re`.
 Typecheck and staged/unstaged `git diff --check` passed.
 Original delivery results remain in the implementation record.

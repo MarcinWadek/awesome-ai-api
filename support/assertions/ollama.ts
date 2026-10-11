@@ -1,6 +1,22 @@
 import { expect, type APIResponse } from '@playwright/test';
 import type { ChatChunk, GenerateChunk, StreamChunk } from '../../types/ollama';
-import { expectNonEmptyString } from './http';
+import { expectJsonResponse, expectNonEmptyString } from './http';
+
+export async function expectOllamaJsonError(
+  response: APIResponse,
+  status: number,
+  field: string,
+  expectedMessage?: string,
+): Promise<void> {
+  expect(response.status()).toBe(status);
+  expectJsonResponse(response);
+  const body = await response.json() as Record<string, unknown>;
+  if (expectedMessage === undefined) {
+    expectNonEmptyString(body[field]);
+  } else {
+    expect(body[field]).toBe(expectedMessage);
+  }
+}
 
 export function expectSseResponse(response: APIResponse): void {
   expect(response.status()).toBe(200);
@@ -81,4 +97,31 @@ export function expectChatChunks(chunks: ChatChunk[]): void {
 export function assistantText(chunks: ChatChunk[]): string {
   return chunks.filter(chunk => chunk.message?.role === 'assistant')
     .map(chunk => chunk.message?.content ?? '').join('');
+}
+
+export function expectGeneratedAnswer(chunks: GenerateChunk[], text: string, thinking: string): void {
+  const content = chunks.filter(chunk => chunk.response != null);
+  expect(content.length).toBeGreaterThan(1);
+  expect(content.map(chunk => chunk.response).join('')).toBe(text);
+  expect(chunks.map(chunk => chunk.thinking ?? '').join('')).toBe(thinking);
+  expectCompletedPhase(chunks);
+  expectThinkingBeforeContent(chunks.map(chunk => ({
+    thinking: chunk.thinking, content: chunk.response,
+  })));
+}
+
+export function expectChatAnswer(chunks: ChatChunk[], text: string, thinking: string): void {
+  expect(chunks.filter(chunk => chunk.message?.content != null).length).toBeGreaterThan(1);
+  expectAssistantMessages(chunks);
+  expect(assistantText(chunks)).toBe(text);
+  expect(chunks.map(chunk => chunk.message?.thinking ?? '').join('')).toBe(thinking);
+  expectCompletedPhase(chunks);
+  expectThinkingBeforeContent(chunks.map(chunk => ({
+    thinking: chunk.message?.thinking, content: chunk.message?.content,
+  })));
+}
+
+export function expectAssistantMessages(chunks: ChatChunk[]): void {
+  expect(chunks.filter(chunk => chunk.message != null)
+    .every(chunk => chunk.message?.role === 'assistant')).toBe(true);
 }
