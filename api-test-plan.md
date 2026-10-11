@@ -4,6 +4,10 @@ Keep this single working plan short and action-oriented. Do not create separate 
 Detailed coverage and validation history live in [api-test-plan-history.md](api-test-plan-history.md).
 Backend/mock findings live in the [repository review](docs/exploration/2026-10-07-parallel-delivery.md).
 
+Ollama completed: [11 October live exploration](docs/exploration/2026-10-11-ollama.md),
+[11 API tests delivered](docs/implementation/ollama-streaming-tests.md).
+Known limitation: [mock final answer disagrees with catalogue](docs/ollama-mock-bug-report.md).
+
 ## Baseline
 
 Already Done (core coverage):
@@ -15,8 +19,22 @@ Already Done (core coverage):
 - Cart: get, clear. Item POST is setup only, not dedicated coverage.
 - Traffic: info, paginated logs in legacy public mode.
 - OpenAPI: docs and Swagger UI smoke checks.
+- Ollama: tool definitions, generate, chat and chat/tools; multiline SSE events,
+  whitespace, tool results and completion through EOF; 200/400/401 core cases.
 
-Latest validation: **59/59 passed on 7 October 2026**, two workers, zero retries.
+Current suite: **70 API tests**, including **11 Ollama tests**. Standalone SSE
+parser tests and the three additional auth-fixture tests were removed at the
+user's request.
+Latest validation after removing the auth-fixture tests: **70/70 passed on
+11 October 2026**, 56.9s, two workers, zero retries, `https://awesome.byst.re`.
+Last Ollama batch: **11/11 passed on 11 October 2026**, 16.3s, two workers,
+zero retries, `https://awesome.byst.re`.
+Typecheck and staged/unstaged `git diff --check` passed.
+Original delivery results remain in the implementation record.
+Review follow-up completed: model-phase completion, thinking/content ordering,
+tool-call roles, exact mock prose, separate scenario data, and fixture setup
+cleanup. Catalogue checks cover identity and payload validity; exact mutable
+price/stock/availability equality requires isolated data and remains deferred.
 QR tests are not implemented yet.
 
 Before new coverage, confirm the baseline:
@@ -36,11 +54,13 @@ Can start with the existing `authenticatedUser` fixture.
 Do next:
 
 1. `GET /api/v1/users/me/email-events` - empty list and missing auth.
-2. `GET /api/v1/ollama/chat/tools/definitions` - schema and missing auth.
-3. `GET /api/v1/traffic/logs/{correlationId}` - controlled lookup and unknown ID.
-4. `POST /api/v1/qr/create` - PNG, blank text, missing auth.
-5. Explore password `forgot` and `reset`, plus `POST /api/v1/email` side effects.
-6. Spike a streaming helper for Ollama `generate`, `chat` and `chat/tools`.
+2. `GET /api/v1/traffic/logs/{correlationId}` - controlled lookup and unknown ID.
+3. `POST /api/v1/qr/create` - PNG, blank text, missing auth.
+4. Explore password `forgot` and `reset`, plus `POST /api/v1/email` side effects.
+
+Ollama core coverage is complete for the verified mock. Real upstream errors,
+model 404, rate limits, iteration caps, system-prompt behavior and incremental
+flush timing remain deferred; buffered SSE tests do not measure token latency.
 
 Once product data and cleanup are ready:
 
@@ -82,7 +102,6 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 | Order detail/cancel/status and owned admin-list assertions | Created-order helper; admin fixture for admin cases. |
 | Password reset success | Valid token from verified local echo or observable email/outbox. |
 | Nonempty/delivery email assertions | Controlled email action and bounded event/sink polling. Empty reads can start now. |
-| Ollama streaming/tool success | Streaming collector and reachable upstream; catalogue data for product tools. |
 | Traffic detail success | Captured request with unique `X-Client-Session-Id`, then its listed correlation ID. |
 
 ## Shared Decisions
@@ -101,7 +120,7 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 3. Thread B provides product setup and cleanup.
 4. Thread A adds cart item tests, then checkout.
 5. Created orders unblock detail/cancel and admin status assertions.
-6. Finish password reset, email side effects and streaming/tool cases when their prerequisites are verified.
+6. Finish password reset and email side effects when their prerequisites are verified.
 7. Run each new batch first, then the full suite and static checks.
 
 ## Test Rules
@@ -122,7 +141,8 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 - User edit/right-to-be-forgotten allow owner or admin. Missing-user behavior is **Needs verification**.
 - Cart add checks stock without reserving it; checkout deducts stock and clears the cart. Cancellation is allowed from `PENDING` or `PAID` and restores deducted stock.
 - QR returns `image/png`; use compatible Accept headers and verify error negotiation.
-- Backend Ollama returns `text/event-stream`; the mock streams deterministic NDJSON.
+- Backend Ollama returns multiline `text/event-stream`; the mock streams deterministic NDJSON.
+  Product tool payloads use actual catalogue data; canned final prose may disagree.
 - Email send delay can be 10 seconds to 10 minutes; verify timing before choosing polling limits.
 
 Inventory, MFA and SSO coverage are later backlog items; details remain in the history file.
@@ -140,7 +160,7 @@ flowchart TD
   admin --> orderAdmin
   token[Verified reset token access] --> password[Password reset success]
   email[Controlled action and email polling] --> events[Nonempty email assertions]
-  stream[Streaming helper and reachable upstream] --> ollama[Ollama streaming tests]
-  ollama --> tools[Tool-call tests with catalogue data]
+  stream[Buffered SSE collector and verified mock] --> ollama[Ollama streaming tests complete]
+  ollama --> tools[Tool-call tests with catalogue data complete]
   traffic[Controlled session request] --> correlation[Traffic detail lookup]
 ```

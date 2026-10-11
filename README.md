@@ -138,9 +138,11 @@ out of traces. Do not log or attach fixture values to reports, persist tokens,
 or override the trace setting in consuming specs. After each consuming test,
 the fixture deletes its generated account and user-owned data through
 `DELETE /api/v1/users/{username}/right-to-be-forgotten`, using that user's JWT.
-Cleanup runs after the consuming test, including assertion failures, and requires
-HTTP 204. There is no retry or fallback if fixture setup fails before yielding
-the user and token.
+Cleanup covers failures after confirmed registration, including failed login
+setup and consuming-test assertions, and requires HTTP 204. When setup did not
+obtain an access token, cleanup signs in again; a 401 deletion response triggers
+one fresh login and deletion retry. If cleanup also fails, the account username
+and both failures are reported.
 This fixture owns account deletion: consuming tests should not delete the account
 themselves or change its credentials. Interrupted processes or an unconfirmed
 signup response can leave accounts behind. Existing signup tests still retain
@@ -178,6 +180,32 @@ malformed, and signature-altered tokens. Run it with two workers and zero retrie
 ```powershell
 npx.cmd playwright test tests/api/users/me.spec.ts --project=api --retries=0 --workers=2
 ```
+
+## Ollama tests
+
+Four endpoint specs cover tool definitions and generate/chat/tool SSE responses:
+11 API tests for authenticated success, essential validation, and missing JWTs.
+They reuse `authenticatedUser` through `fixtures/ollama.fixture.ts`, which
+initializes `OllamaClient` in fixture setup. Inputs and expected mock prose live
+in `support/ollama-test-data.ts`. The endpoint tests use a shared helper to read
+multiline SSE events and preserve text fragments.
+
+```powershell
+npm.cmd run test:api -- tests/api/ollama --workers=2 --retries=0
+```
+
+Known prompts and exact prose are tied to the deterministic mock scenarios.
+Tests check thinking-before-content for the selected generate/chat scenarios,
+assistant roles for tool calls and one completion marker per model phase.
+The tool test consumes the entire body and checks exact final prose separately
+from product data. It validates product identity against catalogue reads and
+the types of price/stock fields. Exact mutable price, stock and availability
+comparisons require isolated catalogue data and are deferred. Playwright buffers
+responses; these tests do not establish token latency.
+
+See [Ollama exploration](docs/exploration/2026-10-11-ollama.md),
+[implementation record](docs/implementation/ollama-streaming-tests.md), and the
+[mock grounding limitation](docs/ollama-mock-bug-report.md).
 
 ## Refresh and logout tests
 
