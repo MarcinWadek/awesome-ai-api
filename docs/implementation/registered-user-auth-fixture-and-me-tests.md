@@ -1,4 +1,9 @@
-# Implementation plan: registered-user authentication fixture
+# Implementation plan: registered-user authentication fixture and GET /users/me tests
+
+Historical implementation record. Fixture details and verification counts below
+describe the original delivery; consult [the current test plan](../../api-test-plan.md)
+and `fixtures/auth.fixture.ts` for the maintained behavior. Code paths in this
+record are relative to the repository root.
 
 Status: implemented and validated. Typecheck passed, all four new `/users/me` tests passed, and the full suite passed (15 tests) with two workers and zero retries. Live tests required HTTPS access outside the network-restricted sandbox.
 
