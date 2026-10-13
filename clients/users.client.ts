@@ -1,5 +1,6 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { ChatSystemPrompt, ToolSystemPrompt } from '../types/prompts';
+import { safeRequest } from '../support/safe-request';
 
 export class UsersClient {
   constructor(private readonly request: APIRequestContext) {}
@@ -17,16 +18,16 @@ export class UsersClient {
   }
 
   async getMe(token?: string): Promise<APIResponse> {
-    return this.request.get('/api/v1/users/me', {
+    return safeRequest('Read current user', () => this.request.get('/api/v1/users/me', {
       headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
-    });
+    }));
   }
 
   async forgetUser(username: string, token: string): Promise<APIResponse> {
-    return this.request.delete(
+    return safeRequest('Delete generated user', () => this.request.delete(
       `/api/v1/users/${encodeURIComponent(username)}/right-to-be-forgotten`,
       { headers: { Authorization: `Bearer ${token}` } },
-    );
+    ));
   }
 
   async getChatSystemPrompt(token?: string): Promise<APIResponse> {

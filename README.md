@@ -9,8 +9,9 @@ verification, code review/improvement, then a summary.
 ## Run the project after cloning
 
 This repository contains Playwright API tests for Awesome AI. It does not
-start a local application server: tests call the API configured in `.env`.
-The example endpoint is `https://awesome.byst.re`.
+start a local application server: tests call two APIs configured in `.env`.
+Existing non-admin tests use `https://awesome.byst.re`; admin tests use
+`https://aitesters.byst.re`.
 
 ### Prerequisites
 
@@ -28,7 +29,8 @@ cp .env.example .env
 
 In PowerShell, use `Copy-Item .env.example .env` to copy the file. Fill in
 `API_LOGIN_USERNAME` and `API_LOGIN_PASSWORD` in `.env` with your test account
-credentials, then run:
+credentials. Fill in `ADMIN_API_LOGIN_USERNAME` and `ADMIN_API_LOGIN_PASSWORD`
+with the course staging admin credentials, then run both projects:
 
 ```bash
 npm test
@@ -58,7 +60,8 @@ npm run test:api
 
 The API documentation is included in this project in the `docs/api-docs.json` file.
 
-We test the publicly available website: [https://awesome.byst.re](https://awesome.byst.re).
+The existing suite targets [awesome](https://awesome.byst.re); admin examples
+target [aitesters staging](https://aitesters.byst.re).
 
 The backend source code is also publicly available one directory above, in the `test-secure-backend` folder.
 
@@ -66,10 +69,20 @@ Swagger is publicly available as well, so it can be checked when needed: [https:
 
 ## Configuration
 
-Set `API_BASE_URL`, `API_LOGIN_USERNAME`, and `API_LOGIN_PASSWORD` in the
-repository-root `.env`. Dotenv loads this file before configuration values are
-read, including when running from the Playwright IDE extension. Missing or blank
-values fail immediately with an error naming the variable.
+Set `API_BASE_URL=https://awesome.byst.re`, `API_LOGIN_USERNAME`, and
+`API_LOGIN_PASSWORD` for the existing `api` project. Set
+`ADMIN_API_BASE_URL=https://aitesters.byst.re`, `ADMIN_API_LOGIN_USERNAME`, and
+`ADMIN_API_LOGIN_PASSWORD` for the `admin` project in the repository-root `.env`.
+When upgrading an existing checkout, add these admin variables from `.env.example`
+without replacing the existing values.
+
+Dotenv loads this file before configuration values are read, including when
+running from the Playwright IDE extension. If a URL variable is absent, the project
+uses its default: awesome for `api`, aitesters for `admin`. Explicitly blank URL
+values fail rather than silently falling back. Credentials are required only
+when their environment's sign-in is used. Missing or blank credentials report
+the variable name, never its value. Each project can run without variables for
+the other environment.
 
 Existing shell or CI variables take precedence over `.env`. In CI, supply the
 credentials through your CI provider's secrets and expose them under the same
@@ -79,6 +92,11 @@ Only `.env.example`, with empty credential placeholders, is committed. `.env`
 and `.env.*` files are ignored, except `.env.example`. Playwright authentication
 state and generated reports/traces are also ignored because they can contain
 session tokens or credentials.
+
+Project file filters are disjoint: `api` runs `tests/api/**/*.spec.ts`, while
+`admin` runs `tests/admin/**/*.spec.ts`. `npm test` runs both; `npm run test:api`
+and `npm run test:admin` select one. Both use isolated test-scoped request
+contexts and can run together with multiple workers. CI defaults to four workers.
 
 This follows Playwright's guidance on
 [environment variables and dotenv](https://playwright.dev/docs/test-parameterize#env-files)
@@ -147,8 +165,8 @@ This fixture owns account deletion: consuming tests should not delete the accoun
 themselves or change its credentials. Interrupted processes or an unconfirmed
 signup response can leave accounts behind. Existing signup tests still retain
 their accounts.
-The fixture uses generated credentials, although startup configuration still
-requires the shared `.env` login credentials for the existing suite.
+The fixture uses generated credentials. Shared `.env` login credentials are
+read only by tests that explicitly sign in with that configured account.
 
 The lazy `authenticatedPeer` fixture supplies a second independent account for
 prompt isolation checks. It uses the same lifecycle and cleanup as
@@ -209,6 +227,50 @@ responses; these tests do not establish token latency.
 See [Ollama exploration](docs/exploration/2026-10-11-ollama.md),
 [implementation record](docs/implementation/ollama-streaming-tests.md), and the
 [mock grounding limitation](docs/ollama-mock-bug-report.md).
+
+## Admin tests and disposable products
+
+Six staging examples cover usable admin authentication, product creation,
+partial update, deletion, and two creation authorization checks (401/403).
+Admin sign-in is test-scoped and validates the admin role and usable token. The fixture
+rejects routing outside aitesters. No worker token cache or saved auth state is
+used, and cleanup never logs out, deletes, resets or edits the shared admin.
+
+Import `test` and `expect` from `fixtures/admin.fixture.ts`. The
+`authenticatedAdmin` fixture supplies `{ token }`; create `ProductsClient` in
+`beforeEach` and call its methods directly in tests. There is no product fixture,
+product registry or authentication retry helper.
+
+Product specs prepare valid data with a fresh UUID name in `beforeEach`.
+Their `afterEach` reads the staging catalogue and deletes only products with
+that exact name, accepting 204/404. This handles assertion failures, lost creation
+replies and unexpected creation in authorization tests without caching IDs across
+runs. These examples keep the unique name unchanged when updating price/stock.
+If a future test changes the name, its cleanup must identify that test's new name.
+Traces are disabled, and clients use `safeRequest` for the final transport error.
+Playwright records automatic API-step errors before the client catches them;
+`support/redact-errors.reporter.ts` removes those request details before the
+list/HTML reporters receive them. Specs and fixtures need no wrappers.
+Keep the redaction reporter first. A CLI `--reporter` override replaces the
+configured reporter list and must include redaction when running real requests.
+Do not log/attach tokens or credentials, enable request debug logging, or override
+admin trace settings.
+
+Staging resets daily, so tests create their data on every run. Process termination
+can prevent teardown; a reset during execution can interrupt tests. Future cart
+or order scenarios using these products must also create users and carts on
+aitesters and remove those references before product cleanup. Existing awesome
+users/carts must never receive staging product IDs or tokens.
+
+```powershell
+npm.cmd run test:admin -- --workers=4 --retries=0
+npm.cmd test -- --project=api --project=admin --workers=4 --retries=0
+```
+
+See [admin exploration](docs/exploration/2026-10-12-admin-products.md) and the
+[delivery record](docs/implementation/admin-environments-and-disposable-products.md).
+Commerce setup, admin user/order/inventory endpoints and broad negative coverage
+remain deferred.
 
 ## Refresh and logout tests
 

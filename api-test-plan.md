@@ -20,18 +20,29 @@ Already Done (core coverage):
 - Auth: signup, signin, refresh, logout.
 - Users: me, list, detail.
 - Prompts: chat and tool prompt get/update; known parsing/type defects remain open.
-- Products: list, detail.
+- Products: list, detail; admin create, partial update and delete on staging.
 - Cart: get, clear. Item POST is setup only, not dedicated coverage.
 - Traffic: info, paginated logs in legacy public mode.
 - OpenAPI: docs and Swagger UI smoke checks.
 - Ollama: tool definitions, generate, chat and chat/tools; multiline SSE events,
   whitespace, tool results and completion through EOF; 200/400/401 core cases.
 
-Current suite: **70 API tests**, including **11 Ollama tests**. Standalone SSE
+Current suite: **76 API tests**: 70 existing tests on awesome (`api`) and six
+admin examples on aitesters (`admin`), including **11 Ollama tests**. Standalone SSE
 parser tests and the three additional auth-fixture tests were removed at the
 user's request.
-Latest validation after the Ollama readability refactor: **70/70 passed on
-11 October 2026**, 54.8s, two workers, zero retries, `https://awesome.byst.re`.
+Latest validation after report/configuration fixes: **76/76 passed on 12 October 2026**,
+48.8s, four workers, zero retries, both environments. Admin batch: **6/6 passed**, 6.5s.
+Two temporary report probes passed; decoded HTML, JSON and result artifacts
+contained no placeholder token. Discovery without dotenv/credentials/URL variables
+passed independently (70 api / six admin). No permanent API tests were added.
+Product setup/cleanup is local to specs; only the admin authentication fixture
+remains in the admin infrastructure. A temporary assertion failure confirmed
+`afterEach` cleanup; the original test was restored. The earlier focused overlap
+run passed **9/9** and measured cross-project/concurrent-admin execution.
+See the admin implementation record for details.
+The prior Ollama readability refactor passed **70/70 on 11 October 2026**,
+54.8s, two workers, zero retries, `https://awesome.byst.re`.
 Last Ollama batch: **11/11 passed on 11 October 2026**, 16.1s, two workers,
 zero retries, `https://awesome.byst.re`.
 Typecheck and staged/unstaged `git diff --check` passed.
@@ -42,10 +53,10 @@ cleanup. Catalogue checks cover identity and payload validity; exact mutable
 price/stock/availability equality requires isolated data and remains deferred.
 QR tests are not implemented yet.
 
-Before new coverage, confirm the baseline:
+Before new coverage, confirm the combined baseline:
 
 ```powershell
-npm.cmd run test:api -- --workers=2 --retries=0
+npm.cmd test -- --project=api --project=admin --workers=4 --retries=0
 ```
 
 ## How To Split The Work
@@ -67,7 +78,9 @@ Ollama core coverage is complete for the verified mock. Real upstream errors,
 model 404, rate limits, iteration caps, system-prompt behavior and incremental
 flush timing remain deferred; buffered SSE tests do not measure token latency.
 
-Once product data and cleanup are ready:
+Product client methods and test-local setup/cleanup are ready on **aitesters**.
+Future scenarios using admin-created products must run in the staging project and create their users/carts there;
+the existing non-admin suite remains on awesome. Do next after staging setup:
 
 1. Cart item add, update and remove.
 2. Order create and list.
@@ -77,16 +90,21 @@ Empty order-list coverage can start earlier without product data.
 
 ### Thread B: Admin
 
-Start by verifying admin login for the active backend profile.
+Core infrastructure and examples are delivered:
+[12 October exploration](docs/exploration/2026-10-12-admin-products.md),
+[implementation record](docs/implementation/admin-environments-and-disposable-products.md).
 
-Do next:
-
-1. Verify sign-in returns a usable token with `ROLE_ADMIN`.
-2. Add an admin fixture and product mutation client methods.
-3. `POST /api/v1/products`.
-4. `PUT /api/v1/products/{id}`.
-5. `DELETE /api/v1/products/{id}`.
-6. Provide disposable product setup and cleanup for Thread A.
+- Separate `api`/`admin` projects with disjoint file filters and environment routing.
+- Test-scoped admin sign-in, usable profile with `ROLE_ADMIN`, and disabled traces.
+- A minimal admin fixture; product specs create UUID-named data directly and
+  remove matching products in `afterEach`. The product fixture was removed.
+- Clients protect final transport errors; the first reporter also redacts
+  automatic API-step errors before list/HTML output. Local decoded-report probes
+  passed. URL defaults let either project run without the other's variables.
+- Six tests: sign-in/profile 200, create 201/401/403, update 200, delete 204/lookup 404.
+- Concurrent admin sign-ins and independent refresh verified live. Access JWT
+  strings can be identical; refresh sessions are distinct. Never log out the
+  shared admin. Fixture/request state is test-scoped, with no serial dependency.
 
 Then continue:
 
@@ -101,8 +119,7 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 
 | Work | Needs |
 | --- | --- |
-| Admin success paths | Verified admin fixture/client. Signup only creates clients. |
-| Cart item success paths | Confirmed in-stock product data. |
+| Cart item success paths on staging | Use disposable in-stock products and staging users together. Existing awesome tests remain separate. |
 | Checkout and stock assertions | Disposable products, populated cart, valid address and cleanup. |
 | Order detail/cancel/status and owned admin-list assertions | Created-order helper; admin fixture for admin cases. |
 | Password reset success | Valid token from verified local echo or observable email/outbox. |
@@ -111,7 +128,9 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 
 ## Shared Decisions
 
-- Products: use discovered seeds for cart-only setup; prefer disposable admin-created products for checkout. Never mutate shared seeds.
+- Products: existing awesome cart-only setup reads seeds. New mutation/commerce
+  scenarios use owned staging products and staging users; never mutate shared seeds
+  or transfer product IDs/tokens between environments.
 - Cleanup: own every created resource. Remove carts/orders before products; forgetting a user does not restore stock. Handle partial setup and already-deleted users.
 - Admin: never reset, delete, logout or change MFA on the shared admin account during teardown.
 - Email/reset: verify token and sink access first. Outbox requires admin and may require a key; do not clear it globally during parallel tests. Email-event metadata does not contain reset tokens.
@@ -121,8 +140,9 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 ## Delivery Order
 
 1. Confirm baseline.
-2. Start Thread A reads/QR/exploration and Thread B admin setup in parallel.
-3. Thread B provides product setup and cleanup.
+2. Continue Thread A reads/QR/exploration on awesome; core admin setup is complete.
+3. Use the admin fixture and product client for staging scenarios with staging users/carts;
+   keep setup and cleanup local to each scenario.
 4. Thread A adds cart item tests, then checkout.
 5. Created orders unblock detail/cancel and admin status assertions.
 6. Finish password reset and email side effects when their prerequisites are verified.

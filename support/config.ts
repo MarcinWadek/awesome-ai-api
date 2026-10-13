@@ -6,8 +6,8 @@ import type { LoginRequest } from '../types/auth';
 // Shell and CI environment variables take precedence over the local file.
 dotenv.config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
+function requireEnv(name: string, defaultValue?: string): string {
+  const value = process.env[name] ?? defaultValue;
   if (!value?.trim()) {
     throw new Error(
       `Missing required environment variable ${name}. Set it in .env (see .env.example) or in your shell/CI environment.`,
@@ -17,9 +17,21 @@ function requireEnv(name: string): string {
 }
 
 export const apiConfig = {
-  baseUrl: requireEnv('API_BASE_URL'),
-  validLoginCredentials: {
-    username: requireEnv('API_LOGIN_USERNAME'),
-    password: requireEnv('API_LOGIN_PASSWORD'),
-  } satisfies LoginRequest,
+  baseUrl: requireEnv('API_BASE_URL', 'https://awesome.byst.re'),
+  get validLoginCredentials(): LoginRequest {
+    return {
+      username: requireEnv('API_LOGIN_USERNAME'),
+      password: requireEnv('API_LOGIN_PASSWORD'),
+    };
+  },
+} as const;
+
+export const adminApiConfig = {
+  baseUrl: requireEnv('ADMIN_API_BASE_URL', 'https://aitesters.byst.re'),
+  get validLoginCredentials(): LoginRequest {
+    return {
+      username: requireEnv('ADMIN_API_LOGIN_USERNAME'),
+      password: requireEnv('ADMIN_API_LOGIN_PASSWORD'),
+    };
+  },
 } as const;
