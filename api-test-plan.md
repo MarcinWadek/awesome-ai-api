@@ -15,23 +15,44 @@ The 11 cases and their assertion scope are retained. Validation completed.
 
 ## Baseline
 
+Product/user CRUD extension implemented: [live staging evidence](docs/exploration/2026-10-13-products-users-crud.md)
+and [implementation record](docs/implementation/products-users-crud-gaps.md). Seventeen
+new cases passed 17/17 on 13 October 2026 (22.4s, four workers, zero retries).
+Full api/admin regression passed 93/93 (1.2m, four workers, zero retries).
+Typechecking and `git diff --check` passed. All new cases use disposable staging data,
+with same-environment users/tokens and deletion-aware user teardown.
+
+| Staging operation | Delivered coverage |
+| --- | --- |
+| Product POST | 201, invalid payload 400, missing auth 401, client 403 |
+| Product PUT | 200, invalid payload 400, missing auth 401, client 403, absent ID 404 |
+| Product DELETE | 204, missing auth 401, client 403, absent ID 404 (empty body) |
+| User PUT | Owner/admin 200, invalid payload 400, missing auth 401, peer client 403 |
+| User DELETE | Admin 204, missing auth 401, client including owner 403, absent username 404 |
+
+Successful updates are read back; rejected updates/deletions preserve targets.
+No defects observed in this requested scope. Missing-user PUT and dedicated
+right-to-be-forgotten scenarios remain deferred outside this delivery.
+
 Already Done (core coverage):
 
 - Auth: signup, signin, refresh, logout.
-- Users: me, list, detail.
+- Users: me, list, detail; staging owner/admin edit, validation/auth/ownership
+  rejection, admin deletion and deletion auth/role/not-found cases.
 - Prompts: chat and tool prompt get/update; known parsing/type defects remain open.
-- Products: list, detail; admin create, partial update and delete on staging.
+- Products: list, detail; admin create, partial update and delete on staging,
+  mutation validation/auth/role checks and update/delete not-found cases.
 - Cart: get, clear. Item POST is setup only, not dedicated coverage.
 - Traffic: info, paginated logs in legacy public mode.
 - OpenAPI: docs and Swagger UI smoke checks.
 - Ollama: tool definitions, generate, chat and chat/tools; multiline SSE events,
   whitespace, tool results and completion through EOF; 200/400/401 core cases.
 
-Current suite: **76 API tests**: 70 existing tests on awesome (`api`) and six
-admin examples on aitesters (`admin`), including **11 Ollama tests**. Standalone SSE
+Current suite: **93 API tests**: 70 existing tests on awesome (`api`) and 23
+admin tests on aitesters (`admin`), including **11 Ollama tests**. Standalone SSE
 parser tests and the three additional auth-fixture tests were removed at the
 user's request.
-Latest validation after report/configuration fixes: **76/76 passed on 12 October 2026**,
+Previous validation after report/configuration fixes: **76/76 passed on 12 October 2026**,
 48.8s, four workers, zero retries, both environments. Admin batch: **6/6 passed**, 6.5s.
 Two temporary report probes passed; decoded HTML, JSON and result artifacts
 contained no placeholder token. Discovery without dotenv/credentials/URL variables
@@ -101,17 +122,18 @@ Core infrastructure and examples are delivered:
 - Clients protect final transport errors; the first reporter also redacts
   automatic API-step errors before list/HTML output. Local decoded-report probes
   passed. URL defaults let either project run without the other's variables.
-- Six tests: sign-in/profile 200, create 201/401/403, update 200, delete 204/lookup 404.
+- Original six examples: sign-in/profile 200, create 201/401/403, update 200,
+  delete 204/lookup 404. The 13 October CRUD extension adds 17 tests; the current
+  staging coverage matrix is maintained above.
 - Concurrent admin sign-ins and independent refresh verified live. Access JWT
   strings can be identical; refresh sessions are distinct. Never log out the
   shared admin. Fixture/request state is test-scoped, with no serial dependency.
 
 Then continue:
 
-1. `PUT /api/v1/users/{username}` - owner/admin/forbidden cases.
-2. `DELETE /api/v1/users/{username}` and dedicated right-to-be-forgotten coverage.
-3. `GET /api/v1/orders/admin`.
-4. `PUT /api/v1/orders/{id}/status`.
+1. Dedicated right-to-be-forgotten coverage and missing-user PUT exploration.
+2. `GET /api/v1/orders/admin`.
+3. `PUT /api/v1/orders/{id}/status`.
 
 Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 
@@ -163,7 +185,8 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 
 - Public: signup, signin, refresh, password forgot/reset and docs. Traffic is public only in legacy mode; local outbox requires admin.
 - Product mutations, user deletion and admin order list/status require `ROLE_ADMIN`.
-- User edit/right-to-be-forgotten allow owner or admin. Missing-user behavior is **Needs verification**.
+- User edit/right-to-be-forgotten allow owner or admin. Missing-user edit/forget
+  behavior is **Needs verification**; admin DELETE missing user is verified JSON 404.
 - Cart add checks stock without reserving it; checkout deducts stock and clears the cart. Cancellation is allowed from `PENDING` or `PAID` and restores deducted stock.
 - QR returns `image/png`; use compatible Accept headers and verify error negotiation.
 - Backend Ollama returns multiline `text/event-stream`; the mock streams deterministic NDJSON.

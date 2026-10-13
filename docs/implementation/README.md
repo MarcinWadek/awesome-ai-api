@@ -7,6 +7,7 @@
 | Documentation delivery: backend/mock review, parallel workstreams and prerequisite gates | [Parallel API delivery planning record](parallel-api-delivery.md) |
 | Ollama definitions and generation/chat/tool streams | [Ollama streaming tests](ollama-streaming-tests.md) |
 | Separate admin environment, authentication and disposable product examples | [Admin infrastructure and products](admin-environments-and-disposable-products.md) |
+| Product/user CRUD gaps on staging | [Product and user CRUD](products-users-crud-gaps.md) |
 
 These completed plans preserve implementation decisions and their original
 verification results. Current coverage lives in the single

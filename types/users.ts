@@ -1,5 +1,11 @@
 import type { LoginResponse } from './auth';
 
+export interface UserUpdateRequest {
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+}
+
 export interface UserResponse {
   id: number;
   username: string;

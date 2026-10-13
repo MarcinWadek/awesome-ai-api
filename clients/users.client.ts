@@ -1,5 +1,6 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { ChatSystemPrompt, ToolSystemPrompt } from '../types/prompts';
+import type { UserUpdateRequest } from '../types/users';
 import { safeRequest } from '../support/safe-request';
 
 export class UsersClient {
@@ -19,6 +20,19 @@ export class UsersClient {
 
   async getMe(token?: string): Promise<APIResponse> {
     return safeRequest('Read current user', () => this.request.get('/api/v1/users/me', {
+      headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
+    }));
+  }
+
+  async updateUser(username: string, data: UserUpdateRequest, token?: string): Promise<APIResponse> {
+    return safeRequest('Update user', () => this.request.put(`/api/v1/users/${encodeURIComponent(username)}`, {
+      data,
+      headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
+    }));
+  }
+
+  async deleteUser(username: string, token?: string): Promise<APIResponse> {
+    return safeRequest('Delete user', () => this.request.delete(`/api/v1/users/${encodeURIComponent(username)}`, {
       headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
     }));
   }

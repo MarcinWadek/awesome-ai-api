@@ -52,6 +52,20 @@ test.describe('POST /api/v1/products', () => {
     });
   });
 
+  test('400: rejects an invalid product payload', async ({ authenticatedAdmin }) => {
+    const response = await test.step('When the admin creates a product with a negative price', () =>
+      productsClient.createProduct({ ...data, price: -1 }, authenticatedAdmin.token),
+    );
+    await test.step('Then validation identifies the price and no product is created', async () => {
+      expect(response.status()).toBe(400);
+      expectJsonResponse(response);
+      expect(await response.json()).toEqual({ price: 'Price must be greater than 0' });
+      const read = await productsClient.getProducts(authenticatedAdmin.token);
+      expect(read.status()).toBe(200);
+      expect((await read.json() as ProductResponse[]).some(product => product.name === data.name)).toBe(false);
+    });
+  });
+
   test('401: rejects product creation without authentication', async () => {
     const response = await test.step('When an anonymous request tries to create a product with valid data', () =>
       productsClient.createProduct(data),
