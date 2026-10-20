@@ -20,4 +20,10 @@ export class TrafficClient {
       headers: sessionId === undefined ? undefined : { 'X-Client-Session-Id': sessionId },
     });
   }
+
+  getLog(correlationId: string, sessionId?: string): Promise<APIResponse> {
+    return this.request.get(`/api/v1/traffic/logs/${encodeURIComponent(correlationId)}`, {
+      headers: sessionId === undefined ? undefined : { 'X-Client-Session-Id': sessionId },
+    });
+  }
 }

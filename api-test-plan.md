@@ -13,6 +13,22 @@ Ollama readability refactor: setup and stream collection moved to
 in `support/assertions/ollama.ts` and `support/assertions/ollama-tools.ts`.
 The 11 cases and their assertion scope are retained. Validation completed.
 
+## Cart items on staging
+
+[20 October exploration](docs/exploration/2026-10-20-cart-items.md) confirmed the
+requested scope without contract discrepancies. [Implementation record](docs/implementation/cart-item-tests.md):
+11 delivered admin-project cases, POST/PUT 200/400/401/409 and DELETE 200/401/404, with
+persisted state checks, isolated staging users/products and cart-first cleanup.
+Focused run **11/11 passed** (21.0s); temporary assertion/partial-setup cleanup
+probes **2/2 passed**. Combined regression, including parallel QR/traffic changes:
+**108 passed, 1 failed** (1.6m, four workers, zero retries); all **34 admin tests**
+passed. Sole failure: the documented [traffic detail 500](docs/traffic-detail-bug-report.md).
+Typecheck passed. `git diff --check` failed only on pre-existing `agents.md`
+whitespace at lines 7/8; cart-scope checks passed. No cart defects found.
+Repeated add/combined-stock, PUT zero, additional boundaries and concurrency
+remain deferred. Future order coverage can build on these owned populated carts;
+no orders are added here.
+
 ## Baseline
 
 Product/user CRUD extension implemented: [live staging evidence](docs/exploration/2026-10-13-products-users-crud.md)
@@ -42,13 +58,17 @@ Already Done (core coverage):
 - Prompts: chat and tool prompt get/update; known parsing/type defects remain open.
 - Products: list, detail; admin create, partial update and delete on staging,
   mutation validation/auth/role checks and update/delete not-found cases.
-- Cart: get, clear. Item POST is setup only, not dedicated coverage.
-- Traffic: info, paginated logs in legacy public mode.
+- Cart: get/clear on awesome; dedicated staging item POST/PUT/DELETE coverage,
+  including persisted state, quantity validation, missing auth, stock conflicts
+  and absent-item deletion (see cart delivery above).
+- Traffic: info, paginated logs and detail unknown-ID 404 in legacy public mode;
+  controlled detail 200 regression implemented but failing on a live 500.
+- QR: PNG 200, blank text 400 and missing authentication 401.
 - OpenAPI: docs and Swagger UI smoke checks.
 - Ollama: tool definitions, generate, chat and chat/tools; multiline SSE events,
   whitespace, tool results and completion through EOF; 200/400/401 core cases.
 
-Current suite: **93 API tests**: 70 existing tests on awesome (`api`) and 23
+Baseline before the 20 October extensions: **93 API tests**: 70 tests on awesome (`api`) and 23
 admin tests on aitesters (`admin`), including **11 Ollama tests**. Standalone SSE
 parser tests and the three additional auth-fixture tests were removed at the
 user's request.
@@ -72,7 +92,29 @@ Review follow-up completed: model-phase completion, thinking/content ordering,
 tool-call roles, exact mock prose, separate scenario data, and fixture setup
 cleanup. Catalogue checks cover identity and payload validity; exact mutable
 price/stock/availability equality requires isolated data and remains deferred.
-QR tests are not implemented yet.
+
+## QR and traffic details (20 October 2026)
+
+Live exploration completed on awesome (`api`): [QR](docs/exploration/2026-10-20-qr-create.md)
+and [traffic details](docs/exploration/2026-10-20-traffic-details.md).
+Added five tests: three QR cases (PNG 200, blank text 400, missing auth 401) and two traffic
+detail cases (own captured request 200, unknown UUID empty 404), using unique
+sessions and bounded capture polling. Separate implementation records:
+[QR](docs/implementation/qr-create-tests.md), [traffic](docs/implementation/traffic-detail-tests.md).
+
+The QR client uses `Accept: image/png, application/json` for success and errors;
+[JSON-only Accept misleadingly returns 401](docs/qr-accept-bug-report.md).
+Traffic remains public in legacy mode. [Found detail returns 500](docs/traffic-detail-bug-report.md),
+including with authentication; retain the intended 200 assertion and report its
+failure. No staging/cart clients or shared fixtures/configuration were changed.
+Focused run: **4 passed, 1 failed** (3.6s, two workers, zero retries), specifically
+the detail 200 assertion received 500. QR fixture teardown passed. Full suite
+**not run**: the requested new-tests-pass gate is blocked by the application defect.
+`npm.cmd run typecheck` passed. Repository-wide `git diff --check` failed on
+pre-existing `agents.md` whitespace (lines 7 and 8); scope-only tracked diff and
+new-file whitespace checks passed. Deferred: QR decoding/limits/rate limits,
+automated incompatible Accept, secured traffic mode and additional detail variants.
+Detail body assertions await a successful backend response.
 
 Before new coverage, confirm the combined baseline:
 
@@ -91,8 +133,9 @@ Can start with the existing `authenticatedUser` fixture.
 Do next:
 
 1. `GET /api/v1/users/me/email-events` - empty list and missing auth.
-2. `GET /api/v1/traffic/logs/{correlationId}` - controlled lookup and unknown ID.
-3. `POST /api/v1/qr/create` - PNG, blank text, missing auth.
+2. Traffic detail tests are implemented; fix the backend's found-entry 500,
+   then rerun the focused batch and full regression (see records above).
+3. QR core coverage is implemented and passed; extended cases remain deferred.
 4. Explore password `forgot` and `reset`, plus `POST /api/v1/email` side effects.
 
 Ollama core coverage is complete for the verified mock. Real upstream errors,
@@ -103,7 +146,7 @@ Product client methods and test-local setup/cleanup are ready on **aitesters**.
 Future scenarios using admin-created products must run in the staging project and create their users/carts there;
 the existing non-admin suite remains on awesome. Do next after staging setup:
 
-1. Cart item add, update and remove.
+1. Cart item add, update and remove — delivered in the staging batch above.
 2. Order create and list.
 3. Order detail and cancel using a created-order helper.
 
@@ -141,12 +184,11 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 
 | Work | Needs |
 | --- | --- |
-| Cart item success paths on staging | Use disposable in-stock products and staging users together. Existing awesome tests remain separate. |
 | Checkout and stock assertions | Disposable products, populated cart, valid address and cleanup. |
 | Order detail/cancel/status and owned admin-list assertions | Created-order helper; admin fixture for admin cases. |
 | Password reset success | Valid token from verified local echo or observable email/outbox. |
 | Nonempty/delivery email assertions | Controlled email action and bounded event/sink polling. Empty reads can start now. |
-| Traffic detail success | Captured request with unique `X-Client-Session-Id`, then its listed correlation ID. |
+| Traffic detail success | Backend fix for found-entry 500; owned session capture and correlation lookup are implemented. |
 
 ## Shared Decisions
 
@@ -165,7 +207,7 @@ Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
 2. Continue Thread A reads/QR/exploration on awesome; core admin setup is complete.
 3. Use the admin fixture and product client for staging scenarios with staging users/carts;
    keep setup and cleanup local to each scenario.
-4. Thread A adds cart item tests, then checkout.
+4. Cart item tests are delivered on staging; checkout remains the next commerce increment.
 5. Created orders unblock detail/cancel and admin status assertions.
 6. Finish password reset and email side effects when their prerequisites are verified.
 7. Run each new batch first, then the full suite and static checks.

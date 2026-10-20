@@ -14,6 +14,9 @@ findings do not guarantee the current deployment behaves identically.
 | 2026-10-11 | Ollama definitions, generation/chat SSE, tool iterations, validation and JWT | [Ollama endpoints](2026-10-11-ollama.md) |
 | 2026-10-12 | Concurrent admin sessions, product mutations, owned cleanup and report redaction | [Admin and products](2026-10-12-admin-products.md) |
 | 2026-10-13 | Product/user mutation validation, authentication, ownership, absent targets and cleanup | [Product and user CRUD](2026-10-13-products-users-crud.md) |
+| 2026-10-20 | QR PNG, validation/authentication and Accept negotiation | [QR creation](2026-10-20-qr-create.md) |
+| 2026-10-20 | Owned capture lookup, legacy authentication and unknown ID | [Traffic details](2026-10-20-traffic-details.md) |
+| 2026-10-20 | Staging cart item add/update/remove, persisted state, validation, authentication, stock and cleanup | [Cart items](2026-10-20-cart-items.md) |
 
 Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated scope.
 For one operation, include its area and operation, such as

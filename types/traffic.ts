@@ -4,7 +4,7 @@ export interface TrafficInfoResponse {
   description: string;
 }
 
-// Only metadata is modeled/asserted; shared request and response bodies stay private.
+// List tests model only metadata; detail tests inspect only their own safe capture.
 export interface TrafficLogEntry {
   correlationId: string;
   timestamp: string;
@@ -22,6 +22,13 @@ export interface TrafficLogsResponse {
   pageSize: number;
   totalElements: number;
   totalPages: number;
+}
+
+export interface TrafficLogDetail extends TrafficLogEntry {
+  requestHeaders: Record<string, string[]>;
+  responseContentType: string | null;
+  responseBody: unknown;
+  responseBodyTruncated: boolean;
 }
 
 export interface TrafficErrorResponse {

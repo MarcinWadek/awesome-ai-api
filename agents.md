@@ -5,3 +5,5 @@
 - while creating a plan never assume anything. In case of doubts check documentation, explore application or ask me
 - initialize htttClients in test setup 
 - keep updating api-test-plan.md to reflect the current state of API 
+- Avoid unnecessary abstractions, refactoring, and speculative code. 
+- Add tests only when they protect important behavior or address a meaningful regression risk; do not duplicate existing coverage.
