@@ -1,6 +1,7 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { LoginRequest, RefreshTokenRequest } from '../types/auth';
 import type { RegistrationRequest } from '../types/registration';
+import { safeRequest } from '../support/safe-request';
 
 const signInPath = '/api/v1/users/signin';
 
@@ -9,17 +10,17 @@ export class AuthClient {
   constructor(private readonly request: APIRequestContext) {}
 
   async signUp(data: Partial<RegistrationRequest>): Promise<APIResponse> {
-    return this.request.post('/api/v1/users/signup', { data });
+    return safeRequest('Register user', () => this.request.post('/api/v1/users/signup', { data }));
   }
 
   async signIn(
     credentials: Partial<LoginRequest>,
     headers?: Record<string, string>,
   ): Promise<APIResponse> {
-    return this.request.post(signInPath, {
+    return safeRequest('Sign in', () => this.request.post(signInPath, {
       data: credentials,
       headers,
-    });
+    }));
   }
 
   async refresh(

@@ -12,6 +12,8 @@ findings do not guarantee the current deployment behaves identically.
 | 2026-10-06 | User list/lookup and cart read/clear | [Users and cart](2026-10-06-users-cart.md) |
 | 2026-10-07 | Backend/mock source review, parallel dependencies and 59-test baseline rerun | [Parallel delivery review](2026-10-07-parallel-delivery.md) |
 | 2026-10-11 | Ollama definitions, generation/chat SSE, tool iterations, validation and JWT | [Ollama endpoints](2026-10-11-ollama.md) |
+| 2026-10-12 | Concurrent admin sessions, product mutations, owned cleanup and report redaction | [Admin and products](2026-10-12-admin-products.md) |
+| 2026-10-13 | Product/user mutation validation, authentication, ownership, absent targets and cleanup | [Product and user CRUD](2026-10-13-products-users-crud.md) |
 
 Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated scope.
 For one operation, include its area and operation, such as
