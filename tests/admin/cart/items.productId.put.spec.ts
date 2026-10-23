@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { CartClient } from '../../../clients/cart.client';
 import { ProductsClient } from '../../../clients/products.client';
 import { test, expect } from '../../../fixtures/admin.fixture';
-import { expectCart } from '../../../support/assertions/cart';
+import { expectCart, expectEmptyCart } from '../../../support/assertions/cart';
 import { expectJsonResponse } from '../../../support/assertions/http';
 import type { ProductCreateRequest, ProductResponse } from '../../../types/products';
 
@@ -64,6 +64,20 @@ test.describe('PUT /api/v1/cart/items/{productId}', () => {
       expectJsonResponse(response);
       expectCart(await response.json(), authenticatedUser.user.username, [{ productId: product.id, quantity: 3 }], 37.02);
       await expectPersistedCart(authenticatedUser.token, authenticatedUser.user.username, 3);
+    });
+  });
+
+  test('200: quantity zero removes the item and persists an empty cart', async ({ authenticatedUser }) => {
+    const response = await test.step('When the user sets the item quantity to zero', () =>
+      cartClient.updateItem(product.id, { quantity: 0 }, authenticatedUser.token),
+    );
+    await test.step('Then zero acts as removal and the persisted cart has zero totals', async () => {
+      expect(response.status()).toBe(200);
+      expectJsonResponse(response);
+      expectEmptyCart(await response.json(), authenticatedUser.user.username);
+      const read = await cartClient.getCart(authenticatedUser.token);
+      expect(read.status()).toBe(200);
+      expectEmptyCart(await read.json(), authenticatedUser.user.username);
     });
   });
 

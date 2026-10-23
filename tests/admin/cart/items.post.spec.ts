@@ -94,6 +94,18 @@ test.describe('POST /api/v1/cart/items', () => {
     });
   });
 
+  test('404: rejects a missing product without adding an item', async ({ authenticatedUser }) => {
+    const response = await test.step('When the user adds absent product zero', () =>
+      cartClient.addItem({ productId: 0, quantity: 1 }, authenticatedUser.token),
+    );
+    await test.step('Then product lookup fails and the persisted cart stays empty', async () => {
+      expect(response.status()).toBe(404);
+      expectJsonResponse(response);
+      expect(await response.json()).toEqual({ message: 'Product not found' });
+      await expectPersistedCart(authenticatedUser.token, authenticatedUser.user.username, 0);
+    });
+  });
+
   test('409: rejects quantity above stock without adding an item', async ({ authenticatedUser }) => {
     const response = await test.step('When the regular user requests more than the owned product stock', () =>
       cartClient.addItem({ productId: product.id, quantity: data.stockQuantity + 1 }, authenticatedUser.token),
@@ -103,6 +115,24 @@ test.describe('POST /api/v1/cart/items', () => {
       expectJsonResponse(response);
       expect(await response.json()).toEqual({ message: `Insufficient stock for product ${product.id}` });
       await expectPersistedCart(authenticatedUser.token, authenticatedUser.user.username, 0);
+    });
+  });
+
+  test('409: validates accumulated quantity and rolls back an excessive repeated add', async ({ authenticatedUser }) => {
+    await test.step('Given repeated adds accumulated five units in the same cart item', async () => {
+      expect((await cartClient.addItem({ productId: product.id, quantity: 2 }, authenticatedUser.token)).status()).toBe(200);
+      expect((await cartClient.addItem({ productId: product.id, quantity: 3 }, authenticatedUser.token)).status()).toBe(200);
+      await expectPersistedCart(authenticatedUser.token, authenticatedUser.user.username, 5);
+    });
+    const response = await test.step('When another add would exceed available stock in total', () =>
+      cartClient.addItem({ productId: product.id, quantity: 3 }, authenticatedUser.token),
+    );
+    await test.step('Then the stock conflict preserves the accumulated item and monetary totals', async () => {
+      expect(response.status()).toBe(409);
+      expectJsonResponse(response);
+      expect(await response.json()).toEqual({ message: `Insufficient stock for product ${product.id}` });
+      await expectPersistedCart(authenticatedUser.token, authenticatedUser.user.username, 5);
+      expect((await productsClient.getProduct(product.id, authenticatedUser.token)).status()).toBe(200);
     });
   });
 });

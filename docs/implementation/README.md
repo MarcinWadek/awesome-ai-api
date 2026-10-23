@@ -11,6 +11,7 @@
 | QR PNG, blank text and missing authentication | [QR creation](qr-create-tests.md) |
 | Controlled traffic detail lookup and unknown ID | [Traffic details](traffic-detail-tests.md) |
 | Staging cart item add/update/remove with owned users and products | [Cart item tests](cart-item-tests.md) |
+| Commerce workflow coverage, isolated staging lifecycle and 23 October reduction to core risks | [Commerce workflow tests](commerce-workflow-tests.md) |
 
 These completed plans preserve implementation decisions and their original
 verification results. Current coverage lives in the single

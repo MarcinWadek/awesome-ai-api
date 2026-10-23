@@ -1,256 +1,151 @@
 # API Test Plan
 
-Keep this single working plan short and action-oriented. Do not create separate folder plans.
-Detailed coverage and validation history live in [api-test-plan-history.md](api-test-plan-history.md).
-Backend/mock findings live in the [repository review](docs/exploration/2026-10-07-parallel-delivery.md).
+Keep this single root working plan current. Earlier deliveries and unrelated
+backlog details remain in [api-test-plan-history.md](api-test-plan-history.md)
+and the [implementation index](docs/implementation/README.md).
 
-Ollama completed: [11 October live exploration](docs/exploration/2026-10-11-ollama.md),
-[11 API tests delivered](docs/implementation/ollama-streaming-tests.md).
-Known limitation: [mock final answer disagrees with catalogue](docs/ollama-mock-bug-report.md).
+## Commerce workflow — scope reduced 23 October 2026
 
-Ollama readability refactor: setup and stream collection moved to
-`support/ollama.helpers.ts`; answer/error assertions and product-tool checks live
-in `support/assertions/ollama.ts` and `support/assertions/ollama-tools.ts`.
-The 11 cases and their assertion scope are retained. Validation completed.
+Sources: `docs/api-docs.json`, read-only backend implementation and
+[focused staging exploration](docs/exploration/2026-10-20-commerce-workflow.md).
+[Implementation and cleanup record](docs/implementation/commerce-workflow-tests.md).
+Existing cart-item and product tests count toward coverage. Setup calls alone do
+not count. “Covered” means the selected meaningful scenarios below are automated
+and verified; it does not mean every possible input permutation.
 
-## Cart items on staging
+The initial matrix was saved before implementation on 20 October. Current state: 19 operations
+covered for the selected risks; checkout partially covered because its defensive
+404 cannot safely be induced. All 20 operations have verified automated cases.
 
-[20 October exploration](docs/exploration/2026-10-20-cart-items.md) confirmed the
-requested scope without contract discrepancies. [Implementation record](docs/implementation/cart-item-tests.md):
-11 delivered admin-project cases, POST/PUT 200/400/401/409 and DELETE 200/401/404, with
-persisted state checks, isolated staging users/products and cart-first cleanup.
-Focused run **11/11 passed** (21.0s); temporary assertion/partial-setup cleanup
-probes **2/2 passed**. Combined regression, including parallel QR/traffic changes:
-**108 passed, 1 failed** (1.6m, four workers, zero retries); all **34 admin tests**
-passed. Sole failure: the documented [traffic detail 500](docs/traffic-detail-bug-report.md).
-Typecheck passed. `git diff --check` failed only on pre-existing `agents.md`
-whitespace at lines 7/8; cart-scope checks passed. No cart defects found.
-Repeated add/combined-stock, PUT zero, additional boundaries and concurrency
-remain deferred. Future order coverage can build on these owned populated carts;
-no orders are added here.
+| Operation | Initial classification | Final classification / selected meaningful scenarios |
+| --- | --- | --- |
+| Cart GET | Partially covered | Covered: existing awesome empty/auth cases and staging cart-item persisted reads; checkout retains exact multi-item totals |
+| Cart DELETE | Partially covered | Covered: awesome clear/auth retained; staging clears all owner items, preserves peer and stock |
+| Cart item POST | Partially covered | Covered: existing persisted 200/400/401/409; adds 404 and repeated accumulation/combined stock rollback |
+| Cart item PUT | Partially covered | Covered: existing persisted 200/400/401/409; adds zero removal |
+| Cart item DELETE | Covered | Covered: existing selective removal/401/404; cart isolation retained in clear/checkout cases |
+| Customer orders POST | Missing | Partially covered (defensive 404 unverified): multi-item snapshot/address/totals, persisted order, cart clearing/deductions; empty/address 400, auth 401, atomic stock-shortage 409 |
+| Customer orders GET | Missing | Covered: owned rows, status filter, pagination, peer empty, auth 401 |
+| Order GET detail | Missing | Covered: owner/admin 200, auth 401, peer hidden/absent 404 |
+| Order POST cancel | Missing | Covered: owner PENDING/admin PAID, persisted cancellation/restoration, repeated cancellation 400 within happy paths, SHIPPED 400, auth 401, peer 403 |
+| Admin orders GET | Missing | Covered: owned row, status filter and pagination across customers, auth 401, client 403 |
+| Admin order status PUT | Missing | Covered: direct PAID/SHIPPED/DELIVERED/PENDING persistence, CANCELLED restoration once after reopen, SHIPPED cancellation 400, owner 403; order-family auth/missing lookup checked separately |
+| Products GET catalogue | Covered | Covered: existing awesome authenticated DTO array and 401 |
+| Products GET detail | Covered | Covered: existing awesome selected identity/fields and 400/401/404 |
+| Admin product POST | Covered | Covered: existing staging persisted 201, validation 400, auth 401, client 403 |
+| Admin product PUT | Covered | Covered: existing staging partial persistence, validation/auth/role/404 |
+| Admin product DELETE | Covered | Covered: existing staging 204 then absent, auth/role/404 |
+| Inventory GET list | Missing | Covered: case-insensitive search/category, stock classes/inclusive threshold, pagination/clamping, auth 401, client 403 |
+| Inventory GET detail | Missing | Covered: exact identity/quantity/timestamp, threshold classification, absent 404; shared inventory read permissions checked on list |
+| Inventory POST adjustments | Missing | Covered: positive/negative deltas, persisted catalogue/inventory/ledger, idempotent replay, zero 400, auth 401, client 403, underflow/conflicting replay 409 |
+| Inventory GET movements | Missing | Covered: exact own records, newest-first, pagination/clamping, empty zero-stock ledger, checkout/cancel correlation; shared inventory read permissions and product lookup checked on list/detail |
 
-## Baseline
+### Isolation and cleanup
 
-Product/user CRUD extension implemented: [live staging evidence](docs/exploration/2026-10-13-products-users-crud.md)
-and [implementation record](docs/implementation/products-users-crud-gaps.md). Seventeen
-new cases passed 17/17 on 13 October 2026 (22.4s, four workers, zero retries).
-Full api/admin regression passed 93/93 (1.2m, four workers, zero retries).
-Typechecking and `git diff --check` passed. All new cases use disposable staging data,
-with same-environment users/tokens and deletion-aware user teardown.
+All new mutable commerce cases run on aitesters through the existing `admin`
+project. Customer calls use disposable ordinary staging users; administrator calls
+use `authenticatedAdmin`. Existing awesome tests and configuration are unchanged.
+Products use UUID names. No shared catalogue mutations, environment transfers or
+shared-admin logout/profile changes.
 
-| Staging operation | Delivered coverage |
+The commerce fixture registers ownership before product creation, handles partial
+setup, rediscovers orders from the shopper list even if checkout parsing failed,
+clears carts, cancels orders before deleting users, verifies deduction/restoration
+balance, restores the disposable product adjustment baseline, deletes users and
+verifies orders absent through admin reads, then deletes products and verifies
+catalogue/inventory/movement absence. Terminal orders may be reset only for owned
+teardown so cancellation can restore stock. Independent cleanup failures are
+aggregated; products are retained if order cleanup fails. Peer carts are cleared
+in finally blocks before commerce product teardown. User deletion is never relied
+on to restore stock. Credentials/tokens are excluded from traces and diagnostics.
+
+Two temporary cleanup fault probes passed (2/2, 19.0s, one worker, no retries):
+assertion failure after checkout and interruption before parsing a created product.
+Independent post-teardown checks verified user/order/product/inventory absence.
+Probe specs were removed; they are not part of the permanent added test count.
+
+### Focused reduction and verification — 23 October
+
+At the user's request, reduced the original additions from **60 to 39** (35%
+fewer): cart 4, orders 23, inventory 12. Removed 21 standalone cases, mostly
+repeated permissions, secondary input/status variants and duplicate cart/detail
+checks. Repeated cancellation still asserts 400, unchanged stock and unchanged
+movement count immediately after successful cancellation. All 20 operations and
+the key checkout, ownership, role, restoration and inventory risks remain covered
+by the selected cases. Existing awesome/product/cart baseline tests are unchanged.
+
+Discovery: **50 commerce tests** (39 additions + 11 baseline cart-item cases).
+Focused staging run: **50/50 passed**, 1.9m, four workers, zero retries.
+Full regression: **148/148 passed**, 3.0m, four workers, zero retries
+(75 api / 73 admin). Typecheck, `git diff --check`, new-file whitespace and
+Markdown link checks passed. The unchanged traffic-detail 200 case also passed;
+the 20 October 500 was not reproduced.
+
+### Historical verification — 20 October
+
+Added **60 permanent tests**: cart 7, customer/admin orders 33, inventory 20.
+The prior 11 staging cart-item tests and all existing products tests are retained.
+First order batch: 31 passed, two test-side pagination error-field mismatches;
+corrected against backend exception handling (`error`, not `message`). No commerce
+application defect identified. Final verification (four workers, zero retries):
+
+| Check | Actual result |
 | --- | --- |
-| Product POST | 201, invalid payload 400, missing auth 401, client 403 |
-| Product PUT | 200, invalid payload 400, missing auth 401, client 403, absent ID 404 |
-| Product DELETE | 204, missing auth 401, client 403, absent ID 404 (empty body) |
-| User PUT | Owner/admin 200, invalid payload 400, missing auth 401, peer client 403 |
-| User DELETE | Admin 204, missing auth 401, client including owner 403, absent username 404 |
+| Focused cart/orders/inventory | **71/71 passed**, 2.5m (60 additions + 11 retained cases) |
+| Full api/admin suite | **168 passed, 1 failed**, 3.5m; all **94 admin** cases passed, 74/75 api cases passed |
+| Typecheck | Passed |
+| `git diff --check` | Passed |
+| New-file whitespace check | Passed, 19 new files |
 
-Successful updates are read back; rejected updates/deletions preserve targets.
-No defects observed in this requested scope. Missing-user PUT and dedicated
-right-to-be-forgotten scenarios remain deferred outside this delivery.
-
-Already Done (core coverage):
-
-- Auth: signup, signin, refresh, logout.
-- Users: me, list, detail; staging owner/admin edit, validation/auth/ownership
-  rejection, admin deletion and deletion auth/role/not-found cases.
-- Prompts: chat and tool prompt get/update; known parsing/type defects remain open.
-- Products: list, detail; admin create, partial update and delete on staging,
-  mutation validation/auth/role checks and update/delete not-found cases.
-- Cart: get/clear on awesome; dedicated staging item POST/PUT/DELETE coverage,
-  including persisted state, quantity validation, missing auth, stock conflicts
-  and absent-item deletion (see cart delivery above).
-- Traffic: info, paginated logs and detail unknown-ID 404 in legacy public mode;
-  controlled detail 200 regression implemented but failing on a live 500.
-- QR: PNG 200, blank text 400 and missing authentication 401.
-- OpenAPI: docs and Swagger UI smoke checks.
-- Ollama: tool definitions, generate, chat and chat/tools; multiline SSE events,
-  whitespace, tool results and completion through EOF; 200/400/401 core cases.
-
-Baseline before the 20 October extensions: **93 API tests**: 70 tests on awesome (`api`) and 23
-admin tests on aitesters (`admin`), including **11 Ollama tests**. Standalone SSE
-parser tests and the three additional auth-fixture tests were removed at the
-user's request.
-Previous validation after report/configuration fixes: **76/76 passed on 12 October 2026**,
-48.8s, four workers, zero retries, both environments. Admin batch: **6/6 passed**, 6.5s.
-Two temporary report probes passed; decoded HTML, JSON and result artifacts
-contained no placeholder token. Discovery without dotenv/credentials/URL variables
-passed independently (70 api / six admin). No permanent API tests were added.
-Product setup/cleanup is local to specs; only the admin authentication fixture
-remains in the admin infrastructure. A temporary assertion failure confirmed
-`afterEach` cleanup; the original test was restored. The earlier focused overlap
-run passed **9/9** and measured cross-project/concurrent-admin execution.
-See the admin implementation record for details.
-The prior Ollama readability refactor passed **70/70 on 11 October 2026**,
-54.8s, two workers, zero retries, `https://awesome.byst.re`.
-Last Ollama batch: **11/11 passed on 11 October 2026**, 16.1s, two workers,
-zero retries, `https://awesome.byst.re`.
-Typecheck and staged/unstaged `git diff --check` passed.
-Original delivery results remain in the implementation record.
-Review follow-up completed: model-phase completion, thinking/content ordering,
-tool-call roles, exact mock prose, separate scenario data, and fixture setup
-cleanup. Catalogue checks cover identity and payload validity; exact mutable
-price/stock/availability equality requires isolated data and remains deferred.
-
-## QR and traffic details (20 October 2026)
-
-Live exploration completed on awesome (`api`): [QR](docs/exploration/2026-10-20-qr-create.md)
-and [traffic details](docs/exploration/2026-10-20-traffic-details.md).
-Added five tests: three QR cases (PNG 200, blank text 400, missing auth 401) and two traffic
-detail cases (own captured request 200, unknown UUID empty 404), using unique
-sessions and bounded capture polling. Separate implementation records:
-[QR](docs/implementation/qr-create-tests.md), [traffic](docs/implementation/traffic-detail-tests.md).
-
-The QR client uses `Accept: image/png, application/json` for success and errors;
-[JSON-only Accept misleadingly returns 401](docs/qr-accept-bug-report.md).
-Traffic remains public in legacy mode. [Found detail returns 500](docs/traffic-detail-bug-report.md),
-including with authentication; retain the intended 200 assertion and report its
-failure. No staging/cart clients or shared fixtures/configuration were changed.
-Focused run: **4 passed, 1 failed** (3.6s, two workers, zero retries), specifically
-the detail 200 assertion received 500. QR fixture teardown passed. Full suite
-**not run**: the requested new-tests-pass gate is blocked by the application defect.
-`npm.cmd run typecheck` passed. Repository-wide `git diff --check` failed on
-pre-existing `agents.md` whitespace (lines 7 and 8); scope-only tracked diff and
-new-file whitespace checks passed. Deferred: QR decoding/limits/rate limits,
-automated incompatible Accept, secured traffic mode and additional detail variants.
-Detail body assertions await a successful backend response.
-
-Before new coverage, confirm the combined baseline:
+The sole full-suite failure is the existing traffic detail 500, outside commerce.
+Its intended-200 assertion stays active. All commerce teardown checks completed.
 
 ```powershell
+npm.cmd test -- tests/admin/cart tests/admin/orders tests/admin/inventory --project=admin --workers=4 --retries=0
 npm.cmd test -- --project=api --project=admin --workers=4 --retries=0
+npm.cmd run typecheck
+git diff --check
 ```
 
-## How To Split The Work
+### Remaining boundaries
 
-Use two main threads. Agree shared client/fixture changes before editing the same files.
+- **Blocked scenario: checkout product-disappeared 404**. No safe probe: a cart product is protected by a database foreign key;
+  deleting a referenced product is not a safe supported setup. This defensive
+  branch remains unverified. Missing resources are covered independently by
+  cart add/update/delete, product, order and inventory operations.
+- Additional malformed IDs/tokens, every DTO validation combination, overflow,
+  requestId conflict by changed delta (changed reason covered), concurrency and
+  load are deferred. These are not prerequisites for the selected workflow.
+- Reduction deferrals: separate customer/admin list pagination errors, DELIVERED
+  and repeated-CANCELLED status rejection variants, per-operation cart peer
+  mutations, inventory threshold validation and detail/history permission errors,
+  adjustment/history missing product, status missing auth/ID and cancel missing
+  ID. Representative family authentication, roles, ownership and missing-resource
+  checks remain. Historical live observations are preserved in the records.
+- Administrator order-list assertions discover only the generated order and do
+  not assume shared order counts. Read responses are not saved as attachments.
 
-### Thread A: Non-Admin
+## Other coverage and defect records
 
-Can start with the existing `authenticatedUser` fixture.
+The existing 109-test baseline comprised 75 awesome `api` tests and 34 aitesters
+`admin` tests. Auth signup/signin/refresh/logout; users/profile and staging CRUD;
+product reads/CRUD; carts; prompt reads/updates; QR; traffic; docs/Swagger; and 11
+Ollama tool/streaming cases remain in their existing environments.
 
-Do next:
+- [Historical traffic found-entry detail 500](docs/traffic-detail-bug-report.md):
+  not reproduced on 23 October; the unchanged intended-200 test passed its body
+  checks. Root cause/deployment change unconfirmed. Unknown-ID 404 is covered.
+- [QR JSON-only Accept defect](docs/qr-accept-bug-report.md): tests use the
+  documented compatible image/png, application/json Accept header.
+- [Prompt parsing/type defects](docs/prompt-bug-report.md) and
+  [Ollama mock catalogue/prose inconsistency](docs/ollama-mock-bug-report.md)
+  remain recorded. See their historical implementation records for limits.
+- Deferred outside commerce: password reset success requires an observable token;
+  email side effects require a controlled sink/polling window; missing-user PUT,
+  dedicated right-to-be-forgotten, MFA, SSO, real upstream Ollama failures and
+  incremental stream latency remain backlog.
 
-1. `GET /api/v1/users/me/email-events` - empty list and missing auth.
-2. Traffic detail tests are implemented; fix the backend's found-entry 500,
-   then rerun the focused batch and full regression (see records above).
-3. QR core coverage is implemented and passed; extended cases remain deferred.
-4. Explore password `forgot` and `reset`, plus `POST /api/v1/email` side effects.
-
-Ollama core coverage is complete for the verified mock. Real upstream errors,
-model 404, rate limits, iteration caps, system-prompt behavior and incremental
-flush timing remain deferred; buffered SSE tests do not measure token latency.
-
-Product client methods and test-local setup/cleanup are ready on **aitesters**.
-Future scenarios using admin-created products must run in the staging project and create their users/carts there;
-the existing non-admin suite remains on awesome. Do next after staging setup:
-
-1. Cart item add, update and remove — delivered in the staging batch above.
-2. Order create and list.
-3. Order detail and cancel using a created-order helper.
-
-Empty order-list coverage can start earlier without product data.
-
-### Thread B: Admin
-
-Core infrastructure and examples are delivered:
-[12 October exploration](docs/exploration/2026-10-12-admin-products.md),
-[implementation record](docs/implementation/admin-environments-and-disposable-products.md).
-
-- Separate `api`/`admin` projects with disjoint file filters and environment routing.
-- Test-scoped admin sign-in, usable profile with `ROLE_ADMIN`, and disabled traces.
-- A minimal admin fixture; product specs create UUID-named data directly and
-  remove matching products in `afterEach`. The product fixture was removed.
-- Clients protect final transport errors; the first reporter also redacts
-  automatic API-step errors before list/HTML output. Local decoded-report probes
-  passed. URL defaults let either project run without the other's variables.
-- Original six examples: sign-in/profile 200, create 201/401/403, update 200,
-  delete 204/lookup 404. The 13 October CRUD extension adds 17 tests; the current
-  staging coverage matrix is maintained above.
-- Concurrent admin sign-ins and independent refresh verified live. Access JWT
-  strings can be identical; refresh sessions are distinct. Never log out the
-  shared admin. Fixture/request state is test-scoped, with no serial dependency.
-
-Then continue:
-
-1. Dedicated right-to-be-forgotten coverage and missing-user PUT exploration.
-2. `GET /api/v1/orders/admin`.
-3. `PUT /api/v1/orders/{id}/status`.
-
-Owner edit/forget cases do not need admin, but need deletion-aware cleanup.
-
-## Blocked Until
-
-| Work | Needs |
-| --- | --- |
-| Checkout and stock assertions | Disposable products, populated cart, valid address and cleanup. |
-| Order detail/cancel/status and owned admin-list assertions | Created-order helper; admin fixture for admin cases. |
-| Password reset success | Valid token from verified local echo or observable email/outbox. |
-| Nonempty/delivery email assertions | Controlled email action and bounded event/sink polling. Empty reads can start now. |
-| Traffic detail success | Backend fix for found-entry 500; owned session capture and correlation lookup are implemented. |
-
-## Shared Decisions
-
-- Products: existing awesome cart-only setup reads seeds. New mutation/commerce
-  scenarios use owned staging products and staging users; never mutate shared seeds
-  or transfer product IDs/tokens between environments.
-- Cleanup: own every created resource. Remove carts/orders before products; forgetting a user does not restore stock. Handle partial setup and already-deleted users.
-- Admin: never reset, delete, logout or change MFA on the shared admin account during teardown.
-- Email/reset: verify token and sink access first. Outbox requires admin and may require a key; do not clear it globally during parallel tests. Email-event metadata does not contain reset tokens.
-- Ollama: separate backend SSE from mock NDJSON; preserve whitespace and consume tool streams through EOF, not the first `done:true`. Model `404` needs another verified upstream; this mock echoes supplied models.
-- Traffic: generate a unique-session request, then find its correlation ID through `/traffic/logs`.
-
-## Delivery Order
-
-1. Confirm baseline.
-2. Continue Thread A reads/QR/exploration on awesome; core admin setup is complete.
-3. Use the admin fixture and product client for staging scenarios with staging users/carts;
-   keep setup and cleanup local to each scenario.
-4. Cart item tests are delivered on staging; checkout remains the next commerce increment.
-5. Created orders unblock detail/cancel and admin status assertions.
-6. Finish password reset and email side effects when their prerequisites are verified.
-7. Run each new batch first, then the full suite and static checks.
-
-## Test Rules
-
-- One spec per endpoint operation; different HTTP methods use separate files.
-- Initialize HTTP clients in `test.beforeEach` or fixture setup.
-- Use Given/When/Then `test.step` labels.
-- Order cases by response code ascending: `200`, `201`, `202`, `204`, then `400`, `401`, `403`, `404`, `409`, `422`, `429`.
-- Start with a happy path, missing auth and one meaningful negative case; add role/ownership cases where needed.
-- Check `docs/api-docs.json`, backend code and live behavior when unsure. Mark unresolved behavior **Needs verification**.
-- Run new tests first. After they pass, run the whole suite, `npm.cmd run typecheck` and `git diff --check`.
-- Update this root plan; setup requests do not count as completed coverage.
-
-## Backend Facts To Remember
-
-- Public: signup, signin, refresh, password forgot/reset and docs. Traffic is public only in legacy mode; local outbox requires admin.
-- Product mutations, user deletion and admin order list/status require `ROLE_ADMIN`.
-- User edit/right-to-be-forgotten allow owner or admin. Missing-user edit/forget
-  behavior is **Needs verification**; admin DELETE missing user is verified JSON 404.
-- Cart add checks stock without reserving it; checkout deducts stock and clears the cart. Cancellation is allowed from `PENDING` or `PAID` and restores deducted stock.
-- QR returns `image/png`; use compatible Accept headers and verify error negotiation.
-- Backend Ollama returns multiline `text/event-stream`; the mock streams deterministic NDJSON.
-  Product tool payloads use actual catalogue data; canned final prose may disagree.
-- Email send delay can be 10 seconds to 10 minutes; verify timing before choosing polling limits.
-
-Inventory, MFA and SSO coverage are later backlog items; details remain in the history file.
-
-## Dependency Map
-
-```mermaid
-flowchart TD
-  auth[Existing user fixture] --> reads[Protected reads and QR]
-  admin[Verified admin fixture] --> product[Disposable product data]
-  product --> cart[Populated cart]
-  cart --> order[Created order]
-  order --> detail[Order detail and cancel]
-  order --> orderAdmin[Owned admin list and status tests]
-  admin --> orderAdmin
-  token[Verified reset token access] --> password[Password reset success]
-  email[Controlled action and email polling] --> events[Nonempty email assertions]
-  stream[Buffered SSE collector and verified mock] --> ollama[Ollama streaming tests complete]
-  ollama --> tools[Tool-call tests with catalogue data complete]
-  traffic[Controlled session request] --> correlation[Traffic detail lookup]
-```
+Rules: one spec per operation, clients initialized in setup, Given/When/Then
+steps, ascending expected statuses, new tests before full suite, then typecheck
+and diff checks. Add only distinct business-risk coverage and preserve defects
+as failures rather than weakening expectations.

@@ -17,6 +17,7 @@ findings do not guarantee the current deployment behaves identically.
 | 2026-10-20 | QR PNG, validation/authentication and Accept negotiation | [QR creation](2026-10-20-qr-create.md) |
 | 2026-10-20 | Owned capture lookup, legacy authentication and unknown ID | [Traffic details](2026-10-20-traffic-details.md) |
 | 2026-10-20 | Staging cart item add/update/remove, persisted state, validation, authentication, stock and cleanup | [Cart items](2026-10-20-cart-items.md) |
+| 2026-10-20 | Staging orders, inventory, stock effects and verified cleanup | [Commerce workflow](2026-10-20-commerce-workflow.md) |
 
 Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated scope.
 For one operation, include its area and operation, such as
