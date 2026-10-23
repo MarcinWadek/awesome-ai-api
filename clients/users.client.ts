@@ -24,6 +24,12 @@ export class UsersClient {
     }));
   }
 
+  async getEmailEvents(token?: string): Promise<APIResponse> {
+    return safeRequest('Read email events', () => this.request.get('/api/v1/users/me/email-events', {
+      headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` },
+    }));
+  }
+
   async updateUser(username: string, data: UserUpdateRequest, token?: string): Promise<APIResponse> {
     return safeRequest('Update user', () => this.request.put(`/api/v1/users/${encodeURIComponent(username)}`, {
       data,
@@ -37,10 +43,10 @@ export class UsersClient {
     }));
   }
 
-  async forgetUser(username: string, token: string): Promise<APIResponse> {
+  async forgetUser(username: string, token?: string): Promise<APIResponse> {
     return safeRequest('Delete generated user', () => this.request.delete(
       `/api/v1/users/${encodeURIComponent(username)}/right-to-be-forgotten`,
-      { headers: { Authorization: `Bearer ${token}` } },
+      { headers: token === undefined ? undefined : { Authorization: `Bearer ${token}` } },
     ));
   }
 

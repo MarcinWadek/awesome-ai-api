@@ -1,6 +1,7 @@
 # API coverage and test status report
 
-Reviewed: **23 October 2026**. Test repository revision: `81fa46c`.
+Reviewed: **23 October 2026**. Implementation base revision: `f92f0a0`;
+account lifecycle changes were reviewed in the working tree.
 This report replaces both former root test plans and is the single maintained
 source for developer-facing coverage, test status and next actions.
 Detailed delivery history remains in the [exploration reports](docs/exploration/README.md)
@@ -8,17 +9,16 @@ and [implementation records](docs/implementation/README.md).
 
 ## Coverage summary and measurement
 
-**41 of 53 operations have functional automated tests: 77.4% endpoint coverage.**
-**12 operations (22.6%) lack those tests**; the complete list appears below.
+**43 of 53 operations have functional automated tests: 81.1% endpoint coverage.**
+**10 operations (18.9%) lack those tests**; the complete list appears below.
 
 | Metric | Status |
 | --- | --- |
 | Operations in the saved OpenAPI contract | 53 across 43 paths |
-| Operations with functional automated tests | 41 / 53 — **77.4%** |
-| Operations without functional automated tests | 12 / 53 — **22.6%** |
-| Of these, called only as supporting infrastructure | 1: right-to-be-forgotten during cleanup |
-| Tests discovered by Playwright | **148** in 45 files: 75 `api`, 73 `admin` |
-| Latest recorded full regression | **148/148 passed**, 23 October 2026, 3.0 min, 4 workers, 0 retries |
+| Operations with functional automated tests | 43 / 53 — **81.1%** |
+| Operations without functional automated tests | 10 / 53 — **18.9%** |
+| Tests discovered by Playwright | **153** in 47 files: 80 `api`, 73 `admin` |
+| Latest recorded full regression | **153/153 passed**, 23 October 2026, 2.9 min, 4 workers, 0 retries |
 
 The denominator includes every HTTP operation in [docs/api-docs.json](docs/api-docs.json).
 An endpoint is an **HTTP method + path** pair: GET and DELETE on the same URL
@@ -28,7 +28,7 @@ The numerator includes operations exercised with behavioral assertions in active
 projects count once. Clients, setup, cleanup, manual exploration and checks of
 OpenAPI declarations alone do not increase this numerator.
 
-**77.4% does not mean code coverage or complete scenario, response-code or
+**81.1% does not mean code coverage or complete scenario, response-code or
 permission coverage.** An operation with tests can still have important gaps;
 these are listed below. Scenario coverage has no percentage because there is no
 complete, agreed scenario inventory. Backend line and branch coverage are not
@@ -37,7 +37,7 @@ measured here.
 The report combines two environments: `api` defaults to
 `https://awesome.byst.re`; `admin` defaults to `https://aitesters.byst.re`.
 The `admin` project also exercises ordinary staging customers, including checkout.
-The aggregate 77.4% does not establish equivalent coverage in each environment.
+The aggregate 81.1% does not establish equivalent coverage in each environment.
 Addresses come from [configuration](support/config.ts) and can be overridden by
 environment variables. The scope is the saved REST contract; this is not a claim
 that it inventories the current deployment, profile-specific endpoints such as
@@ -48,7 +48,7 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 | Area | Operations with tests / total | Without tests | Functional tests |
 | --- | --- | --- | --- |
 | Authentication, passwords, MFA and SSO | 4 / 13 | 9 | 20 |
-| Users, account deletion and email events | 5 / 7 | 2 | 18 |
+| Users, account deletion and email events | 7 / 7 | 0 | 23 |
 | User prompts | 4 / 4 | 0 | 12 |
 | Products | 5 / 5 | 0 | 19 |
 | Cart | 5 / 5 | 0 | 19 |
@@ -58,7 +58,7 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 | Ollama | 4 / 4 | 0 | 11 |
 | QR | 1 / 1 | 0 | 3 |
 | Email sending | 0 / 1 | 1 | 0 |
-| **REST total** | **41 / 53** | **12** | **145** |
+| **REST total** | **43 / 53** | **10** | **150** |
 
 The other **3 tests** cover two technical endpoints outside the saved contract's
 `paths`: [GET /v3/api-docs](tests/api/docs/documentation.spec.ts) (2 tests) and
@@ -74,8 +74,6 @@ implemented; confirm expected behavior before adding them.
 
 | Operation | Current status | Next action and dependencies |
 | --- | --- | --- |
-| `DELETE /api/v1/users/{username}/right-to-be-forgotten` | **Cleanup only**, no operation test | **P1:** explicitly test owner deletion and data removal, plus rejection of another user. Provide a fixture that tolerates deliberate account deletion. |
-| `GET /api/v1/users/me/email-events` | **Missing** | **P1:** empty result for a new account and missing JWT; add isolation of nonempty events after controlled sending is available. |
 | `POST /api/v1/users/password/forgot` | **Missing** | **P1:** generic response for known and unknown identifiers without account enumeration; use an owned account and controlled recipient. |
 | `POST /api/v1/users/password/reset` | **Missing** | **P1:** invalid-token rejection first; success requires an observable reset token. Verify new-password login, rejection of the old password and refresh-token revocation. |
 | `GET /api/v1/users/2fa/status` | **Missing** | **P2:** fresh-account state and missing JWT, then state after MFA activation. |
@@ -87,17 +85,19 @@ implemented; confirm expected behavior before adding them.
 | `POST /api/v1/email` | **Missing** | **P2:** permissions and validation, then event/delivery checks with a controlled sink and bounded polling. An HTTP response alone does not prove delivery. |
 | `POST /api/v1/users/sso/exchange` | **Missing** | **P3:** success and invalid-token cases after establishing a test IdP, valid OIDC ID token, issuer/audience configuration and cleanup. |
 
-Right-to-be-forgotten has a `204` assertion in the
-[authentication fixture](fixtures/auth.fixture.ts), but no tests of its own
-contract, access rules or completeness of data removal. It therefore remains
-among the 12 gaps. **The other 11 operations have no direct functional tests
-at all**; appearing in the [OpenAPI policy](support/contracts/openapi-policy.ts)
-does not change that classification.
+All 10 operations above lack direct functional regression tests. Manual
+[password/email exploration on 23 October](docs/exploration/2026-10-23-password-email.md)
+confirmed useful cases but does not count as automated coverage. Appearing in the
+[OpenAPI policy](support/contracts/openapi-policy.ts) does not change that classification.
 
 Password/email dependency evidence: [backend and deployment review](docs/exploration/2026-10-07-parallel-delivery.md).
 Token echo and outbox availability depend on the active profile and must be
 confirmed on the target environment. Lack of a token blocks successful reset,
 not every negative case. MFA tests must not require changing the shared admin's MFA.
+Current runtime evidence: awesome returned null reset tokens; a separate staging
+outbox request returned 403 with no configured outbox key. No accessible token
+channel or completed sink delivery was established. Exact deployment profiles
+and the outbox denial cause remain unconfirmed.
 
 ## Operations with tests — complete matrix
 
@@ -116,6 +116,8 @@ asserted cases, not every response declared in OpenAPI.
 | `GET /api/v1/users/{username}` | Own profile, 401, absent user 404 | [username GET](tests/api/users/username.get.spec.ts) / api |
 | `PUT /api/v1/users/{username}` | Owner/admin persisted updates; validation 400, missing JWT 401, peer 403 | [username PUT](tests/admin/users/username.put.spec.ts) / admin |
 | `DELETE /api/v1/users/{username}` | Admin deletion: 204 and absent profile; 401, client/owner 403, absent user 404 | [username DELETE](tests/admin/users/username.delete.spec.ts) / admin |
+| `DELETE /api/v1/users/{username}/right-to-be-forgotten` | Owner 204/empty body, independent observer 404, saved refresh token rejected; missing JWT 401 and peer 403 preserve target | [right-to-be-forgotten](tests/api/users/right-to-be-forgotten.delete.spec.ts) / api |
+| `GET /api/v1/users/me/email-events` | Fresh account has an empty JSON array; missing authentication 401 | [email events](tests/api/users/me.email-events.get.spec.ts) / api |
 | `GET /api/v1/users/chat-system-prompt` | New account's default prompt, 401 | [chat GET](tests/api/users/chat-system-prompt.get.spec.ts) / api |
 | `PUT /api/v1/users/chat-system-prompt` | Unicode, persistence and isolation, null reset, oversized prompt 400, 401 | [chat PUT](tests/api/users/chat-system-prompt.put.spec.ts) / api |
 | `GET /api/v1/users/tool-system-prompt` | New account's default prompt, 401 | [tool GET](tests/api/users/tool-system-prompt.get.spec.ts) / api |
@@ -157,6 +159,7 @@ asserted cases, not every response declared in OpenAPI.
 | Commerce permissions and lookups | No separate 401/403 cases for inventory detail/movements, 401/404 for order status, 404 for cancel/adjustments/movements, or missing-product cart-item PUT. Tests of related operations do not establish these cases. |
 | Other commerce boundaries | Deferred: order-list pagination errors, some terminal statuses, inventory threshold validation, requestId conflict with changed delta (changed reason is covered), additional peer mutations, overflow, concurrency and load. [Reduction scope](docs/implementation/commerce-workflow-tests.md). |
 | Updating an absent user | No PUT test. Verify target behavior before asserting 403/404: authorization can precede controller lookup. [CRUD record](docs/implementation/products-users-crud-gaps.md). |
+| Account deletion / email events | Profile absence and refresh-token rejection are covered; full cascade removal, admin deletion, nonexistent-target variants and nonempty event isolation remain untested. Requests using a deleted account's retained JWT produced 500 during exploration/initial teardown; independently authenticated lookup established absence in the deletion test. [Bug report](docs/deleted-account-jwt-bug-report.md). |
 | Refresh/logout | Historical observation on 5 October: consumed refresh reuse returns 401, but its replacement remains usable, unlike family revocation in local backend source. Family revocation is not asserted; reconcile the contract and deployed behavior. Logout tests refresh revocation, not immediate access-JWT invalidation. |
 | Prompts | Historical parsing/type defects: malformed JSON, absent body and object-valued fields return 401 instead of 400; numbers become strings. No automated regressions assert the intended behavior. Fix status is unconfirmed. [Bug report](docs/prompt-bug-report.md). |
 | QR | JSON-only Accept returned misleading 401. Tests use compatible `image/png, application/json`; incompatible-Accept negotiation has no regression test. Fix status is unconfirmed. [Bug report](docs/qr-accept-bug-report.md). |
@@ -166,14 +169,16 @@ asserted cases, not every response declared in OpenAPI.
 
 ## Recommended next work
 
-The following packages divide the remaining work into separate deliveries.
-**All are planned, not implemented. Start with step 1.** Coverage milestones are
-cumulative projections against the current 53-operation contract, assuming all
-preceding packages are delivered. They are not current results or test-count targets.
+The following packages divide the work into separate deliveries.
+**Step 1 is implemented; start the next implementation with step 2.** Password/email
+exploration for steps 2–4 is complete, with token/sink dependencies still open.
+Other packages remain planned. Coverage milestones after step 1 are cumulative
+projections against the 53-operation contract, assuming preceding packages are
+delivered. They are not current results or test-count targets.
 
 | Step | Delivery | New operations | Projected coverage | Dependency |
 | --- | --- | --- | --- | --- |
-| 1 | Account deletion and basic email-event reads | 2 | 43/53 — **81.1%** | Existing disposable-user support; deletion-aware cleanup |
+| 1 — implemented | Account deletion and basic email-event reads | 2 delivered | 43/53 — **81.1%** current | Five focused tests passed after review |
 | 2 | Password-recovery entry point and reset rejection | 2 | 45/53 — **84.9%** | Owned account and controlled recipient |
 | 3 | Successful password recovery | 0; deepens step 2 | 45/53 — **84.9%** | Observable reset token on the selected environment |
 | 4 | Email sending and event isolation | 1 | 46/53 — **86.8%** | Controlled mail sink and bounded polling |
@@ -184,21 +189,24 @@ preceding packages are delivered. They are not current results or test-count tar
 
 ### Step 1 — Account deletion and basic email-event reads
 
-- Scope: `DELETE /api/v1/users/{username}/right-to-be-forgotten` and
-  `GET /api/v1/users/me/email-events`.
-- Implement a small lifecycle that tolerates deliberate deletion and still
-  cleans up after a failed assertion. Keep it separate from the existing fixture
-  that assumes it owns account deletion.
-- Test owner deletion with an empty response and subsequent absence of the
-  account and selected owned data; missing authentication and rejection of a
-  different user must preserve the target. Confirm actual responses before
-  fixing expectations. Do not introduce orders solely to exercise deletion.
-- Test the empty email-event result for a fresh user and missing authentication.
-  Nonempty event isolation belongs to step 4.
-- Done when both operations have dedicated specs, rejected deletion preserves
-  the account, and successful deletion leaves no owned test resources behind.
+Delivered five tests across the two operation specs. Owner deletion asserts an
+empty 204 response, profile absence through an independent user, and rejection
+of the saved refresh token. Both rejected deletion paths preserve the target.
+Email-event tests cover a fresh empty list and missing authentication. A dedicated
+fixture keeps the observer alive through target teardown, verifies absence and
+requires 204 when cleanup actually deletes a surviving target. No orders or mail
+side effects are introduced. Full cascade coverage and nonempty event isolation
+remain deferred.
+
+Evidence: [exploration](docs/exploration/2026-10-23-account-lifecycle.md) and
+[implementation/review results](docs/implementation/account-lifecycle-tests.md).
 
 ### Step 2 — Password-recovery entry point and reset rejection
+
+Exploration completed: known/unknown forgot requests returned matching 202
+messages with null tokens; invalid reset returned 400 and the original password
+remained usable. These observations are ready to become regression tests;
+none were added in this delivery. [Evidence](docs/exploration/2026-10-23-password-email.md).
 
 - Scope: `POST /api/v1/users/password/forgot` and
   `POST /api/v1/users/password/reset`.
@@ -225,6 +233,10 @@ preceding packages are delivered. They are not current results or test-count tar
   mark successful recovery covered.
 
 ### Step 4 — Email sending and event isolation
+
+Exploration completed: accepted send returned 200, invalid recipient 400 and
+missing authentication 401. Immediate owned events were QUEUED. Sink delivery,
+cross-user isolation and final transitions were not verified.
 
 - Scope: `POST /api/v1/email`, extending step 1's email-event tests.
 - First confirm sink access, recipient ownership, expected event states and a
@@ -312,17 +324,20 @@ after verification. Planning this sequence does not mark any new coverage done.
 
 | Evidence / check | Result and meaning |
 | --- | --- |
-| Contract and active-spec review, 23 October | 53 operations, 41 with tests; linked evidence in the matrix above |
-| `npx.cmd playwright test --list` during this review | 148 tests / 45 files, 75 api + 73 admin; discovery sends no API requests and is not a regression result |
+| Contract and active-spec review, 23 October | 53 operations, 43 with tests; linked evidence in the matrix above |
+| `npx.cmd playwright test --list` during this review | 153 tests / 47 files, 80 api + 73 admin; discovery sends no API requests and is not a regression result |
 | `npm.cmd run typecheck` during this review | Passed |
-| Matrix, links and whitespace checks during this review | Passed: all 53 operations reconciled against contract/specs, 163 local Markdown links checked, `git diff --check` clean |
-| Full run recorded earlier on 23 October | 148/148 passed, 3.0 min, 4 workers, 0 retries; [durable verification record](docs/implementation/commerce-workflow-tests.md) |
+| Matrix, links and whitespace checks during this review | Passed: all 53 operations reconciled against contract/specs, local Markdown links checked, `git diff --check` clean |
+| Parent focused run after review changes, 23 October | **5/5 passed**, 9.6s, 2 workers, 0 retries; [account lifecycle record](docs/implementation/account-lifecycle-tests.md) |
+| Parent full regression after focused pass, 23 October | **153/153 passed**, 2.9 min, 4 workers, 0 retries; same account lifecycle record |
+| Previous full regression, before this implementation | 148/148 passed, 3.0 min, 4 workers, 0 retries; [commerce verification record](docs/implementation/commerce-workflow-tests.md) |
 | Focused commerce run recorded earlier on 23 October | 50/50 passed, 1.9 min, 4 workers, 0 retries; same implementation record |
 
-This documentation change did not rerun tests against the APIs. The latest
-recorded run does not guarantee current service health or resolution of the
-listed defects. Historical totals of 59, 109 and 169 tests describe earlier suite
-versions and are not the current test count.
+This delivery added five account lifecycle tests and ran focused and full live
+regressions. Password/email work was exploratory only and added no regression
+tests. The passing suite does not establish resolution of unasserted defects,
+including the deleted-account JWT 500. Historical totals of 59, 109, 148 and 169
+tests describe earlier suite versions and are not the current test count.
 
 After contract/test changes, recount method/path pairs, move operations between
 tables and update area totals and discovery. Record the date and result of an

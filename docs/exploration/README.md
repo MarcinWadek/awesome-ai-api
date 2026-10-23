@@ -18,6 +18,8 @@ findings do not guarantee the current deployment behaves identically.
 | 2026-10-20 | Owned capture lookup, legacy authentication and unknown ID | [Traffic details](2026-10-20-traffic-details.md) |
 | 2026-10-20 | Staging cart item add/update/remove, persisted state, validation, authentication, stock and cleanup | [Cart items](2026-10-20-cart-items.md) |
 | 2026-10-20 | Staging orders, inventory, stock effects and verified cleanup | [Commerce workflow](2026-10-20-commerce-workflow.md) |
+| 2026-10-23 | Account deletion, access control, empty email-event reads and cleanup | [Account lifecycle](2026-10-23-account-lifecycle.md) |
+| 2026-10-23 | Password recovery and email behavior, token visibility and mail observation prerequisites | [Password and email](2026-10-23-password-email.md) |
 
 Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated scope.
 For one operation, include its area and operation, such as

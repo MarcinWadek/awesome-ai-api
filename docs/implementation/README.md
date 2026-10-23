@@ -12,6 +12,7 @@
 | Controlled traffic detail lookup and unknown ID | [Traffic details](traffic-detail-tests.md) |
 | Staging cart item add/update/remove with owned users and products | [Cart item tests](cart-item-tests.md) |
 | Commerce workflow coverage, isolated staging lifecycle and 23 October reduction to core risks | [Commerce workflow tests](commerce-workflow-tests.md) |
+| Dedicated account deletion and basic email-event reads | [Account lifecycle tests](account-lifecycle-tests.md) |
 
 These completed plans preserve implementation decisions and their original
 verification results. Current coverage lives in the single
