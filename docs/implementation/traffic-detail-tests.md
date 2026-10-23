@@ -3,7 +3,7 @@
 Status: delivered implementation record, 20 October 2026; live success remains
 blocked by a backend defect.
 Evidence: [traffic exploration](../exploration/2026-10-20-traffic-details.md).
-Maintained coverage: [root plan](../../api-test-plan.md).
+Maintained coverage: [coverage report](../../api-coverage-report.md).
 
 Implemented two cases in `tests/api/traffic/logs-correlation-id.get.spec.ts`, ordered
 200/404. Initialized TrafficClient in `beforeEach` and added a URL-encoded detail
@@ -41,7 +41,7 @@ full-suite result for this delivery.
 pre-existing `agents.md` trailing whitespace at lines 7 and 8 (left untouched).
 Scope-only tracked diff and all new QR/traffic file whitespace checks passed.
 Rerun the focused command and full regression after a backend fix, followed by
-typecheck and whitespace checks. These are delivery results; the root plan
+typecheck and whitespace checks. These are delivery results; the coverage report
 maintains subsequent status.
 
 Owned captures expire under server retention; no traffic deletion API exists.

@@ -4,6 +4,6 @@
 - implement test.step for better readability 
 - while creating a plan never assume anything. In case of doubts check documentation, explore application or ask me
 - initialize htttClients in test setup 
-- keep updating api-test-plan.md to reflect the current state of API 
+- Keep `api-coverage-report.md` as the single maintained endpoint coverage and status report. It replaces both retired root test plans, including references to those plans in older workflow guidance. Keep implementation plans scoped to individual deliveries.
 - Avoid unnecessary abstractions, refactoring, and speculative code. 
 - Add tests only when they protect important behavior or address a meaningful regression risk; do not duplicate existing coverage.

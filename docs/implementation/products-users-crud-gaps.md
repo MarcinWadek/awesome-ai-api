@@ -1,7 +1,7 @@
 # Product and user CRUD gaps
 
 Status: completed historical implementation record, 13 October 2026.
-Maintained coverage: [root plan](../../api-test-plan.md).
+Maintained coverage: [coverage report](../../api-coverage-report.md).
 Contract and live evidence: [13 October exploration](../exploration/2026-10-13-products-users-crud.md).
 
 Delivered 17 cases, reusing existing product happy paths and POST 401/403:
@@ -35,4 +35,4 @@ All specs use Given/When/Then steps and ascending status order.
 No defects or unresolved cases in the requested scope. Missing-user PUT,
 dedicated right-to-be-forgotten coverage, additional validation boundaries and
 commerce-linked deletion remain outside this delivery. No backend code was changed.
-Original results here are historical; the root plan maintains current suite status.
+Original results here are historical; the coverage report maintains current suite status.

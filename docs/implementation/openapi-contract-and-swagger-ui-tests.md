@@ -1,7 +1,7 @@
 # Implementation plan: OpenAPI contract and Swagger UI tests
 
 Historical implementation record. Design details and verification counts below
-describe this delivery; consult [the current test plan](../../api-test-plan.md)
+describe this delivery; consult [the current coverage report](../../api-coverage-report.md)
 and `tests/api/docs/` for the maintained coverage. Code paths in this record are
 relative to the repository root.
 

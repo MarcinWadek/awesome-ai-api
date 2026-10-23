@@ -46,7 +46,7 @@ and root cause remain unconfirmed. Raw run logs are gitignored at
 
 Historical implementation record, completed 20 October 2026. Evidence:
 [exploration](../exploration/2026-10-20-commerce-workflow.md),
-[maintained matrix](../../api-test-plan.md).
+[maintained matrix](../../api-coverage-report.md).
 
 Existing catalogue/product CRUD and eleven staging cart-item tests count toward
 coverage. Add focused scenarios to existing cart-item operation specs only where

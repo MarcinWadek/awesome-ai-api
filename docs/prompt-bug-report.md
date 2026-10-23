@@ -2,12 +2,12 @@
 
 Confirmed: 6 October 2026 on `https://awesome.byst.re`.
 
-Affected endpoints (numbers from the API test plan):
+Affected endpoints:
 
-| Number | Endpoint | Payload field |
-| --- | --- | --- |
-| 8 | `PUT /api/v1/users/chat-system-prompt` | `chatSystemPrompt` |
-| 10 | `PUT /api/v1/users/tool-system-prompt` | `toolSystemPrompt` |
+| Endpoint | Payload field |
+| --- | --- |
+| `PUT /api/v1/users/chat-system-prompt` | `chatSystemPrompt` |
+| `PUT /api/v1/users/tool-system-prompt` | `toolSystemPrompt` |
 
 ## 1. Invalid request bodies return an authentication error
 
@@ -15,7 +15,7 @@ Affected endpoints (numbers from the API test plan):
 
 1. Sign in and obtain a valid access token.
 2. Call either endpoint with `Authorization: Bearer <token>` and `Content-Type: application/json`.
-3. Send malformed JSON (`{`), omit the body, or send an object-valued field, e.g. `{"chatSystemPrompt":{}}` (use `toolSystemPrompt` for endpoint 10).
+3. Send malformed JSON (`{`), omit the body, or send an object-valued field, e.g. `{"chatSystemPrompt":{}}` (use `toolSystemPrompt` for the tool endpoint).
 
 **Expected:** `400 Bad Request` with a validation error.
 
@@ -26,7 +26,7 @@ Affected endpoints (numbers from the API test plan):
 **Steps:**
 
 1. Sign in and obtain a valid access token.
-2. Call endpoint 8 with the headers above and `{"chatSystemPrompt":123}`, or endpoint 10 with `{"toolSystemPrompt":123}`.
+2. Call the chat endpoint with the headers above and `{"chatSystemPrompt":123}`, or the tool endpoint with `{"toolSystemPrompt":123}`.
 3. GET the corresponding prompt using the same token.
 
 **Expected:** Reject the numeric field with `400`; the schema allows only a string or null. Preserve the previous prompt.

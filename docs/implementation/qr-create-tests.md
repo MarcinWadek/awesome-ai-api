@@ -3,7 +3,7 @@
 Status: delivered implementation record, 20 October 2026; combined verification
 is blocked by the traffic application defect.
 Evidence: [QR exploration](../exploration/2026-10-20-qr-create.md).
-Maintained coverage: [root plan](../../api-test-plan.md).
+Maintained coverage: [coverage report](../../api-coverage-report.md).
 
 Implemented three cases in `tests/api/qr/create.post.spec.ts`, ordered 200/400/401:
 valid text returns a PNG (signature, IHDR dimensions and terminal IEND), blank

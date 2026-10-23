@@ -2,7 +2,7 @@
 
 Completed **11 October 2026**. Historical implementation record. Evidence:
 [live exploration](../exploration/2026-10-11-ollama.md).
-Maintained coverage: [root API plan](../../api-test-plan.md).
+Maintained coverage: [API coverage report](../../api-coverage-report.md).
 
 ## Selected scope
 

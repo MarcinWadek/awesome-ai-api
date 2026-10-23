@@ -47,4 +47,4 @@ missing item PUT, PUT zero removal, additional quantity boundaries, concurrent
 mutations and cross-user isolation. Automation adds a retained-item check to the
 DELETE success case to distinguish selective removal from whole-cart clearing.
 See the [implementation plan](../implementation/cart-item-tests.md) and
-[current root plan](../../api-test-plan.md).
+[current coverage report](../../api-coverage-report.md).

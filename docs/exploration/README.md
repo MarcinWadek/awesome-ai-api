@@ -30,12 +30,12 @@ request conditions and expected versus observed results; isolated setup and clea
 and any defects, untested areas or implications for focused automation. Include
 enough request detail to reproduce an unusual result without recording credentials,
 tokens or unrelated account data. Add the report to this index and link it from
-the affected API test plans. Keep separate bug reports linked to their evidence.
+the API coverage report. Keep separate bug reports linked to their evidence.
 
 The Markdown report is the durable record. Raw responses and ad hoc runners stay
 in the gitignored `exploration-results/` directory; record artifact references
 only when they exist. Findings may cover more cases than the automated core suite.
 
 Related documentation: [API testing workflow](../api-testing-workflow.md),
-[root test plan](../../api-test-plan.md), and
+[API coverage report](../../api-coverage-report.md), and
 [prompt defects](../prompt-bug-report.md).

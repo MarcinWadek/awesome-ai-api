@@ -4,7 +4,7 @@ Observed 20 October 2026 at `https://aitesters.byst.re` only. Sources:
 `docs/api-docs.json`, live `/v3/api-docs`, backend OrderController/OrderService,
 AdminInventoryController/InventoryService, CartService, UserService, repository
 and migration V4. Existing product/cart coverage is credited in the
-[root matrix](../../api-test-plan.md). Raw runner/output: gitignored
+[root matrix](../../api-coverage-report.md). Raw runner/output: gitignored
 `exploration-results/commerce.cjs` and `commerce-live.jsonl`.
 
 Two ordinary UUID users and two admin-created UUID products (12.34/5, stock 7)

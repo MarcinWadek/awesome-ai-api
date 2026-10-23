@@ -5,7 +5,7 @@ two explicitly routed Playwright projects,
 test-scoped admin authentication, product mutation client methods, owned product
 creation/cleanup, and six examples. Evidence:
 [admin exploration](../exploration/2026-10-12-admin-products.md).
-Maintained coverage: [root API test plan](../../api-test-plan.md).
+Maintained coverage: [API coverage and status report](../../api-coverage-report.md).
 
 ## Delivery
 

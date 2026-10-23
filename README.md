@@ -1,5 +1,8 @@
 # README
 
+Current endpoint coverage, suite status, missing automation and recommended next
+tasks: [API coverage and status report](api-coverage-report.md).
+
 Exploratory evidence: [API exploration reports](docs/exploration/README.md).
 
 Our process: [API testing workflow](docs/api-testing-workflow.md) — exploratory
@@ -187,7 +190,7 @@ npx.cmd playwright test tests/api/traffic tests/api/products tests/api/users/cha
 ```
 
 Run `npm.cmd run typecheck` and the full API suite after the new tests pass.
-See [the API test plan](api-test-plan.md) and
+See [the API coverage report](api-coverage-report.md) and
 [exploratory findings](docs/exploration/2026-10-06-traffic-products-prompts.md) for remaining input
 boundaries and the two known prompt parsing/type defects. Those defects are
 documented without skipped test placeholders.
@@ -269,8 +272,9 @@ npm.cmd test -- --project=api --project=admin --workers=4 --retries=0
 
 See [admin exploration](docs/exploration/2026-10-12-admin-products.md) and the
 [delivery record](docs/implementation/admin-environments-and-disposable-products.md).
-Commerce setup, admin user/order/inventory endpoints and broad negative coverage
-remain deferred.
+Current commerce, user CRUD and inventory coverage is listed in the
+[API coverage and status report](api-coverage-report.md); this section describes
+the original admin/product examples.
 
 ## Refresh and logout tests
 
@@ -284,7 +288,7 @@ npx.cmd playwright test tests/api/users/refresh.spec.ts tests/api/users/logout.s
 ```
 
 The live deployment's replay behavior differs from the local backend's token
-family revocation logic; details are recorded in `api-test-plan.md`.
+family revocation logic; details are recorded in `api-coverage-report.md`.
 
 ## Registration tests
 

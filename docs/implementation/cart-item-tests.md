@@ -2,7 +2,7 @@
 
 Historical implementation record, completed 20 October 2026. Evidence:
 [live staging exploration](../exploration/2026-10-20-cart-items.md).
-Maintained scope: [root API test plan](../../api-test-plan.md).
+Maintained scope: [API coverage and status report](../../api-coverage-report.md).
 
 Delivered **11 tests** in the Playwright `admin` project:
 

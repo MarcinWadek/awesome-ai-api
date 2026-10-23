@@ -6,7 +6,7 @@ clean when inspected. Sources: API tests `5187613`, backend `32eb381`, mock `976
 The configured live API is `https://awesome.byst.re`; deployed revision/profile and
 upstream type were not independently established.
 
-Maintained plan: [root API plan](../../api-test-plan.md). Delivery document:
+Maintained coverage: [API coverage report](../../api-coverage-report.md). Delivery document:
 [parallel delivery planning record](../implementation/parallel-api-delivery.md).
 
 ## Contract sources inspected
@@ -26,7 +26,7 @@ Java backend paths without a full prefix in the table are under
 `src/main/java/com/awesome/testing/`. Cross-checked operation names, roles and
 response codes with `docs/api-docs.json`, all existing clients, fixture lifecycle,
 the former endpoint plans and prior exploration/implementation records.
-Coverage is now maintained only in the root API test plan.
+Coverage is now maintained only in the API coverage and status report.
 
 ## Findings and implications
 
@@ -118,6 +118,6 @@ cleanup remains a documented gap. No extra mutation/side-effect probes were run.
 Admin credentials/role/MFA; active profile and outbox key; sink/delay control;
 inventory cleanup in the target database; deployed upstream model/error
 capabilities; scenario-compatible product data; QR error negotiation; and
-missing-user edit/forget status. The [compact working plan](../../api-test-plan.md) identifies the blockers;
-independent reads/helpers may proceed. Detailed workstream notes are preserved in
-[the archived plan](../../api-test-plan-history.md).
+missing-user edit/forget status. These prerequisites describe the 7 October review.
+The [coverage report](../../api-coverage-report.md) tracks current coverage,
+remaining blockers and next actions; it replaced both root plans on 23 October.

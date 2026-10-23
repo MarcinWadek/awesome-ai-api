@@ -1,10 +1,10 @@
 # Parallel API delivery planning record
 
 Documentation update completed on **7 October 2026**. This record describes the
-planning delivery; endpoint tests and prerequisite helpers remain future work.
-The compact two-thread plan, blockers and dependency map live in the
-[root API test plan](../../api-test-plan.md). The earlier detailed plan is preserved
-in [api-test-plan-history.md](../../api-test-plan-history.md). Evidence and repository
+planning delivery; its future-work statements below are historical. Current
+coverage, blockers and next actions live in the
+[API coverage and status report](../../api-coverage-report.md), which replaced
+both root test plans on 23 October 2026. Evidence and repository
 revisions are in the [source review](../exploration/2026-10-07-parallel-delivery.md).
 
 ## Delivered scope
@@ -34,7 +34,7 @@ revisions are in the [source review](../exploration/2026-10-07-parallel-delivery
 - New tests: **0**. No clients, fixtures, backend or mock code changed. No Maven
   suites were required for this documentation-only delivery.
 
-Current coverage is maintained in the single root API test plan. Future batches
+Current coverage is maintained in the single API coverage and status report. Future batches
 should create a focused implementation record, verify their new tests first,
 then run the full suite and update the relevant plans with actual results.
 
@@ -54,6 +54,6 @@ preserved in history, Markdown fences and `git diff --check`. The working plan i
 ## Consolidation on 7 October 2026
 
 Following the updated repository rule, removed the four folder-level test plans
-and redirected their incoming links to the root plan. Test folders and specs
+and redirected their incoming links to the then-current root plan. Test folders and specs
 remain in place. The earlier folder handoffs above describe historical deliveries;
-maintain only the root plan going forward.
+maintain only the coverage report going forward.

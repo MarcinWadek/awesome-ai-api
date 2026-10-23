@@ -15,10 +15,10 @@
 
 These completed plans preserve implementation decisions and their original
 verification results. Current coverage lives in the single
-[root API test plan](../../api-test-plan.md).
+[API coverage and status report](../../api-coverage-report.md).
 
 Save future implementation plans here with descriptive, lowercase,
 hyphen-separated scope names. Keep simple implementation plans short and link the
-root `api-test-plan.md` for maintained coverage. Add each plan to
+root `api-coverage-report.md` for maintained coverage. Add each plan to
 this index, update it through delivery, then mark it as a historical record with
 actual verification results and links to current plans.
