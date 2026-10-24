@@ -22,6 +22,7 @@ findings do not guarantee the current deployment behaves identically.
 | 2026-10-23 | Password recovery and email behavior, token visibility and mail observation prerequisites | [Password and email](2026-10-23-password-email.md) |
 | 2026-10-23 | MFA enrollment, TOTP/challenge replay, recovery, disable and owned cleanup | [MFA lifecycle](2026-10-23-mfa.md) |
 | 2026-10-24 | Forgot response parity and validation; invalid reset with unchanged credentials | [Password recovery](2026-10-24-password-recovery.md) |
+| 2026-10-24 | Email acceptance/private events and disabled SSO capability checks | [Email and SSO](2026-10-24-email-sso.md) |
 
 Use `YYYY-MM-DD-<scope>.md` with a short lowercase, hyphen-separated scope.
 For one operation, include its area and operation, such as

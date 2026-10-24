@@ -43,3 +43,7 @@ export interface ResetPasswordRequest {
   newPassword: string;
   confirmPassword: string;
 }
+
+export interface SsoExchangeRequest {
+  idToken: string;
+}

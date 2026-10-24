@@ -1,7 +1,7 @@
 # API coverage and test status report
 
-Reviewed: **24 October 2026**. Implementation base revision: `51e4dd4`;
-password recovery changes were reviewed in the working tree without subagents.
+Reviewed: **24 October 2026**. Implementation base revision: `5a1cb99`;
+email/SSO changes were reviewed in the working tree without subagents.
 This report replaces both former root test plans and is the single maintained
 source for developer-facing coverage, test status and next actions.
 Detailed delivery history remains in the [exploration reports](docs/exploration/README.md)
@@ -9,17 +9,17 @@ and [implementation records](docs/implementation/README.md).
 
 ## Coverage summary and measurement
 
-**51 of 53 operations have functional automated tests: 96.2% endpoint coverage.**
-**2 operations (3.8%) lack those tests**; the complete list appears below.
-**Password reset has negative-case coverage only; successful recovery remains unverified.**
+**53 of 53 operations have direct automated behavioral checks: 100% operation coverage.**
+**This is not complete feature coverage:** SSO has validation/disabled-policy tests
+only; successful SSO, successful password reset and SMTP delivery remain unverified.
 
 | Metric | Status |
 | --- | --- |
 | Operations in the saved OpenAPI contract | 53 across 43 paths |
-| Operations with functional automated tests | 51 / 53 — **96.2%** |
-| Operations without functional automated tests | 2 / 53 — **3.8%** |
-| Tests discovered by Playwright | **172** in 55 files: 99 `api`, 73 `admin` |
-| Latest recorded full regression | **172/172 passed**, 24 October 2026, 4.5 min, 4 workers, 0 retries |
+| Operations with direct automated behavioral checks | 53 / 53 — **100%** |
+| Operations without any direct automated behavioral check | 0 / 53 |
+| Tests discovered by Playwright | **177** in 57 files: 104 `api`, 73 `admin` |
+| Latest recorded full regression | **177/177 passed**, 24 October 2026, 4.2 min, 4 workers, 0 retries |
 
 The denominator includes every HTTP operation in [docs/api-docs.json](docs/api-docs.json).
 An endpoint is an **HTTP method + path** pair: GET and DELETE on the same URL
@@ -29,7 +29,7 @@ The numerator includes operations exercised with behavioral assertions in active
 projects count once. Clients, setup, cleanup, manual exploration and checks of
 OpenAPI declarations alone do not increase this numerator.
 
-**96.2% does not mean code coverage or complete scenario, response-code or
+**100% operation coverage does not mean code coverage or complete scenario, response-code or
 permission coverage.** An operation with tests can still have important gaps;
 these are listed below. Scenario coverage has no percentage because there is no
 complete, agreed scenario inventory. Backend line and branch coverage are not
@@ -38,7 +38,7 @@ measured here.
 The report combines two environments: `api` defaults to
 `https://awesome.byst.re`; `admin` defaults to `https://aitesters.byst.re`.
 The `admin` project also exercises ordinary staging customers, including checkout.
-The aggregate 96.2% does not establish equivalent coverage in each environment.
+The aggregate 100% does not establish equivalent coverage in each environment.
 Addresses come from [configuration](support/config.ts) and can be overridden by
 environment variables. The scope is the saved REST contract; this is not a claim
 that it inventories the current deployment, profile-specific endpoints such as
@@ -48,7 +48,7 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 
 | Area | Operations with tests / total | Without tests | Functional tests |
 | --- | --- | --- | --- |
-| Authentication, passwords, MFA and SSO | 12 / 13 | 1 | 39 |
+| Authentication, passwords, MFA and SSO | 13 / 13 | 0 | 41 |
 | Users, account deletion and email events | 7 / 7 | 0 | 23 |
 | User prompts | 4 / 4 | 0 | 12 |
 | Products | 5 / 5 | 0 | 19 |
@@ -58,8 +58,8 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 | Traffic | 3 / 3 | 0 | 8 |
 | Ollama | 4 / 4 | 0 | 11 |
 | QR | 1 / 1 | 0 | 3 |
-| Email sending | 0 / 1 | 1 | 0 |
-| **REST total** | **51 / 53** | **2** | **169** |
+| Email sending | 1 / 1 | 0 | 3 |
+| **REST total** | **53 / 53** | **0** | **174** |
 
 The other **3 tests** cover two technical endpoints outside the saved contract's
 `paths`: [GET /v3/api-docs](tests/api/docs/documentation.spec.ts) (2 tests) and
@@ -70,18 +70,16 @@ operations functional coverage.
 
 ## Operations without functional tests — complete list
 
-Priorities indicate a recommended sequence. The proposed cases below are not
-implemented; confirm expected behavior before adding them.
+None at the per-operation level: each saved-contract operation now has at least
+one active HTTP test with behavioral assertions. This includes rejection paths
+and the disabled-SSO policy. It does not establish each operation's successful
+business flow. The matrix and remaining-gaps section retain these distinctions;
+OpenAPI declaration checks and manual exploration alone still do not count.
 
-| Operation | Current status | Next action and dependencies |
-| --- | --- | --- |
-| `POST /api/v1/email` | **Missing** | **P2:** permissions and validation, then event/delivery checks with a controlled sink and bounded polling. An HTTP response alone does not prove delivery. |
-| `POST /api/v1/users/sso/exchange` | **Missing** | **P3:** success and invalid-token cases after establishing a test IdP, valid OIDC ID token, issuer/audience configuration and cleanup. |
-
-Both operations above lack direct functional regression tests. Manual
-[password/email exploration on 23 October](docs/exploration/2026-10-23-password-email.md)
-confirmed useful cases but does not count as automated coverage. Appearing in the
-[OpenAPI policy](support/contracts/openapi-policy.ts) does not change that classification.
+The [24 October email/SSO evidence](docs/exploration/2026-10-24-email-sso.md)
+confirms current SSO-disabled responses and owned email events. SSO success needs
+an enabled API and trusted test IdP. Email acceptance and event isolation are
+covered; later handoff, delivery and rendered message contents are not.
 
 Password/email dependency evidence: [backend and deployment review](docs/exploration/2026-10-07-parallel-delivery.md).
 Token echo and outbox availability depend on the active profile and must be
@@ -106,6 +104,8 @@ asserted cases, not every response declared in OpenAPI.
 | `POST /api/v1/users/logout` | Empty 200, refresh revocation across sessions, fresh session after login, 401 | [logout](tests/api/users/logout.spec.ts) / api |
 | `POST /api/v1/users/password/forgot` | Known/unknown identifiers share generic 202 and null token on the non-echo target; omitted identifier 400 | [forgot](tests/api/users/password.forgot.post.spec.ts) / api |
 | `POST /api/v1/users/password/reset` | **Negative only:** unknown nonblank token 400, proposed password rejected, original password still creates a usable session | [reset](tests/api/users/password.reset.post.spec.ts) / api |
+| `POST /api/v1/users/sso/exchange` | **Disabled-policy/validation only:** missing ID token 400; nonblank input returns exact SSO-disabled 404 without session fields | [SSO exchange](tests/api/users/sso.exchange.post.spec.ts) / api |
+| `POST /api/v1/email` | Empty 200 and one masked owned GENERIC event, peer isolation; invalid recipient 400/no event and missing JWT 401. No delivery claim | [email](tests/api/email/index.post.spec.ts) / api |
 | `GET /api/v1/users/2fa/status` | Fresh disabled status/count, 401; enabled and recovery-count persistence checked in workflow assertions | [MFA status](tests/api/users/2fa.status.get.spec.ts) / api |
 | `POST /api/v1/users/2fa/setup` | Consistent manual secret/OTPAuth/PNG/expiry, pending setup remains disabled; 401 | [MFA setup](tests/api/users/2fa.setup.post.spec.ts) / api |
 | `POST /api/v1/users/2fa/confirm` | Enabled status, unique recovery codes, old refresh rejected; missing authentication/invalid factor 401 preserve disabled status | [MFA confirm](tests/api/users/2fa.confirm.post.spec.ts) / api |
@@ -118,7 +118,7 @@ asserted cases, not every response declared in OpenAPI.
 | `PUT /api/v1/users/{username}` | Owner/admin persisted updates; validation 400, missing JWT 401, peer 403 | [username PUT](tests/admin/users/username.put.spec.ts) / admin |
 | `DELETE /api/v1/users/{username}` | Admin deletion: 204 and absent profile; 401, client/owner 403, absent user 404 | [username DELETE](tests/admin/users/username.delete.spec.ts) / admin |
 | `DELETE /api/v1/users/{username}/right-to-be-forgotten` | Owner 204/empty body, independent observer 404, saved refresh token rejected; missing JWT 401 and peer 403 preserve target | [right-to-be-forgotten](tests/api/users/right-to-be-forgotten.delete.spec.ts) / api |
-| `GET /api/v1/users/me/email-events` | Fresh account has an empty JSON array; missing authentication 401 | [email events](tests/api/users/me.email-events.get.spec.ts) / api |
+| `GET /api/v1/users/me/email-events` | Fresh empty array and missing authentication 401; populated owned metadata and peer isolation asserted by email workflow | [email events](tests/api/users/me.email-events.get.spec.ts), [email workflow](tests/api/email/index.post.spec.ts) / api |
 | `GET /api/v1/users/chat-system-prompt` | New account's default prompt, 401 | [chat GET](tests/api/users/chat-system-prompt.get.spec.ts) / api |
 | `PUT /api/v1/users/chat-system-prompt` | Unicode, persistence and isolation, null reset, oversized prompt 400, 401 | [chat PUT](tests/api/users/chat-system-prompt.put.spec.ts) / api |
 | `GET /api/v1/users/tool-system-prompt` | New account's default prompt, 401 | [tool GET](tests/api/users/tool-system-prompt.get.spec.ts) / api |
@@ -160,7 +160,9 @@ asserted cases, not every response declared in OpenAPI.
 | Commerce permissions and lookups | No separate 401/403 cases for inventory detail/movements, 401/404 for order status, 404 for cancel/adjustments/movements, or missing-product cart-item PUT. Tests of related operations do not establish these cases. |
 | Other commerce boundaries | Deferred: order-list pagination errors, some terminal statuses, inventory threshold validation, requestId conflict with changed delta (changed reason is covered), additional peer mutations, overflow, concurrency and load. [Reduction scope](docs/implementation/commerce-workflow-tests.md). |
 | Updating an absent user | No PUT test. Verify target behavior before asserting 403/404: authorization can precede controller lookup. [CRUD record](docs/implementation/products-users-crud-gaps.md). |
-| Account deletion / email events | Profile absence and refresh-token rejection are covered; full cascade removal, admin deletion, nonexistent-target variants and nonempty event isolation remain untested. Requests using a deleted account's retained JWT produced 500 during exploration/initial teardown; independently authenticated lookup established absence in the deletion test. [Bug report](docs/deleted-account-jwt-bug-report.md). |
+| Account deletion / email events | Profile absence, refresh-token rejection and one populated GENERIC event's isolation are covered. Full cascade removal, admin deletion, nonexistent-target variants and other event types remain outside the selected cases. Requests using a deleted account's retained JWT produced 500 during earlier exploration/initial teardown. [Bug report](docs/deleted-account-jwt-bug-report.md). |
+| SSO | Only missing-input 400 and explicitly disabled 404 are automated. Both configured APIs disable SSO, local Keycloak is unreachable and no trusted token setup is available. Success, provisioning/linking/conflicts and verifier 401 checks remain unverified. [Evidence](docs/exploration/2026-10-24-email-sso.md). |
+| Email delivery | Acceptance and private event recording are covered, not SMTP delivery or template rendering. Tests allow recorded QUEUED/SENT_TO_SMTP_SINK/FAILED metadata without interpreting it as delivery success. Final transitions, sink contents, retries and rate-limit boundaries need controlled infrastructure. [Scope](docs/implementation/email-sso-tests.md). |
 | Password recovery | Forgot response parity/identifier validation and invalid-token reset are covered. Successful reset, expiry/reuse, post-success refresh revocation, reset/MFA interaction and timing-based enumeration remain unverified. Null-token assertions are deployment-specific. [Current observations](docs/exploration/2026-10-24-password-recovery.md). |
 | MFA | Core lifecycle has 16 tests. Exact expiry/skew, rate-limit saturation, races, provider-managed accounts, reset/MFA interaction and additional 400/409/410/422 combinations remain deferred. Disable success uses a recovery code; no separate TOTP-disable success. Recovery replacement samples old/new codes. [Exploration and limits](docs/exploration/2026-10-23-mfa.md). |
 | Refresh/logout | Historical observation on 5 October: consumed refresh reuse returns 401, but its replacement remains usable, unlike family revocation in local backend source. Family revocation is not asserted; reconcile the contract and deployed behavior. Logout tests refresh revocation, not immediate access-JWT invalidation. |
@@ -172,24 +174,23 @@ asserted cases, not every response declared in OpenAPI.
 
 ## Recommended next work
 
-**Steps 1, 2, 5 and 6 are implemented**, giving current coverage of 51/53.
-The [MFA implementation record](docs/implementation/mfa-lifecycle-tests.md) links
-the 16-test delivery and verification. The
-[password entry/reset-negative record](docs/implementation/password-recovery-entry-tests.md)
-adds three tests for step 2. Successful reset/delivery still need token/sink access.
-Remaining milestones assume step 4, then step 7 are delivered; they are projections,
-not current coverage. Step 3 deepens reset success without adding an operation.
+All 53 operations have checks, but success-flow work remains. Steps 1, 2, 5 and 6
+are implemented; step 4 covers acceptance/events, and step 7 covers validation and
+the current disabled policy. Remaining work improves behavior coverage without
+raising the operation numerator. Prioritize an enabled trusted SSO test setup,
+an observable reset-token channel, controlled email delivery, then selected
+regression gaps. [Email/SSO delivery record](docs/implementation/email-sso-tests.md).
 
-| Step | Delivery | New operations | Projected coverage | Dependency |
+| Step | Delivery | Counted operations | Remaining behavior | Dependency |
 | --- | --- | --- | --- | --- |
-| 1 — implemented | Account deletion and basic email-event reads | 2 delivered | Included in current 51/53 | Five focused tests passed after review |
-| 2 — implemented | Password-recovery entry point and reset rejection | 2 delivered | Included in current 51/53 | Three tests; reset negative cases only |
-| 3 | Successful password recovery | 0; deepens step 2 | Unchanged at 51/53 — **96.2%** | Observable reset token on the selected environment |
-| 4 | Email sending and event isolation | 1 | 52/53 — **98.1%** | Controlled mail sink and bounded polling |
-| 5 — implemented | MFA enrollment | 3 delivered | Included in current 51/53 | Seven enrollment tests |
-| 6 — implemented | MFA login, recovery and disable | 3 delivered | Included in current 51/53 | Nine authentication/recovery tests |
-| 7 | SSO token exchange | 1 | 53/53 — **100%** | Test IdP, valid ID token and account cleanup |
-| 8 | Existing-operation reliability and regression gaps | 0 | Unchanged | Confirmed behavior and the dependencies listed below |
+| 1 — implemented | Account deletion and basic email-event reads | 2 | Full deletion cascade and additional event types | Existing lifecycle support |
+| 2 — implemented | Password-recovery entry point and reset rejection | 2 | Successful reset is step 3 | Three current tests |
+| 3 — open | Successful password recovery | Already counted | Valid reset, password/session effects and token lifecycle | Observable reset token |
+| 4 — core implemented | Email acceptance and event isolation | 1 | SMTP delivery, final transitions and contents | Controlled mail sink |
+| 5 — implemented | MFA enrollment | 3 | Specialized boundaries remain deferred | Seven enrollment tests |
+| 6 — implemented | MFA login, recovery and disable | 3 | Specialized boundaries remain deferred | Nine authentication/recovery tests |
+| 7 — partial | SSO exchange validation/disabled policy | 1 | Enabled exchange, identity mapping and token verification | Enabled API and trusted test IdP |
+| 8 — open | Existing-operation reliability and regression gaps | Already counted | Selected defects, permissions and cleanup gaps | Confirmed behavior and controlled dependencies |
 
 ### Step 1 — Account deletion and basic email-event reads
 
@@ -199,8 +200,8 @@ of the saved refresh token. Both rejected deletion paths preserve the target.
 Email-event tests cover a fresh empty list and missing authentication. A dedicated
 fixture keeps the observer alive through target teardown, verifies absence and
 requires 204 when cleanup actually deletes a surviving target. No orders or mail
-side effects are introduced. Full cascade coverage and nonempty event isolation
-remain deferred.
+side effects were introduced in that delivery. Full cascade coverage remains
+deferred; later step 4 now checks isolation of a populated GENERIC event.
 
 Evidence: [exploration](docs/exploration/2026-10-23-account-lifecycle.md) and
 [implementation/review results](docs/implementation/account-lifecycle-tests.md).
@@ -231,18 +232,11 @@ reset, reset-token lifecycle and delivery are not established by these tests.
 
 ### Step 4 — Email sending and event isolation
 
-Exploration completed: accepted send returned 200, invalid recipient 400 and
-missing authentication 401. Immediate owned events were QUEUED. Sink delivery,
-cross-user isolation and final transitions were not verified.
-
-- Scope: `POST /api/v1/email`, extending step 1's email-event tests.
-- First confirm sink access, recipient ownership, expected event states and a
-  bounded observation window. Reuse this setup for step 3 if it supplies tokens.
-- Test an accepted send, missing authentication and one meaningful validation
-  case. Correlate only the owned request with its event and verify another user
-  cannot see that event. Avoid assumptions about shared inbox/event counts.
-- Done when the response and owned event are asserted reliably. Claim delivery
-  only if the controlled sink confirms it; otherwise state the observation limit.
+Delivered three tests: accepted empty 200 with a masked owned GENERIC event and
+empty peer events, invalid-recipient 400 without event creation, and missing JWT
+401. Event creation is polled for at most five seconds; no fixed delivery wait
+or global outbox access is used. SMTP handoff/delivery and message contents remain
+unverified. [Evidence](docs/exploration/2026-10-24-email-sso.md).
 
 ### Step 5 — MFA enrollment
 
@@ -264,13 +258,15 @@ test failure and an unusable stored access token; it was removed afterward.
 
 ### Step 7 — SSO token exchange
 
-- Scope: `POST /api/v1/users/sso/exchange`.
-- Confirm test IdP access, issuer/audience expectations, a valid ID token and how
-  the created/mapped application account can be safely deleted.
-- Test a valid exchange with usable application tokens and a representative
-  invalid-token rejection. Verify the expected mapped identity and privileges.
-- Done when both paths and cleanup pass. Without an IdP/token provider, keep
-  success explicitly blocked; invalid-token tests alone are limited coverage.
+Delivered two exact policy cases: missing ID token 400 and nonblank input 404
+`SSO login is disabled`. Both configured API hosts return that disabled response;
+the local IdP is unreachable. No app JWT is sent and no SSO accounts are created.
+Do not interpret this as invalid-signature 401 or successful exchange coverage.
+
+Next: supply an enabled API and trusted IdP for disposable identities, establish
+safe account cleanup, then verify usable tokens, mapped identity/privileges,
+provisioning/linking and meaningful rejection/conflict cases. Backend mocks and
+an arbitrary self-signed token cannot establish the deployed trust chain.
 
 ### Step 8 — Existing-operation reliability and regression gaps
 
@@ -315,10 +311,12 @@ after verification. Planning this sequence does not mark any new coverage done.
 
 | Evidence / check | Result and meaning |
 | --- | --- |
-| Contract and active-spec review, 24 October | 53 operations, 51 with tests; linked evidence in the matrix above |
-| `npx.cmd playwright test --list` during this review | 172 tests / 55 files, 99 api + 73 admin; discovery sends no API requests and is not a regression result |
+| Contract and active-spec review, 24 October | 53 operations, 53 with direct behavioral tests; linked evidence in the matrix above |
+| `npx.cmd playwright test --list` during this review | 177 tests / 57 files, 104 api + 73 admin; discovery sends no API requests and is not a regression result |
 | `npm.cmd run typecheck` during this review | Passed |
 | Matrix, links and whitespace checks during this review | Passed: all 53 operations reconciled against contract/specs, local Markdown links checked, `git diff --check` clean |
+| Email/SSO focused run, 24 October | **5/5 passed**, 4.7s, 2 workers, 0 retries; [record](docs/implementation/email-sso-tests.md) |
+| Full regression after email/SSO verification, 24 October | **177/177 passed**, 4.2 min, 4 workers, 0 retries; 104 api / 73 admin |
 | Password recovery focused run, 24 October | **3/3 passed**, 5.0s, 2 workers, 0 retries; [record](docs/implementation/password-recovery-entry-tests.md) |
 | Full regression after password-recovery verification, 24 October | **172/172 passed**, 4.5 min, 4 workers, 0 retries; 99 api / 73 admin |
 | MFA focused run, 23 October | **16/16 passed**, 1.6 min, 2 workers, 0 retries; [MFA record](docs/implementation/mfa-lifecycle-tests.md) |
@@ -328,13 +326,13 @@ after verification. Planning this sequence does not mark any new coverage done.
 | Previous full regression, before this implementation | 148/148 passed, 3.0 min, 4 workers, 0 retries; [commerce verification record](docs/implementation/commerce-workflow-tests.md) |
 | Focused commerce run recorded earlier on 23 October | 50/50 passed, 1.9 min, 4 workers, 0 retries; same implementation record |
 
-The 24 October delivery added three password-recovery tests without subagents
-and ran focused and full live regressions. Successful reset remains unverified.
-Earlier deliveries added 16 MFA tests and five account lifecycle tests; email
-sending observations remain exploratory only. The passing suite does not
-establish resolution of unasserted defects, including the deleted-account JWT 500.
-Historical runs refer to their dated suite versions; use the current 172-test
-discovery, project split and linked records.
+The latest 24 October delivery added five email/SSO policy tests without subagents
+and ran focused and full live regressions. Email acceptance/events are verified;
+SMTP delivery, successful SSO and successful password reset remain unverified.
+Earlier deliveries added three password-recovery tests, 16 MFA tests and five
+account lifecycle tests. The passing suite does not establish resolution of
+unasserted defects, including the deleted-account JWT 500. Historical runs refer
+to their dated suite versions; use the current 177-test discovery and project split.
 
 After contract/test changes, recount method/path pairs, move operations between
 tables and update area totals and discovery. Record the date and result of an

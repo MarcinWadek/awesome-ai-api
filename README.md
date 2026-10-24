@@ -320,6 +320,20 @@ npx.cmd playwright test tests/api/users/password. --project=api --workers=2 --re
 See [current observations](docs/exploration/2026-10-24-password-recovery.md) and
 the [implementation record](docs/implementation/password-recovery-entry-tests.md).
 
+## Email and SSO policy tests
+
+Five tests cover email acceptance, owned event metadata/isolation, recipient
+validation and missing authentication, plus SSO input validation and the configured
+disabled-feature policy. Both current API hosts explicitly disable SSO. These
+checks do not establish successful token exchange or SMTP delivery.
+
+```powershell
+npx.cmd playwright test tests/api/email tests/api/users/sso.exchange --project=api --workers=2 --retries=0
+```
+
+See [current exploration](docs/exploration/2026-10-24-email-sso.md) and
+[implementation/limits](docs/implementation/email-sso-tests.md).
+
 ## Registration tests
 
 The basic signup suite has four tests: successful registration and sign-in,

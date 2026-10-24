@@ -1,5 +1,5 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
-import type { ForgotPasswordRequest, LoginRequest, RefreshTokenRequest, ResetPasswordRequest } from '../types/auth';
+import type { ForgotPasswordRequest, LoginRequest, RefreshTokenRequest, ResetPasswordRequest, SsoExchangeRequest } from '../types/auth';
 import type { RegistrationRequest } from '../types/registration';
 import { safeRequest } from '../support/safe-request';
 
@@ -21,6 +21,10 @@ export class AuthClient {
       data: credentials,
       headers,
     }));
+  }
+
+  async exchangeSsoToken(data: Partial<SsoExchangeRequest>): Promise<APIResponse> {
+    return safeRequest('Exchange SSO ID token', () => this.request.post('/api/v1/users/sso/exchange', { data }));
   }
 
   async forgotPassword(data: Partial<ForgotPasswordRequest>): Promise<APIResponse> {
