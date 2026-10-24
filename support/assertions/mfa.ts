@@ -4,14 +4,10 @@ import type { RegistrationRequest } from '../../types/registration';
 import type { LoginResponse } from '../../types/auth';
 import type { MfaRecoveryCodes, MfaSetup } from '../../types/mfa';
 import { TotpAuthenticator } from '../totp';
-import { expectJsonResponse, expectNoStoreResponse } from './http';
+import { json as mfaJson, expectNoStoreResponse } from './http';
 import { expectRegisteredUserProfile } from './users';
 
-export async function mfaJson<T>(response: APIResponse, status = 200): Promise<T> {
-  expect(response.status()).toBe(status);
-  expectJsonResponse(response);
-  return await response.json() as T;
-}
+export { json as mfaJson } from './http';
 
 export async function expectMfaSetup(response: APIResponse, username: string): Promise<{
   setup: MfaSetup;

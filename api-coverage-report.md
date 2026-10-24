@@ -1,11 +1,16 @@
 # API coverage and test status report
 
 Reviewed: **24 October 2026**. Implementation base revision: `5a1cb99`;
-email/SSO changes were reviewed in the working tree without subagents.
+email/SSO and fixture-unification changes were reviewed in the working tree without subagents.
 This report replaces both former root test plans and is the single maintained
 source for developer-facing coverage, test status and next actions.
 Detailed delivery history remains in the [exploration reports](docs/exploration/README.md)
 and [implementation records](docs/implementation/README.md).
+
+The [fixture unification](docs/implementation/fixture-unification.md) shares
+client construction and account lifecycle behavior without changing endpoint
+coverage. Its offline fault checks are separate from the 177 api/admin tests.
+See [fixture conventions](docs/fixtures.md) for ownership and teardown rules.
 
 ## Coverage summary and measurement
 
@@ -19,7 +24,7 @@ only; successful SSO, successful password reset and SMTP delivery remain unverif
 | Operations with direct automated behavioral checks | 53 / 53 — **100%** |
 | Operations without any direct automated behavioral check | 0 / 53 |
 | Tests discovered by Playwright | **177** in 57 files: 104 `api`, 73 `admin` |
-| Latest recorded full regression | **177/177 passed**, 24 October 2026, 4.2 min, 4 workers, 0 retries |
+| Latest recorded full regression | **177/177 passed**, 24 October 2026, 4.0 min, 4 workers, 0 retries |
 
 The denominator includes every HTTP operation in [docs/api-docs.json](docs/api-docs.json).
 An endpoint is an **HTTP method + path** pair: GET and DELETE on the same URL
@@ -315,6 +320,10 @@ after verification. Planning this sequence does not mark any new coverage done.
 | `npx.cmd playwright test --list` during this review | 177 tests / 57 files, 104 api + 73 admin; discovery sends no API requests and is not a regression result |
 | `npm.cmd run typecheck` during this review | Passed |
 | Matrix, links and whitespace checks during this review | Passed: all 53 operations reconciled against contract/specs, local Markdown links checked, `git diff --check` clean |
+| Commerce/MFA helper extraction, 24 October | Targeted **66/66 passed**, 2.7 min; full **177/177 passed**, 4.0 min; both 4 workers, 0 retries. Existing 12 offline fixture checks, typecheck and whitespace also passed; [record](docs/implementation/fixture-unification.md#readability-follow-up) |
+| Fixture lifecycle fault checks, 24 October | **12/12 passed**, offline; partial signup, token renewal, deletion verification and cleanup failures |
+| Fixture targeted live regression, 24 October | **73/73 passed**, 2.7 min, 4 workers, 0 retries |
+| Full regression after fixture unification, 24 October | **177/177 passed**, 4.1 min, 4 workers, 0 retries; [record](docs/implementation/fixture-unification.md) |
 | Email/SSO focused run, 24 October | **5/5 passed**, 4.7s, 2 workers, 0 retries; [record](docs/implementation/email-sso-tests.md) |
 | Full regression after email/SSO verification, 24 October | **177/177 passed**, 4.2 min, 4 workers, 0 retries; 104 api / 73 admin |
 | Password recovery focused run, 24 October | **3/3 passed**, 5.0s, 2 workers, 0 retries; [record](docs/implementation/password-recovery-entry-tests.md) |
@@ -326,8 +335,11 @@ after verification. Planning this sequence does not mark any new coverage done.
 | Previous full regression, before this implementation | 148/148 passed, 3.0 min, 4 workers, 0 retries; [commerce verification record](docs/implementation/commerce-workflow-tests.md) |
 | Focused commerce run recorded earlier on 23 October | 50/50 passed, 1.9 min, 4 workers, 0 retries; same implementation record |
 
-The latest 24 October delivery added five email/SSO policy tests without subagents
-and ran focused and full live regressions. Email acceptance/events are verified;
+The latest 24 October fixture work also extracted local commerce cleanup and MFA
+session-renewal helpers; targeted and full live regressions passed. Fixture
+unification added 12 separate offline cleanup fault checks. The preceding
+endpoint delivery added five email/SSO policy tests without subagents.
+Email acceptance/events are verified;
 SMTP delivery, successful SSO and successful password reset remain unverified.
 Earlier deliveries added three password-recovery tests, 16 MFA tests and five
 account lifecycle tests. The passing suite does not establish resolution of

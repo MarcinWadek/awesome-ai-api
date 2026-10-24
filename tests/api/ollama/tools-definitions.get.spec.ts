@@ -1,4 +1,4 @@
-import { test } from '../../../fixtures/ollama.fixture';
+import { test } from '../../../fixtures/auth.fixture';
 import { expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { expectProductToolDefinitions } from '../../../support/assertions/ollama-tools';
 

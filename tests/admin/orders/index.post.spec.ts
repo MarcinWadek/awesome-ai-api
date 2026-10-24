@@ -9,36 +9,31 @@ test.describe('POST /api/v1/orders', () => {
   test('201: persists multi-item checkout, clears only the owner cart and deducts stock', async ({ commerce: c, authenticatedAdmin, authenticatedPeer }) => {
     const first = await c.product();
     const second = await c.product({ price: 5 });
-    try {
-      await test.step('Given two selected products in the shopper cart and a separate peer cart', async () => {
-        const catalogue = await json<{ id: number }[]>(await c.products.getProducts(c.shopper.token));
-        expect(catalogue.map(p => p.id)).toEqual(expect.arrayContaining([first.id, second.id]));
-        expect((await c.cart.addItem({ productId: first.id, quantity: 2 }, c.shopper.token)).status()).toBe(200);
-        expect((await c.cart.addItem({ productId: second.id, quantity: 1 }, c.shopper.token)).status()).toBe(200);
-        expect((await c.cart.addItem({ productId: second.id, quantity: 2 }, authenticatedPeer.token)).status()).toBe(200);
-        expectCart(await json<CartResponse>(await c.cart.getCart(c.shopper.token)), c.shopper.username,
-          [{ productId: first.id, quantity: 2 }, { productId: second.id, quantity: 1 }], 29.68);
-      });
-      const response = await test.step('When the shopper checks out with a valid shipping address', () => c.orders.create(shippingAddress, c.shopper.token));
-      await test.step('Then the exact order snapshot, cart clearing and inventory deductions persist', async () => {
-        const order = await json<Order>(response, 201);
-        expectOrder(order, c.shopper.username, [{ product: first, quantity: 2 }, { product: second, quantity: 1 }], shippingAddress);
-        expectOrder(await json<Order>(await c.orders.get(order.id, c.shopper.token)), c.shopper.username,
-          [{ product: first, quantity: 2 }, { product: second, quantity: 1 }], shippingAddress);
-        expectEmptyCart(await json<CartResponse>(await c.cart.getCart(c.shopper.token)), c.shopper.username);
-        expectCart(await json<CartResponse>(await c.cart.getCart(authenticatedPeer.token)), authenticatedPeer.user.username,
-          [{ productId: second.id, quantity: 2 }], 10);
-        for (const [product, quantity] of [[first, 2], [second, 1]] as const) {
-          expect(await json<InventoryItem>(await c.inventory.get(product.id, authenticatedAdmin.token))).toMatchObject({ availableQuantity: 7 - quantity });
-          const movements = await json<Page<Movement>>(await c.inventory.movements(product.id, authenticatedAdmin.token));
-          expect(movements.totalElements).toBe(2);
-          expect(movements.content[0]).toMatchObject({ productId: product.id, orderId: order.id, type: 'ORDER_DEDUCTED', delta: -quantity, quantityAfter: 7 - quantity, actor: c.shopper.username });
-        }
-      });
-    } finally {
-      // The peer fixture may tear down after commerce; remove its references first.
-      expect((await c.cart.clearCart(authenticatedPeer.token)).status()).toBe(204);
-    }
+    await test.step('Given two selected products in the shopper cart and a separate peer cart', async () => {
+      const catalogue = await json<{ id: number }[]>(await c.products.getProducts(c.shopper.token));
+      expect(catalogue.map(p => p.id)).toEqual(expect.arrayContaining([first.id, second.id]));
+      expect((await c.cart.addItem({ productId: first.id, quantity: 2 }, c.shopper.token)).status()).toBe(200);
+      expect((await c.cart.addItem({ productId: second.id, quantity: 1 }, c.shopper.token)).status()).toBe(200);
+      expect((await c.cart.addItem({ productId: second.id, quantity: 2 }, authenticatedPeer.token)).status()).toBe(200);
+      expectCart(await json<CartResponse>(await c.cart.getCart(c.shopper.token)), c.shopper.username,
+        [{ productId: first.id, quantity: 2 }, { productId: second.id, quantity: 1 }], 29.68);
+    });
+    const response = await test.step('When the shopper checks out with a valid shipping address', () => c.orders.create(shippingAddress, c.shopper.token));
+    await test.step('Then the exact order snapshot, cart clearing and inventory deductions persist', async () => {
+      const order = await json<Order>(response, 201);
+      expectOrder(order, c.shopper.username, [{ product: first, quantity: 2 }, { product: second, quantity: 1 }], shippingAddress);
+      expectOrder(await json<Order>(await c.orders.get(order.id, c.shopper.token)), c.shopper.username,
+        [{ product: first, quantity: 2 }, { product: second, quantity: 1 }], shippingAddress);
+      expectEmptyCart(await json<CartResponse>(await c.cart.getCart(c.shopper.token)), c.shopper.username);
+      expectCart(await json<CartResponse>(await c.cart.getCart(authenticatedPeer.token)), authenticatedPeer.user.username,
+        [{ productId: second.id, quantity: 2 }], 10);
+      for (const [product, quantity] of [[first, 2], [second, 1]] as const) {
+        expect(await json<InventoryItem>(await c.inventory.get(product.id, authenticatedAdmin.token))).toMatchObject({ availableQuantity: 7 - quantity });
+        const movements = await json<Page<Movement>>(await c.inventory.movements(product.id, authenticatedAdmin.token));
+        expect(movements.totalElements).toBe(2);
+        expect(movements.content[0]).toMatchObject({ productId: product.id, orderId: order.id, type: 'ORDER_DEDUCTED', delta: -quantity, quantityAfter: 7 - quantity, actor: c.shopper.username });
+      }
+    });
   });
 
   test('400: rejects checkout from an empty cart without creating an order', async ({ commerce: c }) => {

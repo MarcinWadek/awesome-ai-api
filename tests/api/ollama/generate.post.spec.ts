@@ -1,4 +1,4 @@
-import { test } from '../../../fixtures/ollama.fixture';
+import { test } from '../../../fixtures/auth.fixture';
 import { expectGeneratedAnswer, expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { readGenerateStream } from '../../../support/ollama.helpers';
 import { ollamaScenarios } from '../../../support/ollama-test-data';

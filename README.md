@@ -128,6 +128,10 @@ curl.exe --% -X POST https://awesome.byst.re/api/v1/users/signin -H "Content-Typ
 
 ## Authenticated user fixture
 
+Fixture ownership, shared lifecycle behavior and teardown order are described in
+[Fixture conventions](docs/fixtures.md). Run `npm run test:fixtures` for the
+offline cleanup fault checks; these are separate from endpoint coverage.
+
 Import `test` and `expect` from `fixtures/auth.fixture.ts` for tests that need a
 fresh registered account. The lazy, test-scoped `authenticatedUser` fixture
 registers a unique user and signs in, returning `{ user, token, refreshToken }`.
@@ -138,11 +142,10 @@ do not register or sign in.
 
 ```typescript
 import { test, expect } from '../../../fixtures/auth.fixture';
-import { UsersClient } from '../../../clients/users.client';
 
-test('gets the registered account', async ({ request, authenticatedUser }) => {
+test('gets the registered account', async ({ usersClient, authenticatedUser }) => {
   const response = await test.step('Get the authenticated user', () =>
-    new UsersClient(request).getMe(authenticatedUser.token),
+    usersClient.getMe(authenticatedUser.token),
   );
   await test.step('Verify the registered identity', async () => {
     expect(response.status()).toBe(200);
@@ -159,14 +162,14 @@ out of traces. Do not log or attach fixture values to reports, persist tokens,
 or override the trace setting in consuming specs. After each consuming test,
 the fixture deletes its generated account and user-owned data through
 `DELETE /api/v1/users/{username}/right-to-be-forgotten`, using that user's JWT.
-Cleanup covers failures after confirmed registration, including failed login
-setup and consuming-test assertions, and requires HTTP 204. When setup did not
+Cleanup covers failed login setup, consuming-test assertions and recovery after
+an unconfirmed signup response, and requires HTTP 204. When setup did not
 obtain an access token, cleanup signs in again; a 401 deletion response triggers
 one fresh login and deletion retry. If cleanup also fails, the account username
 and both failures are reported.
 This fixture owns account deletion: consuming tests should not delete the account
-themselves or change its credentials. Interrupted processes or an unconfirmed
-signup response can leave accounts behind. Existing signup tests still retain
+themselves or change its credentials. Interrupted processes or an unavailable
+cleanup API can leave accounts behind. Existing signup tests still retain
 their accounts.
 The fixture uses generated credentials. Shared `.env` login credentials are
 read only by tests that explicitly sign in with that configured account.
@@ -206,8 +209,9 @@ npx.cmd playwright test tests/api/users/me.spec.ts --project=api --retries=0 --w
 
 Four endpoint specs cover tool definitions and generate/chat/tool SSE responses:
 11 API tests for authenticated success, essential validation, and missing JWTs.
-They reuse `authenticatedUser` through `fixtures/ollama.fixture.ts`, which
-initializes `OllamaClient` in fixture setup. Inputs and expected mock prose live
+They import `fixtures/auth.fixture.ts` and reuse its `authenticatedUser` and
+inherited `ollamaClient`. The shared client fixture initializes `OllamaClient`
+in setup. Inputs and expected mock prose live
 in `support/ollama-test-data.ts`. Specs keep Given/When/Then steps visible:
 [Ollama helpers](support/ollama.helpers.ts) collect streams and prepare catalogue
 context, while [answer assertions](support/assertions/ollama.ts) and
@@ -240,8 +244,9 @@ rejects routing outside aitesters. No worker token cache or saved auth state is
 used, and cleanup never logs out, deletes, resets or edits the shared admin.
 
 Import `test` and `expect` from `fixtures/admin.fixture.ts`. The
-`authenticatedAdmin` fixture supplies `{ token }`; create `ProductsClient` in
-`beforeEach` and call its methods directly in tests. There is no product fixture,
+`authenticatedAdmin` fixture supplies `{ token }`; the inherited `productsClient`
+fixture provides the client initialized in setup. Existing examples that construct
+`ProductsClient` in `beforeEach` remain supported. There is no product fixture,
 product registry or authentication retry helper.
 
 Product specs prepare valid data with a fresh UUID name in `beforeEach`.

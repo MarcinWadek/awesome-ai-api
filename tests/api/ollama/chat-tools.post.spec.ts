@@ -1,5 +1,5 @@
 import { ProductsClient } from '../../../clients/products.client';
-import { test } from '../../../fixtures/ollama.fixture';
+import { test } from '../../../fixtures/auth.fixture';
 import { expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { expectProductToolFlow, expectProductToolResults } from '../../../support/assertions/ollama-tools';
 import { getProductToolContext, readChatStream } from '../../../support/ollama.helpers';
