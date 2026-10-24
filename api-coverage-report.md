@@ -1,7 +1,7 @@
 # API coverage and test status report
 
-Reviewed: **23 October 2026**. Implementation base revision: `e02a80f`;
-MFA changes were reviewed in the working tree and implemented without subagents.
+Reviewed: **24 October 2026**. Implementation base revision: `51e4dd4`;
+password recovery changes were reviewed in the working tree without subagents.
 This report replaces both former root test plans and is the single maintained
 source for developer-facing coverage, test status and next actions.
 Detailed delivery history remains in the [exploration reports](docs/exploration/README.md)
@@ -9,16 +9,17 @@ and [implementation records](docs/implementation/README.md).
 
 ## Coverage summary and measurement
 
-**49 of 53 operations have functional automated tests: 92.5% endpoint coverage.**
-**4 operations (7.5%) lack those tests**; the complete list appears below.
+**51 of 53 operations have functional automated tests: 96.2% endpoint coverage.**
+**2 operations (3.8%) lack those tests**; the complete list appears below.
+**Password reset has negative-case coverage only; successful recovery remains unverified.**
 
 | Metric | Status |
 | --- | --- |
 | Operations in the saved OpenAPI contract | 53 across 43 paths |
-| Operations with functional automated tests | 49 / 53 — **92.5%** |
-| Operations without functional automated tests | 4 / 53 — **7.5%** |
-| Tests discovered by Playwright | **169** in 53 files: 96 `api`, 73 `admin` |
-| Latest recorded full regression | **169/169 passed**, 23 October 2026, 4.0 min, 4 workers, 0 retries |
+| Operations with functional automated tests | 51 / 53 — **96.2%** |
+| Operations without functional automated tests | 2 / 53 — **3.8%** |
+| Tests discovered by Playwright | **172** in 55 files: 99 `api`, 73 `admin` |
+| Latest recorded full regression | **172/172 passed**, 24 October 2026, 4.5 min, 4 workers, 0 retries |
 
 The denominator includes every HTTP operation in [docs/api-docs.json](docs/api-docs.json).
 An endpoint is an **HTTP method + path** pair: GET and DELETE on the same URL
@@ -28,7 +29,7 @@ The numerator includes operations exercised with behavioral assertions in active
 projects count once. Clients, setup, cleanup, manual exploration and checks of
 OpenAPI declarations alone do not increase this numerator.
 
-**92.5% does not mean code coverage or complete scenario, response-code or
+**96.2% does not mean code coverage or complete scenario, response-code or
 permission coverage.** An operation with tests can still have important gaps;
 these are listed below. Scenario coverage has no percentage because there is no
 complete, agreed scenario inventory. Backend line and branch coverage are not
@@ -37,7 +38,7 @@ measured here.
 The report combines two environments: `api` defaults to
 `https://awesome.byst.re`; `admin` defaults to `https://aitesters.byst.re`.
 The `admin` project also exercises ordinary staging customers, including checkout.
-The aggregate 92.5% does not establish equivalent coverage in each environment.
+The aggregate 96.2% does not establish equivalent coverage in each environment.
 Addresses come from [configuration](support/config.ts) and can be overridden by
 environment variables. The scope is the saved REST contract; this is not a claim
 that it inventories the current deployment, profile-specific endpoints such as
@@ -47,7 +48,7 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 
 | Area | Operations with tests / total | Without tests | Functional tests |
 | --- | --- | --- | --- |
-| Authentication, passwords, MFA and SSO | 10 / 13 | 3 | 36 |
+| Authentication, passwords, MFA and SSO | 12 / 13 | 1 | 39 |
 | Users, account deletion and email events | 7 / 7 | 0 | 23 |
 | User prompts | 4 / 4 | 0 | 12 |
 | Products | 5 / 5 | 0 | 19 |
@@ -58,7 +59,7 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 | Ollama | 4 / 4 | 0 | 11 |
 | QR | 1 / 1 | 0 | 3 |
 | Email sending | 0 / 1 | 1 | 0 |
-| **REST total** | **49 / 53** | **4** | **166** |
+| **REST total** | **51 / 53** | **2** | **169** |
 
 The other **3 tests** cover two technical endpoints outside the saved contract's
 `paths`: [GET /v3/api-docs](tests/api/docs/documentation.spec.ts) (2 tests) and
@@ -74,12 +75,10 @@ implemented; confirm expected behavior before adding them.
 
 | Operation | Current status | Next action and dependencies |
 | --- | --- | --- |
-| `POST /api/v1/users/password/forgot` | **Missing** | **P1:** generic response for known and unknown identifiers without account enumeration; use an owned account and controlled recipient. |
-| `POST /api/v1/users/password/reset` | **Missing** | **P1:** invalid-token rejection first; success requires an observable reset token. Verify new-password login, rejection of the old password and refresh-token revocation. |
 | `POST /api/v1/email` | **Missing** | **P2:** permissions and validation, then event/delivery checks with a controlled sink and bounded polling. An HTTP response alone does not prove delivery. |
 | `POST /api/v1/users/sso/exchange` | **Missing** | **P3:** success and invalid-token cases after establishing a test IdP, valid OIDC ID token, issuer/audience configuration and cleanup. |
 
-All 4 operations above lack direct functional regression tests. Manual
+Both operations above lack direct functional regression tests. Manual
 [password/email exploration on 23 October](docs/exploration/2026-10-23-password-email.md)
 confirmed useful cases but does not count as automated coverage. Appearing in the
 [OpenAPI policy](support/contracts/openapi-policy.ts) does not change that classification.
@@ -105,6 +104,8 @@ asserted cases, not every response declared in OpenAPI.
 | `POST /api/v1/users/signin` | Usable token and identity, invalid credentials, empty object, stale Bearer; admin role/session | [signin](tests/api/users/signin.spec.ts) / api; [admin](tests/admin/users/signin.spec.ts) / admin |
 | `POST /api/v1/users/refresh` | Rotation and usable session; absent/blank token, unknown token, access JWT as refresh, reuse, stale Bearer | [refresh](tests/api/users/refresh.spec.ts) / api |
 | `POST /api/v1/users/logout` | Empty 200, refresh revocation across sessions, fresh session after login, 401 | [logout](tests/api/users/logout.spec.ts) / api |
+| `POST /api/v1/users/password/forgot` | Known/unknown identifiers share generic 202 and null token on the non-echo target; omitted identifier 400 | [forgot](tests/api/users/password.forgot.post.spec.ts) / api |
+| `POST /api/v1/users/password/reset` | **Negative only:** unknown nonblank token 400, proposed password rejected, original password still creates a usable session | [reset](tests/api/users/password.reset.post.spec.ts) / api |
 | `GET /api/v1/users/2fa/status` | Fresh disabled status/count, 401; enabled and recovery-count persistence checked in workflow assertions | [MFA status](tests/api/users/2fa.status.get.spec.ts) / api |
 | `POST /api/v1/users/2fa/setup` | Consistent manual secret/OTPAuth/PNG/expiry, pending setup remains disabled; 401 | [MFA setup](tests/api/users/2fa.setup.post.spec.ts) / api |
 | `POST /api/v1/users/2fa/confirm` | Enabled status, unique recovery codes, old refresh rejected; missing authentication/invalid factor 401 preserve disabled status | [MFA confirm](tests/api/users/2fa.confirm.post.spec.ts) / api |
@@ -160,6 +161,7 @@ asserted cases, not every response declared in OpenAPI.
 | Other commerce boundaries | Deferred: order-list pagination errors, some terminal statuses, inventory threshold validation, requestId conflict with changed delta (changed reason is covered), additional peer mutations, overflow, concurrency and load. [Reduction scope](docs/implementation/commerce-workflow-tests.md). |
 | Updating an absent user | No PUT test. Verify target behavior before asserting 403/404: authorization can precede controller lookup. [CRUD record](docs/implementation/products-users-crud-gaps.md). |
 | Account deletion / email events | Profile absence and refresh-token rejection are covered; full cascade removal, admin deletion, nonexistent-target variants and nonempty event isolation remain untested. Requests using a deleted account's retained JWT produced 500 during exploration/initial teardown; independently authenticated lookup established absence in the deletion test. [Bug report](docs/deleted-account-jwt-bug-report.md). |
+| Password recovery | Forgot response parity/identifier validation and invalid-token reset are covered. Successful reset, expiry/reuse, post-success refresh revocation, reset/MFA interaction and timing-based enumeration remain unverified. Null-token assertions are deployment-specific. [Current observations](docs/exploration/2026-10-24-password-recovery.md). |
 | MFA | Core lifecycle has 16 tests. Exact expiry/skew, rate-limit saturation, races, provider-managed accounts, reset/MFA interaction and additional 400/409/410/422 combinations remain deferred. Disable success uses a recovery code; no separate TOTP-disable success. Recovery replacement samples old/new codes. [Exploration and limits](docs/exploration/2026-10-23-mfa.md). |
 | Refresh/logout | Historical observation on 5 October: consumed refresh reuse returns 401, but its replacement remains usable, unlike family revocation in local backend source. Family revocation is not asserted; reconcile the contract and deployed behavior. Logout tests refresh revocation, not immediate access-JWT invalidation. |
 | Prompts | Historical parsing/type defects: malformed JSON, absent body and object-valued fields return 401 instead of 400; numbers become strings. No automated regressions assert the intended behavior. Fix status is unconfirmed. [Bug report](docs/prompt-bug-report.md). |
@@ -170,21 +172,22 @@ asserted cases, not every response declared in OpenAPI.
 
 ## Recommended next work
 
-**Steps 1, 5 and 6 are implemented**, giving current coverage of 49/53.
+**Steps 1, 2, 5 and 6 are implemented**, giving current coverage of 51/53.
 The [MFA implementation record](docs/implementation/mfa-lifecycle-tests.md) links
-the 16-test delivery and verification. Password/email exploration for steps 2–4
-is complete; successful reset/delivery still need token/sink access. Remaining
-milestones below assume step 2, then step 4, then step 7 are delivered; they are
-projections, not current coverage. Step 3 deepens reset success without adding an operation.
+the 16-test delivery and verification. The
+[password entry/reset-negative record](docs/implementation/password-recovery-entry-tests.md)
+adds three tests for step 2. Successful reset/delivery still need token/sink access.
+Remaining milestones assume step 4, then step 7 are delivered; they are projections,
+not current coverage. Step 3 deepens reset success without adding an operation.
 
 | Step | Delivery | New operations | Projected coverage | Dependency |
 | --- | --- | --- | --- | --- |
-| 1 — implemented | Account deletion and basic email-event reads | 2 delivered | Included in current 49/53 | Five focused tests passed after review |
-| 2 | Password-recovery entry point and reset rejection | 2 | 51/53 — **96.2%** | Owned account and controlled recipient |
-| 3 | Successful password recovery | 0; deepens step 2 | 51/53 — **96.2%** after step 2 | Observable reset token on the selected environment |
-| 4 | Email sending and event isolation | 1 | 52/53 — **98.1%** after step 2 | Controlled mail sink and bounded polling |
-| 5 — implemented | MFA enrollment | 3 delivered | Included in current 49/53 | Seven enrollment tests |
-| 6 — implemented | MFA login, recovery and disable | 3 delivered | Included in current 49/53 | Nine authentication/recovery tests |
+| 1 — implemented | Account deletion and basic email-event reads | 2 delivered | Included in current 51/53 | Five focused tests passed after review |
+| 2 — implemented | Password-recovery entry point and reset rejection | 2 delivered | Included in current 51/53 | Three tests; reset negative cases only |
+| 3 | Successful password recovery | 0; deepens step 2 | Unchanged at 51/53 — **96.2%** | Observable reset token on the selected environment |
+| 4 | Email sending and event isolation | 1 | 52/53 — **98.1%** | Controlled mail sink and bounded polling |
+| 5 — implemented | MFA enrollment | 3 delivered | Included in current 51/53 | Seven enrollment tests |
+| 6 — implemented | MFA login, recovery and disable | 3 delivered | Included in current 51/53 | Nine authentication/recovery tests |
 | 7 | SSO token exchange | 1 | 53/53 — **100%** | Test IdP, valid ID token and account cleanup |
 | 8 | Existing-operation reliability and regression gaps | 0 | Unchanged | Confirmed behavior and the dependencies listed below |
 
@@ -204,21 +207,14 @@ Evidence: [exploration](docs/exploration/2026-10-23-account-lifecycle.md) and
 
 ### Step 2 — Password-recovery entry point and reset rejection
 
-Exploration completed: known/unknown forgot requests returned matching 202
-messages with null tokens; invalid reset returned 400 and the original password
-remained usable. These observations are ready to become regression tests;
-none were added in this delivery. [Evidence](docs/exploration/2026-10-23-password-email.md).
-
-- Scope: `POST /api/v1/users/password/forgot` and
-  `POST /api/v1/users/password/reset`.
-- Confirm the active profile and public response contract. Use an owned account
-  and a controlled recipient; do not send mail to unrelated addresses.
-- Test a generic forgot response for known/unknown identifiers without exposing
-  account existence, plus a representative invalid reset token. Check that a
-  rejected reset leaves the original login usable.
-- Done when both operations have functional assertions and teardown succeeds.
-  Label reset coverage as **negative cases only** until step 3 passes: counting
-  an endpoint here does not establish successful account recovery.
+Delivered three tests on 24 October: generic matching 202/no-token responses for
+known/unknown usernames, missing-identifier 400, and unknown-reset-token 400.
+The reset case also rejects the proposed password and proves the original
+password still yields a usable session for the owned profile. Both accounts use
+the existing owner-delete fixture. **Reset remains negative cases only.**
+See [observations](docs/exploration/2026-10-24-password-recovery.md) and
+[implementation](docs/implementation/password-recovery-entry-tests.md). Successful
+reset, reset-token lifecycle and delivery are not established by these tests.
 
 ### Step 3 — Successful password recovery
 
@@ -319,10 +315,12 @@ after verification. Planning this sequence does not mark any new coverage done.
 
 | Evidence / check | Result and meaning |
 | --- | --- |
-| Contract and active-spec review, 23 October | 53 operations, 49 with tests; linked evidence in the matrix above |
-| `npx.cmd playwright test --list` during this review | 169 tests / 53 files, 96 api + 73 admin; discovery sends no API requests and is not a regression result |
+| Contract and active-spec review, 24 October | 53 operations, 51 with tests; linked evidence in the matrix above |
+| `npx.cmd playwright test --list` during this review | 172 tests / 55 files, 99 api + 73 admin; discovery sends no API requests and is not a regression result |
 | `npm.cmd run typecheck` during this review | Passed |
 | Matrix, links and whitespace checks during this review | Passed: all 53 operations reconciled against contract/specs, local Markdown links checked, `git diff --check` clean |
+| Password recovery focused run, 24 October | **3/3 passed**, 5.0s, 2 workers, 0 retries; [record](docs/implementation/password-recovery-entry-tests.md) |
+| Full regression after password-recovery verification, 24 October | **172/172 passed**, 4.5 min, 4 workers, 0 retries; 99 api / 73 admin |
 | MFA focused run, 23 October | **16/16 passed**, 1.6 min, 2 workers, 0 retries; [MFA record](docs/implementation/mfa-lifecycle-tests.md) |
 | MFA review and temporary cleanup fault checks | Three sign-in tests plus two temporary cases: four passed, one intentional expected failure, zero unexpected results; 39.7s. Temporary cases removed. |
 | Full regression after MFA verification, 23 October | **169/169 passed**, 4.0 min, 4 workers, 0 retries; 96 api / 73 admin |
@@ -330,12 +328,13 @@ after verification. Planning this sequence does not mark any new coverage done.
 | Previous full regression, before this implementation | 148/148 passed, 3.0 min, 4 workers, 0 retries; [commerce verification record](docs/implementation/commerce-workflow-tests.md) |
 | Focused commerce run recorded earlier on 23 October | 50/50 passed, 1.9 min, 4 workers, 0 retries; same implementation record |
 
-The current MFA delivery added 16 tests without subagents and ran focused and
-full live regressions. The earlier account lifecycle delivery added five tests;
-password/email work was exploratory only. The passing suite does not establish
-resolution of unasserted defects, including the deleted-account JWT 500.
-Historical runs refer to their dated suite versions, even when a headline test
-count happens to match today's 169; use the current project split and records.
+The 24 October delivery added three password-recovery tests without subagents
+and ran focused and full live regressions. Successful reset remains unverified.
+Earlier deliveries added 16 MFA tests and five account lifecycle tests; email
+sending observations remain exploratory only. The passing suite does not
+establish resolution of unasserted defects, including the deleted-account JWT 500.
+Historical runs refer to their dated suite versions; use the current 172-test
+discovery, project split and linked records.
 
 After contract/test changes, recount method/path pairs, move operations between
 tables and update area totals and discovery. Record the date and result of an

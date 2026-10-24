@@ -1,5 +1,5 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
-import type { LoginRequest, RefreshTokenRequest } from '../types/auth';
+import type { ForgotPasswordRequest, LoginRequest, RefreshTokenRequest, ResetPasswordRequest } from '../types/auth';
 import type { RegistrationRequest } from '../types/registration';
 import { safeRequest } from '../support/safe-request';
 
@@ -21,6 +21,14 @@ export class AuthClient {
       data: credentials,
       headers,
     }));
+  }
+
+  async forgotPassword(data: Partial<ForgotPasswordRequest>): Promise<APIResponse> {
+    return safeRequest('Request password reset', () => this.request.post('/api/v1/users/password/forgot', { data }));
+  }
+
+  async resetPassword(data: Partial<ResetPasswordRequest>): Promise<APIResponse> {
+    return safeRequest('Reset password', () => this.request.post('/api/v1/users/password/reset', { data }));
   }
 
   async refresh(

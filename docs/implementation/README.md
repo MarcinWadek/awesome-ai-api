@@ -14,6 +14,7 @@
 | Commerce workflow coverage, isolated staging lifecycle and 23 October reduction to core risks | [Commerce workflow tests](commerce-workflow-tests.md) |
 | Dedicated account deletion and basic email-event reads | [Account lifecycle tests](account-lifecycle-tests.md) |
 | MFA lifecycle: 16 focused tests, timing, cleanup and verification | [MFA lifecycle tests](mfa-lifecycle-tests.md) |
+| Password recovery entry and invalid-reset rejection | [Password recovery tests](password-recovery-entry-tests.md) |
 
 Each record states whether it is proposed or completed and preserves its
 implementation decisions and available verification results. Current coverage lives in the single

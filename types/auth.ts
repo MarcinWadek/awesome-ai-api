@@ -28,3 +28,18 @@ export interface RefreshTokenResponse {
   token: string;
   refreshToken: string;
 }
+
+export interface ForgotPasswordRequest {
+  identifier: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  token: string | null;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}

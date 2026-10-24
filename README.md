@@ -305,6 +305,21 @@ npx.cmd playwright test tests/api/users/refresh.spec.ts tests/api/users/logout.s
 The live deployment's replay behavior differs from the local backend's token
 family revocation logic; details are recorded in `api-coverage-report.md`.
 
+## Password recovery tests
+
+Three tests cover generic forgot responses for known/unknown accounts, the
+required identifier, and rejection of an unknown reset token with the original
+password still usable. They use the existing disposable-user fixture and no
+Authorization on recovery requests. Reset success and delivery remain unverified;
+the configured API is expected to keep reset-token echo disabled.
+
+```powershell
+npx.cmd playwright test tests/api/users/password. --project=api --workers=2 --retries=0
+```
+
+See [current observations](docs/exploration/2026-10-24-password-recovery.md) and
+the [implementation record](docs/implementation/password-recovery-entry-tests.md).
+
 ## Registration tests
 
 The basic signup suite has four tests: successful registration and sign-in,
