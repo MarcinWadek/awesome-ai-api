@@ -48,7 +48,7 @@ Do not call `/users/me` inside fixture setup. Keep the fixture reusable across e
 | `fixtures/auth.fixture.ts` | Add the fixture contract, registration/login setup, and exported extended `test`/`expect`. Configure `trace: 'off'` on the exported test because setup sends generated passwords and receives tokens. |
 | `clients/users.client.ts` | Add `UsersClient.getMe(token?: string): Promise<APIResponse>`, sending a Bearer header only when a token is supplied, and `forgetUser(username, token)` for cleanup. Encode usernames in deletion paths. |
 | `types/users.ts` | Add `UserResponse` matching the documented `UserResponseDto`: numeric `id`, username, email, roles, nullable first name and last name. Reuse `LoginResponse['roles']` for the role type. |
-| `tests/api/users/me.spec.ts` | Add the endpoint tests below, importing the extended fixture test. |
+| `tests/api/users/me.get.spec.ts` | Add the endpoint tests below, importing the extended fixture test. |
 | `README.md` | Document fixture usage, return fields, lazy test scope, trace policy, and the command for the new spec. |
 
 Reuse the existing registration generator, request/response types, `AuthClient`, HTTP assertions, and configuration. Keep existing signup and signin specs intact; migrating them to the new fixture is outside this initial change.
@@ -101,7 +101,7 @@ Follow `agents.md`: run all newly created tests first; once they pass, run the w
 
 ```powershell
 npm.cmd run typecheck
-npx.cmd playwright test tests/api/users/me.spec.ts --project=api --retries=0 --workers=2
+npx.cmd playwright test tests/api/users/me.get.spec.ts --project=api --retries=0 --workers=2
 npm.cmd test -- --retries=0 --workers=2
 git diff --check
 ```

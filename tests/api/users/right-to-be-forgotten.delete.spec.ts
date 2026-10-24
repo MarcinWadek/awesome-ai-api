@@ -1,91 +1,41 @@
-import { AuthClient } from '../../../clients/auth.client';
-import { UsersClient } from '../../../clients/users.client';
+import type { UserResponse } from '../../../types/users';
+import type { ApiErrorResponse } from '../../../types/auth';
 import { expect, test } from '../../../fixtures/account-lifecycle.fixture';
-import { expectJsonResponse, expectNonEmptyString } from '../../../support/assertions/http';
-
+import { json, expectNonEmptyString } from '../../../support/assertions/http';
 test.describe('DELETE /api/v1/users/{username}/right-to-be-forgotten', () => {
-  test.describe.configure({ retries: 0 });
+  test('204: deletes the owner account and revokes its saved refresh token', async ({ lifecycleUser, authenticatedUser, authClient, usersClient }) => {
+    // Given
+    const { user, token, refreshToken } = lifecycleUser;
 
-  let authClient: AuthClient;
-  let usersClient: UsersClient;
+    // When
+    const response = await usersClient.forgetUser(user.username, token);
 
-  test.beforeEach(({ request }) => {
-    authClient = new AuthClient(request);
-    usersClient = new UsersClient(request);
+    // Then
+    expect(response.status()).toBe(204);
+    expect(await response.body()).toHaveLength(0);
+    const profile = await usersClient.getUser(user.username, authenticatedUser.token);
+    expectNonEmptyString((await json<ApiErrorResponse>(profile, 404)).message);
+    const refreshed = await authClient.refresh({ refreshToken });
+    expectNonEmptyString((await json<ApiErrorResponse>(refreshed, 401)).message);
   });
 
-  test.describe('204', () => {
-    test('deletes the owner account and revokes its saved refresh token', async ({ lifecycleUser, authenticatedUser }) => {
-      const { user, token, refreshToken } = lifecycleUser;
-      const response = await test.step('When the owner deletes its account', () =>
-        usersClient.forgetUser(user.username, token),
-      );
+  test('401: rejects deletion without authentication', async ({ lifecycleUser, authenticatedUser, usersClient }) => {
+    // When
+    const response = await usersClient.forgetUser(lifecycleUser.user.username);
 
-      await test.step('Then deletion succeeds with an empty 204 response', async () => {
-        expect(response.status()).toBe(204);
-        expect(await response.body()).toHaveLength(0);
-      });
-
-      const profile = await test.step('Then an independent user cannot find the deleted profile', () =>
-        usersClient.getUser(user.username, authenticatedUser.token),
-      );
-      await test.step('Verify the profile is absent', async () => {
-        expect(profile.status()).toBe(404);
-        expectJsonResponse(profile);
-        expectNonEmptyString((await profile.json()).message);
-      });
-
-      const refreshed = await test.step('Then the deleted account refresh token is rejected', () =>
-        authClient.refresh({ refreshToken }),
-      );
-      await test.step('Verify the refresh session is no longer usable', async () => {
-        expect(refreshed.status()).toBe(401);
-        expectJsonResponse(refreshed);
-        expectNonEmptyString((await refreshed.json()).message);
-      });
-    });
+    // Then
+    expectNonEmptyString((await json<ApiErrorResponse>(response, 401)).message);
+    const profile = await usersClient.getUser(lifecycleUser.user.username, authenticatedUser.token);
+    expect((await json<UserResponse>(profile)).username).toBe(lifecycleUser.user.username);
   });
 
-  test.describe('401', () => {
-    test('rejects deletion without authentication', async ({ lifecycleUser, authenticatedUser }) => {
-      const response = await test.step('When deletion is requested without a JWT', () =>
-        usersClient.forgetUser(lifecycleUser.user.username),
-      );
-      await test.step('Then the API returns a JSON authentication error', async () => {
-        expect(response.status()).toBe(401);
-        expectJsonResponse(response);
-        expectNonEmptyString((await response.json()).message);
-      });
-      const profile = await test.step('Then an independent user confirms the target account remains', () =>
-        usersClient.getUser(lifecycleUser.user.username, authenticatedUser.token),
-      );
-      await test.step('Verify the target profile is still present', async () => {
-        expect(profile.status()).toBe(200);
-        expectJsonResponse(profile);
-        expect((await profile.json()).username).toBe(lifecycleUser.user.username);
-      });
-    });
-  });
+  test('403: preserves the account when a peer requests deletion', async ({ lifecycleUser, authenticatedUser, usersClient }) => {
+    // When
+    const response = await usersClient.forgetUser(lifecycleUser.user.username, authenticatedUser.token);
 
-  test.describe('403', () => {
-    test('preserves the account when a peer requests deletion', async ({ lifecycleUser, authenticatedUser }) => {
-      const response = await test.step('When one client requests deletion of a peer account', () =>
-        usersClient.forgetUser(lifecycleUser.user.username, authenticatedUser.token),
-      );
-      await test.step('Then the API forbids the request', async () => {
-        expect(response.status()).toBe(403);
-        expectJsonResponse(response);
-        expectNonEmptyString((await response.json()).message);
-      });
-
-      const preserved = await test.step('Then the independent peer confirms the target account remains', () =>
-        usersClient.getUser(lifecycleUser.user.username, authenticatedUser.token),
-      );
-      await test.step('Verify the target profile remains present', async () => {
-        expect(preserved.status()).toBe(200);
-        expectJsonResponse(preserved);
-        expect((await preserved.json()).username).toBe(lifecycleUser.user.username);
-      });
-    });
+    // Then
+    expectNonEmptyString((await json<ApiErrorResponse>(response, 403)).message);
+    const preserved = await usersClient.getUser(lifecycleUser.user.username, authenticatedUser.token);
+    expect((await json<UserResponse>(preserved)).username).toBe(lifecycleUser.user.username);
   });
 });

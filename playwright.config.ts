@@ -5,7 +5,7 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: 0,
   workers: process.env.CI ? 4 : undefined,
   reporter: [
     ['./support/redact-errors.reporter.ts'],
@@ -16,7 +16,7 @@ export default defineConfig({
     extraHTTPHeaders: {
       Accept: 'application/json',
     },
-    trace: 'on-first-retry',
+    trace: 'off',
   },
   projects: [
     {
@@ -27,7 +27,7 @@ export default defineConfig({
     {
       name: 'admin',
       testMatch: '**/admin/**/*.spec.ts',
-      use: { baseURL: adminApiConfig.baseUrl, trace: 'off' },
+      use: { baseURL: adminApiConfig.baseUrl },
     },
   ],
 });

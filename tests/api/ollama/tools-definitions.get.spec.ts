@@ -1,29 +1,20 @@
 import { test } from '../../../fixtures/auth.fixture';
 import { expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { expectProductToolDefinitions } from '../../../support/assertions/ollama-tools';
-
 test.describe('GET /api/v1/ollama/chat/tools/definitions', () => {
-  test.describe.configure({ retries: 0 });
+  test('200: returns usable product tool schemas', async ({ ollamaClient, authenticatedUser }) => {
+    // When
+    const response = await ollamaClient.getToolDefinitions(authenticatedUser.token);
 
-  test.describe('200', () => {
-    test('returns usable product tool schemas', async ({ ollamaClient, authenticatedUser }) => {
-      const response = await test.step('When the authenticated user requests tool definitions', () =>
-        ollamaClient.getToolDefinitions(authenticatedUser.token),
-      );
-      await test.step('Then the response contains function schemas for both product tools', () =>
-        expectProductToolDefinitions(response),
-      );
-    });
+    // Then
+    await expectProductToolDefinitions(response);
   });
 
-  test.describe('401', () => {
-    test('rejects missing authentication', async ({ ollamaClient }) => {
-      const response = await test.step('When an anonymous user requests tool definitions', () =>
-        ollamaClient.getToolDefinitions(),
-      );
-      await test.step('Then the response is a JSON authentication error', () =>
-        expectOllamaJsonError(response, 401, 'message'),
-      );
-    });
+  test('401: rejects missing authentication', async ({ ollamaClient }) => {
+    // When
+    const response = await ollamaClient.getToolDefinitions();
+
+    // Then
+    await expectOllamaJsonError(response, 401, 'message');
   });
 });

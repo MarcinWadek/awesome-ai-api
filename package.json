@@ -11,7 +11,7 @@
     "test:api": "playwright test --project=api",
     "test:admin": "playwright test --project=admin",
     "test:fixtures": "playwright test --config=playwright.fixtures.config.ts",
-    "test:registration": "playwright test tests/api/users/signup.spec.ts --project=api --retries=0 --workers=2",
+    "test:registration": "playwright test tests/api/users/signup.post.spec.ts --project=api --retries=0 --workers=2",
     "typecheck": "tsc --noEmit"
   }
 }

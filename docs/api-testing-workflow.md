@@ -26,10 +26,11 @@
 
 ## 4. Implement and verify
 
-- Create one spec per endpoint operation.
-- Initialize HTTP clients in setup.
-- Use Given/When/Then `test.step` labels.
-- Order cases by response code ascending.
+- Create one method-bearing spec per endpoint operation.
+- Inject HTTP clients from the shared client/scenario fixtures.
+- Use Given/When/Then comments and flat `status: behavior` test names.
+- Order cases by response code ascending; omit empty Given/When/Then sections.
+- Follow [test conventions](test-conventions.md); keep fixture lifecycle steps and justified workflow-specific report groups.
 - Run newly created tests first; once they pass, run the whole suite.
 - Run typechecking and whitespace checks.
 - Update the API coverage and status report with implemented coverage, results and remaining gaps.

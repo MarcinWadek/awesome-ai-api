@@ -17,8 +17,9 @@ shared admin account or persists authentication state.
 | `commerce.fixture.ts` | Own the shopper, products, orders and stock restoration; compose the shared clients and account lifecycle. |
 
 Ollama tests import auth.fixture.ts directly and inherit ollamaClient from the
-client layer. Existing specs constructing clients in beforeEach remain valid;
-scenario fixtures use the shared client layer instead of more constructors.
+client layer. Endpoint specs inject clients from the same layer; beforeEach
+hooks prepare scenario data rather than reconstructing clients. Email, QR and
+traffic clients are available alongside the existing domain clients.
 
 ## Shared account lifecycle
 

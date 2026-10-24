@@ -2,6 +2,7 @@
 
 | Scope | Record |
 | --- | --- |
+| Consistent client injection, flat status names and Given/When/Then comments | [Test organization](test-unification.md) |
 | Shared clients/account lifecycle and ordered commerce peer cleanup | [Fixture unification](fixture-unification.md) |
 | Disposable registered-user authentication fixture and GET /users/me tests | [Registered-user auth fixture and profile tests](registered-user-auth-fixture-and-me-tests.md) |
 | OpenAPI contract and authentication declarations, plus Swagger UI availability | [OpenAPI contract and Swagger UI tests](openapi-contract-and-swagger-ui-tests.md) |

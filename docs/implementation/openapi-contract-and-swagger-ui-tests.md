@@ -35,8 +35,8 @@ endpoint tests verify actual authentication enforcement.
 | `types/openapi.ts` | Minimal document, operation, security, and endpoint types. |
 | `support/assertions/openapi.ts` | Required-operation lookup, security inheritance, and two public assertion helpers. |
 | `support/contracts/openapi-policy.ts` | Existing explicit lists of 10 public and 43 protected operations. |
-| `tests/api/docs/documentation.spec.ts` | Response, document fields, scheme definition, and endpoint security checks. |
-| `tests/api/docs/swagger-ui.spec.ts` | Swagger UI availability, HTML Content-Type, and body marker checks. |
+| `tests/api/docs/documentation.get.spec.ts` | Response, document fields, scheme definition, and endpoint security checks. |
+| `tests/api/docs/swagger-ui.get.spec.ts` | Swagger UI availability, HTML Content-Type, and body marker checks. |
 
 ## Test structure
 

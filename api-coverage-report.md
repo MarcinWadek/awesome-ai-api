@@ -1,7 +1,7 @@
 # API coverage and test status report
 
-Reviewed: **24 October 2026**. Implementation base revision: `5a1cb99`;
-email/SSO and fixture-unification changes were reviewed in the working tree without subagents.
+Reviewed: **24 October 2026**. Implementation base revision: `248ed67`;
+test-unification changes were reviewed in the working tree without subagents.
 This report replaces both former root test plans and is the single maintained
 source for developer-facing coverage, test status and next actions.
 Detailed delivery history remains in the [exploration reports](docs/exploration/README.md)
@@ -11,6 +11,8 @@ The [fixture unification](docs/implementation/fixture-unification.md) shares
 client construction and account lifecycle behavior without changing endpoint
 coverage. Its offline fault checks are separate from the 177 api/admin tests.
 See [fixture conventions](docs/fixtures.md) for ownership and teardown rules.
+The [test organization record](docs/implementation/test-unification.md) covers
+the shared spec structure, client injection, naming and execution defaults.
 
 ## Coverage summary and measurement
 
@@ -24,7 +26,7 @@ only; successful SSO, successful password reset and SMTP delivery remain unverif
 | Operations with direct automated behavioral checks | 53 / 53 — **100%** |
 | Operations without any direct automated behavioral check | 0 / 53 |
 | Tests discovered by Playwright | **177** in 57 files: 104 `api`, 73 `admin` |
-| Latest recorded full regression | **177/177 passed**, 24 October 2026, 4.0 min, 4 workers, 0 retries |
+| Latest recorded full regression | **177/177 passed**, 24 October 2026, 4.3 min, 4 workers, 0 retries |
 
 The denominator includes every HTTP operation in [docs/api-docs.json](docs/api-docs.json).
 An endpoint is an **HTTP method + path** pair: GET and DELETE on the same URL
@@ -67,8 +69,8 @@ the local outbox, GraphQL or gRPC. Those interfaces are outside the denominator.
 | **REST total** | **53 / 53** | **0** | **174** |
 
 The other **3 tests** cover two technical endpoints outside the saved contract's
-`paths`: [GET /v3/api-docs](tests/api/docs/documentation.spec.ts) (2 tests) and
-[GET /swagger-ui/index.html](tests/api/docs/swagger-ui.spec.ts) (1 test).
+`paths`: [GET /v3/api-docs](tests/api/docs/documentation.get.spec.ts) (2 tests) and
+[GET /swagger-ui/index.html](tests/api/docs/swagger-ui.get.spec.ts) (1 test).
 They verify the document, authentication declarations and Swagger UI HTML.
 They do not execute the 53 business operations and therefore do not give those
 operations functional coverage.
@@ -103,10 +105,10 @@ asserted cases, not every response declared in OpenAPI.
 
 | Operation | Automated behavior checks | Spec / project |
 | --- | --- | --- |
-| `POST /api/v1/users/signup` | Registration and client login, required fields, duplicate username/email | [signup](tests/api/users/signup.spec.ts) / api |
-| `POST /api/v1/users/signin` | Usable token and identity, invalid credentials, empty object, stale Bearer; admin role/session | [signin](tests/api/users/signin.spec.ts) / api; [admin](tests/admin/users/signin.spec.ts) / admin |
-| `POST /api/v1/users/refresh` | Rotation and usable session; absent/blank token, unknown token, access JWT as refresh, reuse, stale Bearer | [refresh](tests/api/users/refresh.spec.ts) / api |
-| `POST /api/v1/users/logout` | Empty 200, refresh revocation across sessions, fresh session after login, 401 | [logout](tests/api/users/logout.spec.ts) / api |
+| `POST /api/v1/users/signup` | Registration and client login, required fields, duplicate username/email | [signup](tests/api/users/signup.post.spec.ts) / api |
+| `POST /api/v1/users/signin` | Usable token and identity, invalid credentials, empty object, stale Bearer; admin role/session | [signin](tests/api/users/signin.post.spec.ts) / api; [admin](tests/admin/users/signin.post.spec.ts) / admin |
+| `POST /api/v1/users/refresh` | Rotation and usable session; absent/blank token, unknown token, access JWT as refresh, reuse, stale Bearer | [refresh](tests/api/users/refresh.post.spec.ts) / api |
+| `POST /api/v1/users/logout` | Empty 200, refresh revocation across sessions, fresh session after login, 401 | [logout](tests/api/users/logout.post.spec.ts) / api |
 | `POST /api/v1/users/password/forgot` | Known/unknown identifiers share generic 202 and null token on the non-echo target; omitted identifier 400 | [forgot](tests/api/users/password.forgot.post.spec.ts) / api |
 | `POST /api/v1/users/password/reset` | **Negative only:** unknown nonblank token 400, proposed password rejected, original password still creates a usable session | [reset](tests/api/users/password.reset.post.spec.ts) / api |
 | `POST /api/v1/users/sso/exchange` | **Disabled-policy/validation only:** missing ID token 400; nonblank input returns exact SSO-disabled 404 without session fields | [SSO exchange](tests/api/users/sso.exchange.post.spec.ts) / api |
@@ -117,7 +119,7 @@ asserted cases, not every response declared in OpenAPI.
 | `POST /api/v1/users/signin/2fa` | Password-only challenge has no session; usable TOTP/recovery sessions, challenge and TOTP replay rejection, recovery single use/count, invalid factor 401 | [MFA sign-in](tests/api/users/signin.2fa.post.spec.ts) / api |
 | `POST /api/v1/users/2fa/recovery-codes` | Fresh-TOTP replacement, representative old-code rejection/new-code use; missing JWT 401, wrong password 422 preserves original codes | [MFA recovery](tests/api/users/2fa.recovery-codes.post.spec.ts) / api |
 | `POST /api/v1/users/2fa/disable` | Password/recovery disable, empty 200, disabled status, refresh rejected and password-only login restored; missing JWT/invalid factor 401 | [MFA disable](tests/api/users/2fa.disable.post.spec.ts) / api |
-| `GET /api/v1/users/me` | New account identity; missing JWT, malformed token and altered signature | [me](tests/api/users/me.spec.ts) / api |
+| `GET /api/v1/users/me` | New account identity; missing JWT, malformed token and altered signature | [me](tests/api/users/me.get.spec.ts) / api |
 | `GET /api/v1/users` | List contains registered profile; 401 | [users](tests/api/users/index.get.spec.ts) / api |
 | `GET /api/v1/users/{username}` | Own profile, 401, absent user 404 | [username GET](tests/api/users/username.get.spec.ts) / api |
 | `PUT /api/v1/users/{username}` | Owner/admin persisted updates; validation 400, missing JWT 401, peer 403 | [username PUT](tests/admin/users/username.put.spec.ts) / admin |
@@ -306,8 +308,9 @@ not every deferred permutation.
 
 Before coding, confirm the contract and environment and save a short scoped
 implementation record linked from the existing index. Add only meaningful cases,
-with one spec per operation, clients initialized in setup, Given/When/Then steps
-and response codes in ascending order. Run new tests first, then the full suite
+with one method-bearing spec per operation, injected clients, Given/When/Then
+comments and flat status-prefixed names in ascending response-code order. Follow
+[test conventions](docs/test-conventions.md). Run new tests first, then the full suite
 with zero retries, typecheck and whitespace checks. Record actual results and
 cleanup, update this report's matrix/counts, and mark the package complete only
 after verification. Planning this sequence does not mark any new coverage done.
@@ -320,6 +323,7 @@ after verification. Planning this sequence does not mark any new coverage done.
 | `npx.cmd playwright test --list` during this review | 177 tests / 57 files, 104 api + 73 admin; discovery sends no API requests and is not a regression result |
 | `npm.cmd run typecheck` during this review | Passed |
 | Matrix, links and whitespace checks during this review | Passed: all 53 operations reconciled against contract/specs, local Markdown links checked, `git diff --check` clean |
+| Test organization unification, 24 October | Targeted **51/51 passed**, 1.1 min; full **177/177 passed**, 4.3 min; both 4 workers, 0 retries. Final profile check **4/4 passed**, 3.1s, 2 workers, 0 retries. Offline fixture checks **12/12 passed**; final typecheck with noUnusedLocals, links and whitespace passed; [record](docs/implementation/test-unification.md) |
 | Commerce/MFA helper extraction, 24 October | Targeted **66/66 passed**, 2.7 min; full **177/177 passed**, 4.0 min; both 4 workers, 0 retries. Existing 12 offline fixture checks, typecheck and whitespace also passed; [record](docs/implementation/fixture-unification.md#readability-follow-up) |
 | Fixture lifecycle fault checks, 24 October | **12/12 passed**, offline; partial signup, token renewal, deletion verification and cleanup failures |
 | Fixture targeted live regression, 24 October | **73/73 passed**, 2.7 min, 4 workers, 0 retries |
@@ -335,8 +339,10 @@ after verification. Planning this sequence does not mark any new coverage done.
 | Previous full regression, before this implementation | 148/148 passed, 3.0 min, 4 workers, 0 retries; [commerce verification record](docs/implementation/commerce-workflow-tests.md) |
 | Focused commerce run recorded earlier on 23 October | 50/50 passed, 1.9 min, 4 workers, 0 retries; same implementation record |
 
-The latest 24 October fixture work also extracted local commerce cleanup and MFA
-session-renewal helpers; targeted and full live regressions passed. Fixture
+The latest 24 October work unified endpoint spec structure, injected clients,
+status-prefixed names, method-bearing filenames and execution defaults; targeted
+and full live regressions passed. Earlier fixture work extracted local commerce
+cleanup and MFA session-renewal helpers. Fixture
 unification added 12 separate offline cleanup fault checks. The preceding
 endpoint delivery added five email/SSO policy tests without subagents.
 Email acceptance/events are verified;

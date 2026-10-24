@@ -9,6 +9,9 @@ Our process: [API testing workflow](docs/api-testing-workflow.md) — explorator
 tests, exploration findings, implementation planning, implementation and
 verification, code review/improvement, then a summary.
 
+Current spec structure, client injection and execution defaults:
+[Test conventions](docs/test-conventions.md).
+
 ## Run the project after cloning
 
 This repository contains Playwright API tests for Awesome AI. It does not
@@ -46,7 +49,7 @@ browser binaries are not required.
 To run a single test file, use:
 
 ```bash
-npx playwright test tests/api/users/signin.spec.ts
+npx playwright test tests/api/users/signin.post.spec.ts
 ```
 
 After a run, open the HTML report with:
@@ -100,6 +103,8 @@ Project file filters are disjoint: `api` runs `tests/api/**/*.spec.ts`, while
 `admin` runs `tests/admin/**/*.spec.ts`. `npm test` runs both; `npm run test:api`
 and `npm run test:admin` select one. Both use isolated test-scoped request
 contexts and can run together with multiple workers. CI defaults to four workers.
+Retries and traces are disabled centrally for both projects. MFA specs retain
+their longer timeout for fresh authenticator-code windows.
 
 This follows Playwright's guidance on
 [environment variables and dotenv](https://playwright.dev/docs/test-parameterize#env-files)
@@ -107,7 +112,7 @@ and [keeping authentication state out of version control](https://playwright.dev
 
 ## Login endpoint
 
-The suite covers `POST /api/v1/users/signin` with test groups in HTTP-status
+The suite covers `POST /api/v1/users/signin` with flat tests in HTTP-status
 order: `200`, `401`, and `422`. It checks JSON and no-store response headers,
 stable session-contract fields, and the live deployment's error envelopes. The
 endpoint can also be checked with `curl`.
@@ -142,15 +147,16 @@ do not register or sign in.
 
 ```typescript
 import { test, expect } from '../../../fixtures/auth.fixture';
+import { json } from '../../../support/assertions/http';
+import type { UserResponse } from '../../../types/users';
 
-test('gets the registered account', async ({ usersClient, authenticatedUser }) => {
-  const response = await test.step('Get the authenticated user', () =>
-    usersClient.getMe(authenticatedUser.token),
-  );
-  await test.step('Verify the registered identity', async () => {
-    expect(response.status()).toBe(200);
-    expect((await response.json()).username).toBe(authenticatedUser.user.username);
-  });
+test('200: gets the registered account', async ({ usersClient, authenticatedUser }) => {
+  // When
+  const response = await usersClient.getMe(authenticatedUser.token);
+
+  // Then
+  const profile = await json<UserResponse>(response);
+  expect(profile.username).toBe(authenticatedUser.user.username);
 });
 ```
 
@@ -202,7 +208,7 @@ The `/users/me` spec covers the registered identity and rejection of missing,
 malformed, and signature-altered tokens. Run it with two workers and zero retries:
 
 ```powershell
-npx.cmd playwright test tests/api/users/me.spec.ts --project=api --retries=0 --workers=2
+npx.cmd playwright test tests/api/users/me.get.spec.ts --project=api --retries=0 --workers=2
 ```
 
 ## Ollama tests
@@ -212,7 +218,7 @@ Four endpoint specs cover tool definitions and generate/chat/tool SSE responses:
 They import `fixtures/auth.fixture.ts` and reuse its `authenticatedUser` and
 inherited `ollamaClient`. The shared client fixture initializes `OllamaClient`
 in setup. Inputs and expected mock prose live
-in `support/ollama-test-data.ts`. Specs keep Given/When/Then steps visible:
+in `support/ollama-test-data.ts`. Specs keep Given/When/Then comments visible:
 [Ollama helpers](support/ollama.helpers.ts) collect streams and prepare catalogue
 context, while [answer assertions](support/assertions/ollama.ts) and
 [product-tool assertions](support/assertions/ollama-tools.ts) validate the details.
@@ -245,9 +251,8 @@ used, and cleanup never logs out, deletes, resets or edits the shared admin.
 
 Import `test` and `expect` from `fixtures/admin.fixture.ts`. The
 `authenticatedAdmin` fixture supplies `{ token }`; the inherited `productsClient`
-fixture provides the client initialized in setup. Existing examples that construct
-`ProductsClient` in `beforeEach` remain supported. There is no product fixture,
-product registry or authentication retry helper.
+fixture provides the client initialized in setup. Product specs retain their
+owned-data setup and teardown hooks.
 
 Product specs prepare valid data with a fresh UUID name in `beforeEach`.
 Their `afterEach` reads the staging catalogue and deletes only products with
@@ -301,10 +306,10 @@ See [MFA exploration](docs/exploration/2026-10-23-mfa.md), the
 The dedicated specs cover refresh-token rotation, usable access tokens, invalid
 input and token reuse, plus logout revocation across all of a user's sessions
 and unauthorized logout requests. They use isolated fixture accounts with
-automatic cleanup, disabled traces, zero retries, and ascending status groups.
+automatic cleanup, disabled traces, zero retries, and ascending status-prefixed names.
 
 ```powershell
-npx.cmd playwright test tests/api/users/refresh.spec.ts tests/api/users/logout.spec.ts --project=api --retries=0 --workers=2
+npx.cmd playwright test tests/api/users/refresh.post.spec.ts tests/api/users/logout.post.spec.ts --project=api --retries=0 --workers=2
 ```
 
 The live deployment's replay behavior differs from the local backend's token

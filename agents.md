@@ -1,9 +1,10 @@
 - always run newly created tests to make sure they pass
 - once you confirmed that new tests passed run the whole suite to avoid regressions
 - order tests by response code ascending (200 -> 400 -> 401 -> 404)
-- implement test.step for better readability 
+- Organize endpoint specs with `// Given`, `// When`, `// Then` comments; omit empty sections. Use `test.step` only when a longer workflow benefits from named report groups. Fixture lifecycle steps may remain.
 - while creating a plan never assume anything. In case of doubts check documentation, explore application or ask me
-- initialize htttClients in test setup 
+- Inject HTTP clients from the shared client/scenario fixtures. Keep scenario data preparation visible in tests or their setup hooks.
+- Use one endpoint describe per spec, flat `status: behavior` test names and ascending response codes. Name endpoint files with their HTTP method.
 - Keep `api-coverage-report.md` as the single maintained endpoint coverage and status report. It replaces both retired root test plans, including references to those plans in older workflow guidance. Keep implementation plans scoped to individual deliveries.
 - Avoid unnecessary abstractions, refactoring, and speculative code. 
 - Add tests only when they protect important behavior or address a meaningful regression risk; do not duplicate existing coverage.

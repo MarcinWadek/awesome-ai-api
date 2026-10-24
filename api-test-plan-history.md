@@ -51,7 +51,7 @@ unchanged. `npm.cmd run typecheck` passed during this documentation review.
 
 - Keep one test file per endpoint operation.
 - Same URL with different HTTP methods means separate files.
-- Initialize HTTP clients in test setup, following `tests/api/users/me.spec.ts`.
+- Initialize HTTP clients in test setup, following `tests/api/users/me.get.spec.ts`.
 - Use Given/When/Then `test.step` labels for setup, the tested action, and assertions.
 - In each spec, order tests by expected response code ascending: `200`, `201`, `202`, `204`, then `400`, `401`, `403`, `404`, `409`, `422`, `429`.
 - When an endpoint behavior is unclear, check `docs/api-docs.json`, backend code, or the live app before adding the test.
@@ -61,7 +61,7 @@ Suggested file naming:
 
 | Endpoint | File |
 | --- | --- |
-| `POST /api/v1/users/refresh` | `tests/api/users/refresh.spec.ts` |
+| `POST /api/v1/users/refresh` | `tests/api/users/refresh.post.spec.ts` |
 | `PUT /api/v1/users/{username}` | `tests/api/users/username.put.spec.ts` |
 | `DELETE /api/v1/users/{username}` | `tests/api/users/username.delete.spec.ts` |
 | `GET /api/v1/products/{id}` | `tests/api/products/id.get.spec.ts` |
