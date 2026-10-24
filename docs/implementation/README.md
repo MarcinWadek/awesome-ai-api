@@ -13,9 +13,10 @@
 | Staging cart item add/update/remove with owned users and products | [Cart item tests](cart-item-tests.md) |
 | Commerce workflow coverage, isolated staging lifecycle and 23 October reduction to core risks | [Commerce workflow tests](commerce-workflow-tests.md) |
 | Dedicated account deletion and basic email-event reads | [Account lifecycle tests](account-lifecycle-tests.md) |
+| MFA lifecycle: 16 focused tests, timing, cleanup and verification | [MFA lifecycle tests](mfa-lifecycle-tests.md) |
 
-These completed plans preserve implementation decisions and their original
-verification results. Current coverage lives in the single
+Each record states whether it is proposed or completed and preserves its
+implementation decisions and available verification results. Current coverage lives in the single
 [API coverage and status report](../../api-coverage-report.md).
 
 Save future implementation plans here with descriptive, lowercase,

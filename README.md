@@ -276,6 +276,21 @@ Current commerce, user CRUD and inventory coverage is listed in the
 [API coverage and status report](api-coverage-report.md); this section describes
 the original admin/product examples.
 
+## MFA tests
+
+Six endpoint specs add 16 tests for enrollment, two-factor login, recovery-code
+replacement and disable. They use disposable accounts, direct TOTP generation,
+bounded waits for fresh time steps and independently verified cleanup. Existing
+authentication fixtures and shared admin MFA are unchanged.
+
+```powershell
+npx.cmd playwright test tests/api/users/2fa tests/api/users/signin.2fa --project=api --workers=2 --retries=0
+```
+
+See [MFA exploration](docs/exploration/2026-10-23-mfa.md), the
+[implementation record](docs/implementation/mfa-lifecycle-tests.md), and the
+[coverage report](api-coverage-report.md) for actual results and deferred cases.
+
 ## Refresh and logout tests
 
 The dedicated specs cover refresh-token rotation, usable access tokens, invalid
