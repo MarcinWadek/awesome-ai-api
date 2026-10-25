@@ -34,7 +34,7 @@ test.describe('GET /api/v1/traffic/logs/{correlationId}', () => {
     const response = await trafficClient.getLog(captured.correlationId, session);
 
     // Then
-    // Keep the contract expectation: see docs/traffic-detail-bug-report.md for the live 500.
+    // Historical 500: docs/bug-reports.md#bug-005-existing-traffic-detail-returned-500.
 
     const body = await json<TrafficLogDetail>(response);
     expect(body).toMatchObject({
