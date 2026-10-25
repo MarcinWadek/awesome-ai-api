@@ -2,7 +2,7 @@ import { expect, test } from '../../../fixtures/auth.fixture';
 import { expectInvalidRefreshToken, expectRefreshedTokens } from '../../../support/assertions/auth';
 import { json, expectJsonResponse, expectNoStoreResponse, expectNonEmptyString } from '../../../support/assertions/http';
 import { expectRegisteredUserProfile } from '../../../support/assertions/users';
-import type { RefreshTokenRequest } from '../../../types/auth';
+import { invalidRefreshTokenCases } from '../../../data/auth';
 import type { UserResponse } from '../../../types/users';
 test.describe('POST /api/v1/users/refresh', () => {
   test('200: rotates tokens without Bearer authorization and returns a usable session', async ({ authenticatedUser, authClient, usersClient }) => {
@@ -24,19 +24,7 @@ test.describe('POST /api/v1/users/refresh', () => {
     await expectRefreshedTokens(replacement, tokens.refreshToken);
   });
 
-  for (const { title, data } of [{
-    title: 'missing',
-    data: {}
-  }, {
-    title: 'empty',
-    data: { refreshToken: '' }
-  }, {
-    title: 'whitespace-only',
-    data: { refreshToken: '   ' }
-  }] satisfies Array<{
-    title: string;
-    data: Partial<RefreshTokenRequest>;
-  }>) {
+  for (const { title, data } of invalidRefreshTokenCases) {
     test(`400: rejects ${title} refresh token input`, async ({ authClient }) => {
       // When
       const response = await authClient.refresh(data);

@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import { productData } from '../../../data/products';
+import { deleteProductsByName } from '../../../support/helpers/products';
 import { test, expect } from '../../../fixtures/admin.fixture';
 import { json, expectJsonResponse } from '../../../support/assertions/http';
 import { expectProduct } from '../../../support/assertions/products';
@@ -7,26 +8,11 @@ test.describe('POST /api/v1/products', () => {
   let data: ProductCreateRequest;
 
   test.beforeEach(() => {
-    data = {
-      name: `api-test-${randomUUID()}`,
-      description: 'Disposable API test product',
-      price: 12.34,
-      stockQuantity: 7,
-      category: 'API tests',
-      imageUrl: null
-    };
+    data = productData();
   });
 
   test.afterEach(async ({ authenticatedAdmin, productsClient }) => {
-    // Then
-    const response = await productsClient.getProducts(authenticatedAdmin.token);
-    expect(response.status()).toBe(200);
-    const products = (await response.json()) as ProductResponse[];
-
-    for (const product of products.filter(product => product.name === data.name)) {
-      const cleanup = await productsClient.deleteProduct(product.id, authenticatedAdmin.token);
-      expect([204, 404]).toContain(cleanup.status());
-    }
+    await deleteProductsByName(productsClient, authenticatedAdmin.token, [data.name]);
   });
 
   test('201: creates and persists a disposable product', async ({ authenticatedAdmin, productsClient }) => {

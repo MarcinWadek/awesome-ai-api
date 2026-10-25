@@ -1,6 +1,13 @@
 import { expect } from '@playwright/test';
 import type { ProductResponse } from '../../types/products';
+import type { ProductsClient } from '../../clients/products.client';
 import { expectNonEmptyString } from './http';
+
+export async function expectProductUnchanged(products: ProductsClient, product: ProductResponse, token: string): Promise<void> {
+  const response = await products.getProduct(product.id, token);
+  expect(response.status()).toBe(200);
+  expect(await response.json()).toEqual(product);
+}
 
 export function expectProduct(body: ProductResponse): void {
   expect(Number.isInteger(body.id)).toBe(true);

@@ -1,4 +1,5 @@
-import { test, expect, json, shippingAddress } from '../../../fixtures/commerce.fixture';
+import { test, expect, json } from '../../../fixtures/commerce.fixture';
+import { shippingAddress } from '../../../data/commerce';
 import { expectOrder } from '../../../support/assertions/commerce';
 import type { Order } from '../../../types/commerce';
 test.describe('GET /api/v1/orders/{id}', () => {

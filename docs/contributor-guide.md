@@ -13,10 +13,26 @@ or [checkout workflow](../tests/admin/orders/index.post.spec.ts).
 | [clients](../clients), [types](../types) | HTTP methods and request/response types |
 | [fixtures](../fixtures) | Inject clients and own account/resource lifecycles |
 | [generators](../generators) | Unique registration data; override fields for validation cases |
-| [support](../support) | Assertions, configuration, SSE/TOTP helpers and error redaction |
+| [data](../data) | Product defaults with fresh names, address data, validation cases and deterministic Ollama scenarios |
+| [support/helpers](../support/helpers) | Reusable preparation, cleanup, polling and technical transformations |
+| [support/assertions](../support/assertions) | Response contracts and persisted-state checks |
+| [support/fakes](../support/fakes) | Offline API doubles for fixture lifecycle checks |
+| [support](../support) | Configuration, account lifecycle, SSE/TOTP helpers and error redaction |
 
 Types need runtime assertions. Check status, headers, fields and persistence;
 reuse existing helpers.
+
+Keep the tested request and scenario expectations in the spec. Extract repeated
+setup/cleanup or technical work into domain helpers that receive injected clients
+and explicit data; helpers do not create clients or hide resource ownership.
+For example, `createProduct` prepares a product, `deleteProductsByName` recovers
+owned products even after a lost creation response, and `waitForEmailEvents`
+contains polling. Cleanup hooks still show which resources belong to the test.
+
+Use `productData()` for a fresh payload in each test and override relevant fields
+at the call site. Keep short, meaningful inputs such as `price: -1` in the spec.
+Larger scenario tables and mock payloads belong in `data/`. Account lifecycle and
+stock restoration remain fixture responsibilities.
 
 ## Choose the fixture
 

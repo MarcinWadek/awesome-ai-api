@@ -5,13 +5,10 @@ import type { InventoryClient } from '../clients/inventory.client';
 import type { OrdersClient } from '../clients/orders.client';
 import type { ProductsClient } from '../clients/products.client';
 import { useRegisteredUser, type AuthenticatedUser } from '../support/registered-user';
-import type { Address, Movement, Order, Page } from '../types/commerce';
+import type { Movement, Order, Page } from '../types/commerce';
 import type { ProductCreateRequest, ProductResponse } from '../types/products';
 import { json } from '../support/assertions/http';
-
-export const shippingAddress: Address = {
-  street: '123 Test Street', city: 'Test City', state: 'Test State', zipCode: '35-119', country: 'Poland',
-};
+import { shippingAddress } from '../data/commerce';
 
 interface Commerce {
   cart: CartClient;

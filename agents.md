@@ -4,6 +4,7 @@
 - Organize endpoint specs with `// Given`, `// When`, `// Then` comments; omit empty sections. Use `test.step` only when a longer workflow benefits from named report groups. Fixture lifecycle steps may remain.
 - while creating a plan never assume anything. In case of doubts check documentation, explore application or ask me
 - Inject HTTP clients from the shared client/scenario fixtures. Keep scenario data preparation visible in tests or their setup hooks.
+- Keep tested requests and meaningful expected values in specs. Put reusable preparation, cleanup and polling in `support/helpers`, shared payloads/case tables in `data`, and API doubles in `support/fakes`. Pass injected clients explicitly and preserve cleanup ownership/order.
 - Use one endpoint describe per spec, flat `status: behavior` test names and ascending response codes. Name endpoint files with their HTTP method.
 - Keep `api-coverage-report.md` as the single maintained endpoint coverage and status report. It replaces both retired root test plans, including references to those plans in older workflow guidance. Keep implementation plans scoped to individual deliveries.
 - Avoid unnecessary abstractions, refactoring, and speculative code. 

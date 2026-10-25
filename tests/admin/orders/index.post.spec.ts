@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { test, expect, json, shippingAddress } from '../../../fixtures/commerce.fixture';
+import { test, expect, json } from '../../../fixtures/commerce.fixture';
 import { expectCart, expectEmptyCart } from '../../../support/assertions/cart';
+import { shippingAddress } from '../../../data/commerce';
 import { expectOrder } from '../../../support/assertions/commerce';
 import type { InventoryItem, Movement, Order, Page } from '../../../types/commerce';
 import type { CartResponse } from '../../../types/cart';

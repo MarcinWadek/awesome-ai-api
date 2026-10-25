@@ -1,7 +1,7 @@
 import { test } from '../../../fixtures/auth.fixture';
 import { expectChatAnswer, expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { readChatStream } from '../../../support/ollama.helpers';
-import { ollamaScenarios } from '../../../support/ollama-test-data';
+import { ollamaScenarios } from '../../../data/ollama';
 test.describe('POST /api/v1/ollama/chat', () => {
   test('200: streams assistant thinking and text from a known conversation', async ({ ollamaClient, authenticatedUser }) => {
     // When

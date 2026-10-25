@@ -1,9 +1,8 @@
 import type { AuthClient } from '../../../clients/auth.client';
-import type { UsersClient } from '../../../clients/users.client';
 import { test, expect } from '../../../fixtures/admin.fixture';
 import { generateRegistrationData } from '../../../generators/registration.generator';
 import { json } from '../../../support/assertions/http';
-import { expectRegisteredUserProfile } from '../../../support/assertions/users';
+import { expectPersistedUser } from '../../../support/assertions/users';
 import type { RegistrationRequest } from '../../../types/registration';
 test.describe('DELETE /api/v1/users/{username}', () => {
   let user: RegistrationRequest;
@@ -31,12 +30,6 @@ test.describe('DELETE /api/v1/users/{username}', () => {
     expect(response.status()).toBe(201);
   }
 
-  async function expectUserPresent(usersClient: UsersClient, token: string): Promise<void> {
-    const read = await usersClient.getUser(user.username, token);
-    expect(read.status()).toBe(200);
-    expectRegisteredUserProfile(await read.json(), user);
-  }
-
   test('204: admin deletes a disposable user', async ({ authenticatedAdmin, authClient, usersClient }) => {
     // Given
     await registerUser(authClient);
@@ -59,7 +52,7 @@ test.describe('DELETE /api/v1/users/{username}', () => {
 
     // Then
     expect(await json(response, 401)).toEqual({ message: 'Unauthorized' });
-    await expectUserPresent(usersClient, authenticatedAdmin.token);
+    await expectPersistedUser(usersClient, user, authenticatedAdmin.token);
   });
 
   test('403: rejects user deletion by a staging client, including the owner', async ({ authenticatedAdmin, authClient, usersClient }) => {
@@ -77,7 +70,7 @@ test.describe('DELETE /api/v1/users/{username}', () => {
 
     // Then
     expect(await json(response, 403)).toEqual({ message: 'Access denied' });
-    await expectUserPresent(usersClient, authenticatedAdmin.token);
+    await expectPersistedUser(usersClient, user, authenticatedAdmin.token);
   });
 
   test('404: rejects deletion of a nonexistent user', async ({ authenticatedAdmin, authClient, usersClient }) => {

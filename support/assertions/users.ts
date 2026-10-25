@@ -1,6 +1,15 @@
 import { expect } from '@playwright/test';
+import type { UsersClient } from '../../clients/users.client';
 import type { RegistrationRequest } from '../../types/registration';
 import type { UserResponse } from '../../types/users';
+
+export async function expectPersistedUser(
+  users: UsersClient, user: RegistrationRequest, token: string,
+): Promise<void> {
+  const response = await users.getUser(user.username, token);
+  expect(response.status()).toBe(200);
+  expectRegisteredUserProfile(await response.json(), user);
+}
 
 export function expectRegisteredUserProfile(
   body: UserResponse,

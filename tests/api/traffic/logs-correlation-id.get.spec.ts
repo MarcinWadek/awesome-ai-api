@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '../../../fixtures/clients.fixture';
 import { json, expectNonEmptyString } from '../../../support/assertions/http';
-import { expectTrafficPage } from '../../../support/assertions/traffic';
-import type { TrafficInfoResponse, TrafficLogDetail, TrafficLogEntry, TrafficLogsResponse } from '../../../types/traffic';
+import { waitForCapturedInfoRequest } from '../../../support/helpers/traffic';
+import type { TrafficInfoResponse, TrafficLogDetail } from '../../../types/traffic';
 
 // This deployment exposes traffic publicly in legacy mode. Capture no credentials.
 
@@ -15,20 +15,7 @@ test.describe('GET /api/v1/traffic/logs/{correlationId}', () => {
     expect(info.topic).toBe(`/topic/traffic/${session}`);
     expect(info.webSocketEndpoint).toBe('/api/v1/ws-traffic');
     expectNonEmptyString(info.description);
-    let captured: TrafficLogEntry | undefined;
-    await expect.poll(async () => {
-      const logsResponse = await trafficClient.getLogs({ page: 0, size: 10 }, session);
-      const logs = await json<TrafficLogsResponse>(logsResponse);
-      expectTrafficPage(logs, 0, 10);
-      captured = logs.content.find(entry => entry.clientSessionId === session && entry.method === 'GET' && entry.path === '/api/v1/traffic/info' && entry.status === 200);
-      return captured !== undefined;
-    }, {
-      message: 'The controlled request must appear in its session-scoped traffic logs',
-      timeout: 5_000,
-      intervals: [100, 250, 500]
-    }).toBe(true);
-    if (captured === undefined) throw new Error('Controlled traffic entry was not captured');
-    expectNonEmptyString(captured.correlationId);
+    const captured = await waitForCapturedInfoRequest(trafficClient, session);
 
     // When
     const response = await trafficClient.getLog(captured.correlationId, session);

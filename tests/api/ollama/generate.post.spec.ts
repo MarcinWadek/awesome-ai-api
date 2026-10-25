@@ -1,7 +1,7 @@
 import { test } from '../../../fixtures/auth.fixture';
 import { expectGeneratedAnswer, expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { readGenerateStream } from '../../../support/ollama.helpers';
-import { ollamaScenarios } from '../../../support/ollama-test-data';
+import { ollamaScenarios } from '../../../data/ollama';
 test.describe('POST /api/v1/ollama/generate', () => {
   test('200: streams deterministic thinking and response through final completion', async ({ ollamaClient, authenticatedUser }) => {
     // When

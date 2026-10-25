@@ -2,7 +2,7 @@ import { test } from '../../../fixtures/auth.fixture';
 import { expectOllamaJsonError } from '../../../support/assertions/ollama';
 import { expectProductToolFlow, expectProductToolResults } from '../../../support/assertions/ollama-tools';
 import { getProductToolContext, readChatStream } from '../../../support/ollama.helpers';
-import { listProductsToolDefinition, ollamaScenarios } from '../../../support/ollama-test-data';
+import { listProductsToolDefinition, ollamaScenarios } from '../../../data/ollama';
 test.describe('POST /api/v1/ollama/chat/tools', () => {
   test('200: executes both product tools and completes after intermediate done events', async ({ ollamaClient, authenticatedUser, productsClient }) => {
     // Given

@@ -1,14 +1,14 @@
 # API coverage
 
-Coverage baseline: **24 October 2026**. Documentation condensed on 25 October;
-live APIs were not revalidated by this edit.
+Coverage baseline: **25 October 2026**. Helper/data extraction was verified with
+96 affected-area checks, followed by the full live regression below.
 
 | Measure | Recorded result |
 | --- | --- |
 | Saved REST contract | 53 operations across 43 paths |
 | Operations with direct behavioral tests | **53/53 (100%)** |
 | Endpoint tests | **177 in 57 files**: 104 api, 73 admin |
-| Latest full live regression, 24 October | **177/177 passed**, 4.3 min, 4 workers, 0 retries |
+| Latest full live regression, 25 October | **177/177 passed**, 4.2 min, 4 workers, 0 retries |
 | Offline fixture checks, 25 October | **12/12 passed**, separate from endpoint coverage |
 
 An operation is a method/path pair in [the saved contract](docs/api-docs.json).
