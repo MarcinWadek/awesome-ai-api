@@ -52,6 +52,7 @@ Keep the redaction reporter first, including reporter overrides; do not log secr
 
 ## Documentation
 
+- [Visual HTML report](docs/report.html): coverage dashboard, contributor guide and bug reports.
 - [Contributor guide](docs/contributor-guide.md): architecture, fixtures, test conventions and workflow.
 - [Coverage](api-coverage-report.md): endpoint-to-test matrix, dated results and gaps.
 - [Bug reports](docs/bug-reports.md): concise reproduction steps and last-known status.

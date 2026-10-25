@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Awesome AI API framework report: recorded coverage, contributor guidance and investigated bugs.">
+  <title>Awesome AI API · Engineering report</title>
+  <style>
+    :root{color-scheme:light;--ink:#20332f;--muted:#65766f;--paper:#f5f7f5;--white:#fff;--line:#e0e7e1;--green:#246647;--lime:#c3edb2;--dark:#142b24;--soft:#eaf3e8;--amber:#925c16;--amber-bg:#fbf3e2;--radius:16px;--mono:Consolas,'Cascadia Code',monospace}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 'Segoe UI Variable','Segoe UI',system-ui,sans-serif}button,input,select{font:inherit}button,a,input,select,summary{-webkit-tap-highlight-color:transparent}button,summary{cursor:pointer}a{color:var(--green);text-underline-offset:3px}a:hover{text-decoration-thickness:2px}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #4b8b68;outline-offset:4px}button{color:inherit}svg{display:block}button svg,a svg{width:18px;height:18px;flex-shrink:0}.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.skip{position:absolute;left:-9999px}.skip:focus{position:fixed;left:20px;top:16px;background:white;padding:10px;z-index:10}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:228px;padding:35px 22px 24px;background:var(--dark);color:#e6eee7;display:flex;flex-direction:column;z-index:2}.brand{display:flex;align-items:center;gap:11px;margin-bottom:49px}.brand-mark{width:36px;height:36px;background:var(--lime);border-radius:11px;display:grid;place-items:center;color:var(--dark);font:700 20px var(--mono);transform:rotate(-5deg)}.brand-name{font-weight:650;font-size:16px;line-height:1.3;letter-spacing:-.4px}.brand-name span{display:block;color:#a3b7aa;font-size:11px;font-weight:400;letter-spacing:.09em;text-transform:uppercase;margin-top:4px}.nav-caption{font-size:10px;letter-spacing:.16em;color:#93aa9c;margin:0 14px 12px}.navigation{display:grid;gap:6px}.nav-item{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:9px;color:#bdccc1;text-decoration:none;font-size:13px}.nav-item:hover{background:#203d30;color:white}.nav-item[aria-current="page"]{background:var(--lime);color:var(--dark);font-weight:650}.nav-item .count{margin-left:auto;font-family:var(--mono);font-size:11px;opacity:.7}.sidebar-bottom{margin-top:auto;padding:22px 13px 0;border-top:1px solid #365040;font-size:11px;color:#a3b7aa}.sidebar-bottom strong{display:block;color:#e6eee7;font-size:12px;font-weight:500;margin-bottom:8px}.sidebar-bottom a{color:#d1e7cc;display:inline-flex;gap:8px;align-items:center;margin-top:18px;text-decoration:none}.sidebar-bottom .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lime);margin-right:6px}
+    .main{margin-left:228px;padding:28px 44px 24px;max-width:1680px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;padding-bottom:25px;border-bottom:1px solid var(--line);margin-bottom:31px}.breadcrumb{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px}.breadcrumb strong{font-weight:500;color:var(--ink)}.breadcrumb .slash{color:#abb8ae}.top-actions{display:flex;align-items:center;gap:16px}.record-label{color:var(--muted);font-size:11px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--line);border-radius:8px;background:white;padding:9px 14px;text-decoration:none;font-size:12px;font-weight:600;min-height:38px;white-space:nowrap}.btn:hover{background:#edf4eb}.btn.primary{background:var(--dark);border-color:var(--dark);color:white}.btn.primary:hover{background:#2b4a38}.btn.small{padding:7px 10px;min-height:32px;font-size:11px}.btn.ghost{background:transparent}.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:26px;margin-bottom:29px}.eyebrow{font-size:10px;font-weight:600;letter-spacing:.16em;color:var(--green);text-transform:uppercase;margin:0 0 12px}.hero h1{font-size:46px;line-height:1.09;font-weight:600;letter-spacing:-2px;margin:0 0 15px}.hero h1 em{font-style:normal;color:var(--green)}.hero p{font-size:14px;color:var(--muted);max-width:510px;margin:0}.hero-meta{padding-top:15px;text-align:right;font-size:11px;color:var(--muted);line-height:1.9;min-width:160px}.hero-meta strong{display:block;color:var(--ink);font-size:13px;font-weight:500}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:4px 9px;font-size:10px;font-weight:600;line-height:1.4;white-space:nowrap;background:var(--soft);color:#355b39}.pill:before{content:'';height:5px;width:5px;background:currentColor;border-radius:50%;flex-shrink:0}.pill.amber{background:var(--amber-bg);color:var(--amber)}.pill.neutral{background:#edf0ef;color:#586762}.hero-meta .pill{margin-bottom:11px}.intro-actions{display:flex;gap:9px;margin-top:21px}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.stat{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px 21px;position:relative}.stat.accent{background:var(--lime);border-color:var(--lime)}.stat-label{font-size:11px;font-weight:500;color:#51654d;display:flex;align-items:center;gap:7px}.stat-label svg{width:15px;height:15px}.stat-number{font-size:36px;line-height:1.35;letter-spacing:-1.7px;font-weight:600;margin:10px 0 8px;font-variant-numeric:tabular-nums}.stat-number span{font-size:19px;letter-spacing:-.4px;font-weight:400;color:#687e64}.stat-note{font-size:10px;color:#677b65;line-height:1.5}.scope-note{font-size:11px;color:var(--muted);margin:0 1px 28px}.scope-note strong{font-weight:600;color:var(--ink)}.two-col{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;margin-bottom:18px}.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:23px 25px;min-width:0}.section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}.section-header h2{font-size:17px;line-height:1.4;font-weight:600;letter-spacing:-.45px;margin:0}.section-header p{font-size:11px;color:var(--muted);margin:4px 0 0}.section-header a{font-size:11px;white-space:nowrap;text-decoration:none;padding-top:4px}.area-row{display:grid;grid-template-columns:118px 1fr 54px;gap:13px;align-items:center;margin:16px 0}.area-name{font-size:11px}.area-track{height:7px;background:#f0f4ef;border-radius:7px;overflow:hidden}.area-fill{height:100%;background:#6d9f68;border-radius:7px}.area-value{white-space:nowrap;text-align:right;font:11px var(--mono);color:#4e6852}.chart-note{font-size:10px;color:var(--muted);margin:20px 0 0}.gap-row{display:flex;gap:13px;padding:13px 0;border-bottom:1px solid #edf0ed}.gap-row:first-of-type{padding-top:0}.gap-row:last-of-type{border-bottom:0;padding-bottom:0}.gap-symbol{color:var(--amber);background:var(--amber-bg);width:30px;height:30px;display:grid;place-items:center;border-radius:8px;flex-shrink:0;font:12px var(--mono)}.gap-row h3{margin:0 0 3px;font-size:12px;font-weight:600}.gap-row p{margin:0;color:var(--muted);font-size:11px;line-height:1.6}.workflow-card{margin-bottom:18px}.workflow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.workflow-item{border-left:1px solid var(--line);padding-left:17px}.workflow-item:first-child{border-left:0;padding-left:0}.workflow-item .step{font:10px var(--mono);color:#83977f}.workflow-item h3{font-size:13px;margin:7px 0 3px;font-weight:600}.workflow-item p{font-size:11px;color:var(--muted);margin:0}.bottom-strip{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:20px 24px;background:#e9efe7;border-radius:12px}.bottom-strip strong{font-size:12px;font-weight:600}.bottom-strip p{font-size:11px;color:var(--muted);margin:4px 0 0}.footer{border-top:1px solid var(--line);margin-top:32px;padding-top:16px;display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:10px}.footer a{color:inherit}.report-panel[hidden]{display:none}
+    .page-heading{margin-bottom:24px}.page-heading h1{font-weight:600;font-size:33px;letter-spacing:-1.2px;line-height:1.2;margin:0 0 9px}.page-heading p{color:var(--muted);font-size:13px;margin:0;max-width:690px}.toolbar{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 20px}.field{display:flex;flex-direction:column;gap:6px;min-width:130px}.field.search{flex:1;min-width:200px}.field label{font-size:10px;font-weight:600;color:var(--muted)}input,select{width:100%;background:var(--white);border:1px solid #d8e2d8;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink);min-height:41px}.result-count{font:11px var(--mono);color:var(--muted);margin:0 0 12px}.table-container{overflow-x:auto;background:var(--white);border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}th{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:#f8faf7;font-weight:600;padding:13px 17px;white-space:nowrap}td{padding:12px 17px;border-top:1px solid #edf1ed;vertical-align:top}tbody tr:hover{background:#fafcf9}.endpoint{font:11px/1.6 var(--mono);overflow-wrap:anywhere}.method{font:600 10px var(--mono);display:inline-block;padding:3px 6px;border-radius:4px;min-width:48px;text-align:center}.method.get{background:#e9f2e9;color:#326a3d}.method.post{background:#e7eef9;color:#3f628b}.method.put{background:#fcf0dd;color:#946423}.method.delete{background:#f9e9e5;color:#99594c}.project-tag{font:10px var(--mono);color:var(--muted)}.evidence a{font-size:10px;display:inline-block;margin:0 10px 2px 0}.endpoint-note{display:block;color:var(--amber);font:10px/1.5 'Segoe UI',sans-serif;margin-top:4px}.empty-state{text-align:center;padding:40px;color:var(--muted);font-size:13px}.table-footnote{font-size:11px;color:var(--muted);margin:13px 0 24px}.details-list{display:grid;gap:12px}.doc-section,.bug{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden}.doc-section summary,.bug summary{list-style:none;display:flex;align-items:center;gap:15px;padding:18px 22px;min-height:62px}.doc-section summary::-webkit-details-marker,.bug summary::-webkit-details-marker{display:none}.doc-section summary:after,.bug summary:after{content:'+';font:20px var(--mono);color:var(--muted);margin-left:auto}.doc-section[open] summary:after,.bug[open] summary:after{content:'−'}.doc-section summary h2,.bug summary h2{font-weight:600;font-size:14px;line-height:1.5;letter-spacing:-.2px;margin:0}.section-no,.bug-id{font:10px var(--mono);color:var(--green);flex-shrink:0}.doc-body{padding:0 22px 20px;font-size:12px;line-height:1.8}.doc-body p{margin:12px 0}.doc-body p:first-child{margin-top:0}.doc-body table{font-size:11px;margin-top:10px}.doc-body th{font-size:9px}.doc-body td,.doc-body th{padding:10px 12px}.doc-body li{margin-bottom:7px}.doc-body ul,.doc-body ol{padding-left:21px}.doc-body code{font-size:11px;overflow-wrap:anywhere}code{font-family:var(--mono);background:#edf2eb;padding:1px 4px;border-radius:3px}pre{background:#182e24;color:#d9edce;border-radius:8px;padding:15px 17px;overflow-x:auto;font-size:11px}pre code{background:none;padding:0;color:inherit}.doc-intro{font-size:12px;color:var(--muted);margin-bottom:20px}.quickstart{display:flex;gap:14px;align-items:center;justify-content:space-between;background:var(--dark);color:#e4f0de;border-radius:12px;padding:18px 22px;margin:18px 0}.quickstart code{background:transparent;color:inherit;padding:0;font-size:11px}.quickstart .btn{color:var(--dark);background:var(--lime);border:0}.bug summary{flex-wrap:wrap;gap:12px}.bug summary h2{flex:1;min-width:170px;font-size:13px}.bug .pill{font-size:9px}.bug-summary{display:flex;gap:7px;margin-bottom:20px;flex-wrap:wrap}.bug .doc-body p{max-width:920px}.source-line{font-size:10px;color:var(--muted);margin-top:20px}.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.print-only{display:none}
+    @media(min-width:1800px){.main{margin-left:calc(228px + (100vw - 1800px)/2)}.sidebar{width:calc(228px + (100vw - 1800px)/2);padding-left:calc(22px + (100vw - 1800px)/2)}}
+    @media(max-width:1180px){.sidebar{width:205px;padding-inline:17px}.main{margin-left:205px;padding-inline:28px}.stat{padding:17px}.stat-number{font-size:30px}.two-col{grid-template-columns:1fr 1fr}.area-row{grid-template-columns:100px 1fr 50px;gap:9px}.card{padding:20px}.hero h1{font-size:40px}.record-label{display:none}}
+    @media(max-width:900px){.sidebar{width:76px;padding:28px 13px}.brand{justify-content:center;margin-bottom:34px}.brand-name,.nav-caption,.nav-text,.nav-item .count,.sidebar-bottom{display:none}.nav-item{justify-content:center;padding:14px 12px}.main{margin-left:76px;padding:24px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr 1fr}.hero-meta{min-width:145px}.hero h1{font-size:37px}}
+    @media(max-width:650px){.sidebar{position:static;width:auto;padding:15px 18px 11px;display:block}.brand{justify-content:flex-start;margin-bottom:14px}.brand-name{display:block}.brand-name span{display:none}.navigation{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.nav-item{padding:9px 3px;font-size:10px;gap:4px;flex-direction:column}.nav-item svg{width:16px;height:16px}.nav-text{display:block}.main{margin:0;padding:19px 17px}.topbar{padding-bottom:16px;margin-bottom:23px}.breadcrumb{gap:7px;font-size:10px}.btn{padding:8px 11px}.hero{display:block}.hero h1{font-size:38px}.hero-meta{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:10px;padding-top:20px;font-size:10px}.hero-meta strong{font-size:11px}.hero-meta .pill{margin:0}.hero-meta .meta-extra{display:none}.hero p{font-size:12px}.intro-actions{margin-top:17px}.stats{gap:10px}.stat{padding:16px 14px}.stat-number{font-size:29px;margin-block:8px}.stat-number span{font-size:17px}.stat-label{font-size:10px}.stat-note{font-size:9px}.stat-label svg{display:none}.two-col{grid-template-columns:1fr}.card{padding:20px}.scope-note{font-size:10px}.workflow{grid-template-columns:1fr 1fr;gap:18px}.workflow-item:nth-child(3){border-left:0;padding-left:0}.bottom-strip{padding:18px;flex-direction:column;align-items:flex-start}.footer{font-size:9px;flex-direction:column;gap:5px}.field{flex:1;min-width:110px}.field.search{min-width:100%;flex-basis:100%}.toolbar{gap:10px}.page-heading h1{font-size:29px}.bug summary{padding:16px;gap:8px}.bug summary h2{font-size:12px;min-width:145px}.bug summary .pill{order:3;margin-left:58px}.bug summary:after{order:2}.bug .doc-body{padding-inline:16px}.doc-section summary{padding:16px;gap:10px}.doc-body{padding:0 16px 16px}.doc-body table{display:block;overflow-x:auto}.quickstart{gap:12px;padding:16px}.quickstart code{font-size:10px}.quickstart .btn{font-size:10px}.area-row{grid-template-columns:110px 1fr 52px}.page-heading p{font-size:12px}th,td{padding:11px 12px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    @page{size:A4;margin:14mm}
+    @media print{body{background:white;font-size:10pt;color:#172a20}.sidebar,.top-actions,.intro-actions,.toolbar,.quickstart,.bottom-strip,.no-print,.source-line{display:none!important}.main{margin:0;padding:0;max-width:none}.topbar{padding-bottom:10px;margin-bottom:20px}.report-panel[hidden]{display:block!important}.report-panel{break-before:page}.report-panel:first-of-type{break-before:auto}.hero h1{font-size:30pt}.hero p{font-size:10pt}.hero-meta{font-size:8pt}.stats{grid-template-columns:repeat(4,1fr)}.stat{padding:12px}.stat-number{font-size:23pt}.stat-label,.stat-note,.scope-note,.area-name,.area-value,.chart-note{font-size:8pt}.two-col{grid-template-columns:1fr 1fr}.card,.stat,.doc-section,.bug{box-shadow:none;border-color:#cbd5cb;break-inside:avoid}.card{padding:15px}.workflow-card{margin-bottom:12px}.section-header h2{font-size:13pt}.section-header p,.gap-row p,.workflow-item p{font-size:8pt}.page-heading h1{font-size:24pt}.table-container{overflow:visible;border:0}.table-container table{font-size:8pt}th,td{padding:6px 8px}.endpoint{font-size:7pt}.evidence a{font-size:7pt}.method{font-size:7pt}.project-tag{font-size:7pt}.doc-body{font-size:9pt}.doc-body code{font-size:8pt}.doc-section,.bug{margin-bottom:9px}.doc-section summary,.bug summary{padding:12px 16px}.doc-section summary:after,.bug summary:after{display:none}.doc-section .doc-body,.bug .doc-body{display:block}.pill{font-size:7pt}.footer{font-size:7pt}.print-only{display:block;font-size:8pt;color:#5d6b5c}a{color:#234f31;text-decoration:none}.table-container tr{break-inside:avoid}thead{display:table-header-group}}
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip">Skip to report</a>
+  <aside class="sidebar" aria-label="Report navigation">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">a.</div><div class="brand-name">Awesome AI<span>API engineering</span></div></div>
+    <p class="nav-caption">PROJECT REPORT</p>
+    <nav class="navigation">
+      <a class="nav-item" href="#overview" aria-current="page" aria-label="Overview"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nav-text">Overview</span></a>
+      <a class="nav-item" href="#guide" aria-label="Contributor guide"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Z"/><path d="M12 5v15"/></svg><span class="nav-text">Contributor guide</span></a>
+      <a class="nav-item" href="#coverage" aria-label="Endpoint coverage"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8l10-5Z"/><path d="m2 12 10 5 10-5M2 16l10 5 10-5"/></svg><span class="nav-text">Coverage</span><span class="count">53</span></a>
+      <a class="nav-item" href="#bugs" aria-label="Bug reports"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="6"/><path d="M9 7V5a3 3 0 0 1 6 0v2M12 8v13M2 9h4M18 9h4M2 15h4M18 15h4M4 21l3-3M17 18l3 3"/></svg><span class="nav-text">Bug reports</span><span class="count">5</span></a>
+    </nav>
+    <div class="sidebar-bottom"><strong>Playwright + TypeScript</strong><span class="dot" aria-hidden="true"></span>Recorded evidence<br>Baseline · 24 Oct 2026<a href="https://github.com/MarcinWadek/awesome-ai-api" target="_blank" rel="noopener noreferrer">View repository <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </aside>
+  <main class="main" id="main" tabindex="-1">
+    <header class="topbar"><div class="breadcrumb">Awesome AI API<span class="slash">/</span><strong id="page-label">Overview</strong></div><div class="top-actions"><span class="record-label">Documentation snapshot · 25 Oct 2026</span><button class="btn" type="button" id="print-report"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H3V9h18v9h-3M6 14h12v7H6z"/><path d="M17 11h1"/></svg> Print / PDF</button></div></header>
+
+    <section id="overview" class="report-panel" aria-labelledby="overview-heading">
+      <div class="hero"><div><p class="eyebrow">API AUTOMATION / ENGINEERING REPORT</p><h1 id="overview-heading">API testing,<br><em>with evidence.</em></h1><p>Authentication, commerce and AI integrations.<br>A concise view of the framework, its checks and its limits.</p><div class="intro-actions"><a href="#coverage" class="btn primary">Explore coverage <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="#guide" class="btn">Start contributing</a></div></div><div class="hero-meta"><span class="pill">Recorded regression passed</span><div><strong>24 October 2026</strong>Latest full live run</div><div class="meta-extra">4 workers · 0 retries · 4.3 min</div></div></div>
+      <div class="stats">
+        <article class="stat accent"><div class="stat-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 5-10 5L2 8l10-5Z"/><path d="m2 12 10 5 10-5M2 16l10 5 10-5"/></svg> Operation checks</div><div class="stat-number">53<span> / 53</span></div><div class="stat-note">Saved REST contract · 100%</div></article>
+        <article class="stat"><div class="stat-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Full live regression</div><div class="stat-number">177<span> / 177</span></div><div class="stat-note">Passed · 24 Oct 2026</div></article>
+        <article class="stat"><div class="stat-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5v9l-9 5-9-5V8l9-5Z"/><path d="m3 8 9 5 9-5M12 13v9M7 5.5l9 5"/></svg> Offline fixture checks</div><div class="stat-number">12<span> / 12</span></div><div class="stat-note">Passed · 25 Oct 2026</div></article>
+        <article class="stat"><div class="stat-label"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="7" width="12" height="14" rx="6"/><path d="M9 7V5a3 3 0 0 1 6 0v2M12 8v13M2 9h4M18 9h4M2 15h4M18 15h4M4 21l3-3M17 18l3 3"/></svg> Bug reports</div><div class="stat-number">05</div><div class="stat-note">Dated observations · includes a mock limit</div></article>
+      </div>
+      <p class="scope-note"><strong>Operation coverage measures presence of behavioral checks.</strong> It does not establish complete scenario, feature or code coverage.</p>
+      <div class="two-col"><article class="card"><div class="section-header"><div><h2>Checks across the API</h2><p>Operations with tests, grouped by domain</p></div><a href="#coverage">All endpoints ↗</a></div><div class="area-row"><span class="area-name">Identity + auth</span><div class="area-track" aria-hidden="true"><div class="area-fill" style="width:100%"></div></div><span class="area-value">20 / 20</span></div>
+<div class="area-row"><span class="area-name">Commerce</span><div class="area-track" aria-hidden="true"><div class="area-fill" style="width:100%"></div></div><span class="area-value">20 / 20</span></div>
+<div class="area-row"><span class="area-name">User prompts</span><div class="area-track" aria-hidden="true"><div class="area-fill" style="width:20%"></div></div><span class="area-value">4 / 4</span></div>
+<div class="area-row"><span class="area-name">AI integration</span><div class="area-track" aria-hidden="true"><div class="area-fill" style="width:20%"></div></div><span class="area-value">4 / 4</span></div>
+<div class="area-row"><span class="area-name">Traffic</span><div class="area-track" aria-hidden="true"><div class="area-fill" style="width:15%"></div></div><span class="area-value">3 / 3</span></div>
+<div class="area-row"><span class="area-name">Email + QR</span><div class="area-track" aria-hidden="true"><div class="area-fill" style="width:10%"></div></div><span class="area-value">2 / 2</span></div><p class="chart-note">Bar length shows operation count. API and staging evidence are combined.</p></article><article class="card"><div class="section-header"><div><h2>Coverage has boundaries</h2><p>Important success flows still need infrastructure</p></div><span class="pill amber">Unverified</span></div><div class="gap-row"><span class="gap-symbol" aria-hidden="true">01</span><div><h3>Password recovery</h3><p>Invalid-token rejection is tested. Successful reset needs an observable token.</p></div></div><div class="gap-row"><span class="gap-symbol" aria-hidden="true">02</span><div><h3>Enabled SSO</h3><p>Validation and disabled policy are tested. Success needs a trusted identity provider.</p></div></div><div class="gap-row"><span class="gap-symbol" aria-hidden="true">03</span><div><h3>Email delivery</h3><p>Acceptance and owned events are tested. SMTP delivery needs a controlled sink.</p></div></div></article></div>
+      <article class="card workflow-card"><div class="section-header"><div><h2>A repeatable working method</h2><p>Explore, select meaningful checks, verify and simplify.</p></div><a href="#guide">Contributor guide ↗</a></div><div class="workflow"><div class="workflow-item"><span class="step">01 / UNDERSTAND</span><h3>Contract + exploration</h3><p>Confirm behavior on the target.</p></div><div class="workflow-item"><span class="step">02 / ISOLATE</span><h3>Own the test data</h3><p>Fixtures manage setup and teardown.</p></div><div class="workflow-item"><span class="step">03 / VERIFY</span><h3>Assert real behavior</h3><p>Read back state and side effects.</p></div><div class="workflow-item"><span class="step">04 / REVIEW</span><h3>Integrate + simplify</h3><p>Run regression and remove repetition.</p></div></div></article>
+      <div class="bottom-strip"><div><strong>AI integration testing, with explicit limits.</strong><p>Deterministic mock scenarios verify stream/tool behavior. Real-model quality and token latency remain outside these checks.</p></div><a href="#guide" class="btn">How the framework works <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    </section>
+
+    <section id="guide" class="report-panel" aria-labelledby="guide-heading" hidden>
+      <div class="page-heading"><p class="eyebrow">WORKING WITH THE FRAMEWORK</p><h1 id="guide-heading">Contributor guide</h1><p>Find the right fixture, add a focused test and verify the result.</p></div>
+      <div class="quickstart"><code>npm ci &nbsp;→&nbsp; configure .env &nbsp;→&nbsp; npm test</code><button class="btn small" id="copy-install" type="button">Copy install command</button></div>
+      <div class="details-list"><details class="doc-section"><summary><span class="section-no">RUN</span><h2>Setup and commands</h2></summary><div class="doc-body"><p>Use Node.js 24+ and npm 10+. No browser installation or local backend is required.</p>
+<pre><code class="language-bash">npm ci
+cp .env.example .env
+</code></pre>
+<p>In PowerShell use <code>Copy-Item .env.example .env</code>; use <code>npm.cmd</code>/<code>npx.cmd</code> if script
+execution policy blocks npm. Fill <code>.env</code> with authorized test-account credentials:</p>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Default URL</th>
+<th>Credential variables</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>api</code></td>
+<td><code>https://awesome.byst.re</code></td>
+<td><code>API_LOGIN_USERNAME</code>, <code>API_LOGIN_PASSWORD</code></td>
+</tr>
+<tr>
+<td><code>admin</code></td>
+<td><code>https://aitesters.byst.re</code></td>
+<td><code>ADMIN_API_LOGIN_USERNAME</code>, <code>ADMIN_API_LOGIN_PASSWORD</code></td>
+</tr>
+</tbody></table>
+<p><code>API_BASE_URL</code> / <code>ADMIN_API_BASE_URL</code> select URLs; admin authentication enforces
+the staging origin. The admin project also includes ordinary staging shoppers.
+Absent URL values use defaults; blank values fail. Shell/CI variables override
+<code>.env</code>; credentials are loaded only when configured-account sign-in is needed.
+Discovery needs no credentials. Never commit <code>.env</code>, tokens or generated reports.</p>
+<h2>Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Discover without API requests</td>
+<td><code>npx playwright test --list</code></td>
+</tr>
+<tr>
+<td>Both remote projects</td>
+<td><code>npm test</code></td>
+</tr>
+<tr>
+<td>API / staging only</td>
+<td><code>npm run test:api</code> / <code>npm run test:admin</code></td>
+</tr>
+<tr>
+<td>One spec</td>
+<td><code>npm run test:api -- tests/api/users/me.get.spec.ts</code></td>
+</tr>
+<tr>
+<td>AI checks</td>
+<td><code>npm run test:api -- tests/api/ollama</code></td>
+</tr>
+<tr>
+<td>Offline fixture checks</td>
+<td><code>npm run test:fixtures</code></td>
+</tr>
+<tr>
+<td>Typecheck / whitespace</td>
+<td><code>npm run typecheck</code> / <code>git diff --check</code></td>
+</tr>
+<tr>
+<td>HTML report</td>
+<td><code>npx playwright show-report</code></td>
+</tr>
+</tbody></table>
+<p>For behavioral changes, run affected tests first, then:</p>
+<pre><code class="language-bash">npm test -- --project=api --project=admin --workers=4 --retries=0
+</code></pre>
+<p>Live runs create data. Fixtures clean up most owned resources; signup tests retain
+accounts, and interruption can prevent teardown. Retries and traces are disabled.
+Keep the redaction reporter first, including reporter overrides; do not log secrets.</p>
+</div></details></div>
+      <div class="doc-intro"><p>After <a href="#guide">setup</a>, read the <a href="../tests/api/users/me.get.spec.ts" target="_blank" rel="noopener noreferrer">profile spec</a>
+or <a href="../tests/admin/orders/index.post.spec.ts" target="_blank" rel="noopener noreferrer">checkout workflow</a>.
+<a href="#coverage">Coverage</a> lists checks/gaps;
+<a href="#bugs">Bug reports</a> records unexpected behavior.</p>
+</div>
+      <div class="details-list"><details class="doc-section" open><summary><span class="section-no">01</span><h2>Where changes belong</h2></summary><div class="doc-body"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../tests/api" target="_blank" rel="noopener noreferrer">tests/api</a>, <a href="../tests/admin" target="_blank" rel="noopener noreferrer">tests/admin</a></td>
+<td>API-host and staging-host scenarios; staging includes ordinary shoppers</td>
+</tr>
+<tr>
+<td><a href="../clients" target="_blank" rel="noopener noreferrer">clients</a>, <a href="../types" target="_blank" rel="noopener noreferrer">types</a></td>
+<td>HTTP methods and request/response types</td>
+</tr>
+<tr>
+<td><a href="../fixtures" target="_blank" rel="noopener noreferrer">fixtures</a></td>
+<td>Inject clients and own account/resource lifecycles</td>
+</tr>
+<tr>
+<td><a href="../generators" target="_blank" rel="noopener noreferrer">generators</a></td>
+<td>Unique registration data; override fields for validation cases</td>
+</tr>
+<tr>
+<td><a href="../support" target="_blank" rel="noopener noreferrer">support</a></td>
+<td>Assertions, configuration, SSE/TOTP helpers and error redaction</td>
+</tr>
+</tbody></table>
+<p>Types need runtime assertions. Check status, headers, fields and persistence;
+reuse existing helpers.</p>
+</div></details>
+<details class="doc-section"><summary><span class="section-no">02</span><h2>Choose the fixture</h2></summary><div class="doc-body"><p>Import <code>test</code> and <code>expect</code> from the narrowest suitable entry point:</p>
+<table>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="../fixtures/clients.fixture.ts" target="_blank" rel="noopener noreferrer">clients</a></td>
+<td>Anonymous requests or explicit configured-account login</td>
+</tr>
+<tr>
+<td><a href="../fixtures/auth.fixture.ts" target="_blank" rel="noopener noreferrer">auth</a></td>
+<td>A fresh ordinary account; optional <code>authenticatedPeer</code> for isolation</td>
+</tr>
+<tr>
+<td><a href="../fixtures/admin.fixture.ts" target="_blank" rel="noopener noreferrer">admin</a></td>
+<td>Staging administrator access; origin is guarded to <code>https://aitesters.byst.re</code></td>
+</tr>
+<tr>
+<td><a href="../fixtures/account-lifecycle.fixture.ts" target="_blank" rel="noopener noreferrer">account lifecycle</a></td>
+<td>The scenario deletes its account; an observer verifies absence</td>
+</tr>
+<tr>
+<td><a href="../fixtures/mfa.fixture.ts" target="_blank" rel="noopener noreferrer">MFA</a></td>
+<td>Enrollment, second-factor login or recovery</td>
+</tr>
+<tr>
+<td><a href="../fixtures/commerce.fixture.ts" target="_blank" rel="noopener noreferrer">commerce</a></td>
+<td>Owned shoppers/products/orders and stock restoration</td>
+</tr>
+</tbody></table>
+<p>Clients and resources are lazy and test-scoped. Inject clients in test callbacks;
+keep scenario-specific preparation visible in the test or setup hook.</p>
+</div></details>
+<details class="doc-section"><summary><span class="section-no">03</span><h2>Add or change a test</h2></summary><div class="doc-body"><ol>
+<li>Check the <a href="api-docs.json" target="_blank" rel="noopener noreferrer">saved OpenAPI contract</a>, existing specs and target
+behavior. Backend source can explain behavior but does not prove deployment state.</li>
+<li>Select success, authentication and meaningful negative cases. Add boundaries
+and ownership checks for distinct risks.</li>
+<li>Use one <code>METHOD /path</code> describe, a method-bearing filename and flat
+<code>status: behavior</code> names ordered by response code. Separate preparation,
+request and assertions with <code>// Given</code>, <code>// When</code>, <code>// Then</code>; omit empty sections.
+Reserve <code>test.step</code> for useful workflow/lifecycle groups.</li>
+<li>Verify persistence/state preservation. Report defects without weakening
+assertions, skipping or adding retries.</li>
+<li>Run affected tests first, then the full api/admin suite for behavioral changes.
+Run fixture checks for lifecycle changes, typecheck and whitespace checks.
+Update coverage with dated outcomes/gaps. Documentation edits need link/content
+checks. Record blocked execution honestly.</li>
+</ol>
+</div></details>
+<details class="doc-section"><summary><span class="section-no">04</span><h2>Own data through teardown</h2></summary><div class="doc-body"><ul>
+<li>Keep tokens, users and IDs within one environment. Use generated identities
+and owned products; never modify, log out or delete the shared administrator.</li>
+<li>Ordinary auth owns account deletion. Use specialized fixtures if changing
+credentials, enabling MFA or deleting the account inside the test.</li>
+<li>Commerce clears carts, cancels orders and restores stock before account
+deletion; products follow account/order removal. Preserve dependent data and
+report failures if restoration fails. Do not bypass this order.</li>
+<li>Recover resources after lost responses using unique names; verify cleanup after
+setup/assertion failures. Signup retention and interruption remain limits.
+MFA renewal requires fresh TOTP windows, not fixed sleeps.</li>
+<li>Traces stay off. Keep the redaction reporter first, including CLI overrides;
+never log/attach credentials or enable request debug output.</li>
+</ul>
+</div></details>
+<details class="doc-section"><summary><span class="section-no">05</span><h2>AI checks</h2></summary><div class="doc-body"><p><a href="../tests/api/ollama" target="_blank" rel="noopener noreferrer">Ollama specs</a> exercise deterministic mock scenarios. They
+verify SSE framing, reconstructed text, tool schemas/results and the final
+assistant phase. Consume the whole stream: intermediate <code>done</code> events do not
+end a tool workflow. See <a href="../support/sse.ts" target="_blank" rel="noopener noreferrer">SSE parsing</a> and
+<a href="../support/assertions/ollama-tools.ts" target="_blank" rel="noopener noreferrer">tool assertions</a>.</p>
+<p>Exact mock prose checks transport expectations, not real-model quality or
+grounding. Buffered responses do not measure token latency. Mutable price/stock
+comparisons require isolated data; the known mock/prose mismatch is in Bug reports.</p>
+</div></details>
+<details class="doc-section"><summary><span class="section-no">06</span><h2>How the framework evolved</h2></summary><div class="doc-body"><p>Development moved from contract exploration and authentication to reusable
+fixtures, AI integration, staging CRUD, commerce and MFA. Review then reduced
+repetitive cases and unified clients, cleanup and test style.</p>
+<p>Parallel work included two GPT-6 Luna subagents on 23 October 2026: account-lifecycle
+implementation and password/email exploration. Parent review corrected and
+verified their output. Earlier workstreams were plans; MFA and email/SSO were
+direct deliveries. Agree interfaces/file ownership before delegating, then
+integrate and verify. Concurrent workers need isolated data. Detailed records
+are in the <a href="../README.md" target="_blank" rel="noopener noreferrer">history tag</a>.</p>
+</div></details></div>
+      <p class="source-line">Source: <a href="contributor-guide.md" target="_blank" rel="noopener noreferrer">contributor-guide.md</a></p>
+    </section>
+
+    <section id="coverage" class="report-panel" aria-labelledby="coverage-heading" hidden>
+      <div class="page-heading"><p class="eyebrow">TRACEABLE COVERAGE</p><h1 id="coverage-heading">Every operation. Linked to its tests.</h1><p>53 operations in the saved REST contract. Each has a direct behavioral check; some have negative or disabled-policy coverage only.</p></div>
+      <div class="toolbar"><div class="field search"><label for="endpoint-search">Find an operation</label><input id="endpoint-search" type="search" placeholder="Search method or endpoint…" autocomplete="off"></div><div class="field"><label for="area-filter">API area</label><select id="area-filter"><option value="all">All areas</option><option value="Authentication">Authentication</option><option value="Email">Email</option><option value="Users">Users</option><option value="User prompts">User prompts</option><option value="Products">Products</option><option value="Cart">Cart</option><option value="Orders">Orders</option><option value="Inventory">Inventory</option><option value="Traffic">Traffic</option><option value="AI integration">AI integration</option><option value="QR">QR</option></select></div><div class="field"><label for="project-filter">Playwright project</label><select id="project-filter"><option value="all">All projects</option><option value="api">api</option><option value="admin">admin · staging</option></select></div><button class="btn" type="button" id="clear-filters">Clear filters</button></div>
+      <p id="result-count" class="result-count" aria-live="polite">53 of 53 operations</p>
+      <div class="table-container"><table><caption class="visually-hidden">Saved-contract operations and their active behavioral test specifications</caption><thead><tr><th scope="col">Method</th><th scope="col">Endpoint</th><th scope="col">Project</th><th scope="col">Test evidence</th></tr></thead><tbody id="endpoint-rows"><tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/signup"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/signup</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/signup.post.spec.ts" target="_blank" rel="noopener noreferrer">signup ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api admin" data-search="post /api/v1/users/signin"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/signin</td><td class="project-tag">api + admin</td><td class="evidence"><a href="../tests/api/users/signin.post.spec.ts" target="_blank" rel="noopener noreferrer">signin ↗</a><a href="../tests/admin/users/signin.post.spec.ts" target="_blank" rel="noopener noreferrer">admin ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/refresh"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/refresh</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/refresh.post.spec.ts" target="_blank" rel="noopener noreferrer">refresh ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/logout"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/logout</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/logout.post.spec.ts" target="_blank" rel="noopener noreferrer">logout ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/password/forgot"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/password/forgot</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/password.forgot.post.spec.ts" target="_blank" rel="noopener noreferrer">forgot ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/password/reset"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/password/reset<span class="endpoint-note">Negative checks only</span></td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/password.reset.post.spec.ts" target="_blank" rel="noopener noreferrer">reset ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/sso/exchange"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/sso/exchange<span class="endpoint-note">Disabled policy / validation</span></td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/sso.exchange.post.spec.ts" target="_blank" rel="noopener noreferrer">SSO exchange ↗</a></td></tr>
+<tr data-area="Email" data-projects="api" data-search="post /api/v1/email"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/email</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/email/index.post.spec.ts" target="_blank" rel="noopener noreferrer">email ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="get /api/v1/users/2fa/status"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users/2fa/status</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/2fa.status.get.spec.ts" target="_blank" rel="noopener noreferrer">MFA status ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/2fa/setup"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/2fa/setup</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/2fa.setup.post.spec.ts" target="_blank" rel="noopener noreferrer">MFA setup ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/2fa/confirm"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/2fa/confirm</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/2fa.confirm.post.spec.ts" target="_blank" rel="noopener noreferrer">MFA confirm ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/signin/2fa"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/signin/2fa</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/signin.2fa.post.spec.ts" target="_blank" rel="noopener noreferrer">MFA sign-in ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/2fa/recovery-codes"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/2fa/recovery-codes</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/2fa.recovery-codes.post.spec.ts" target="_blank" rel="noopener noreferrer">MFA recovery ↗</a></td></tr>
+<tr data-area="Authentication" data-projects="api" data-search="post /api/v1/users/2fa/disable"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/users/2fa/disable</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/2fa.disable.post.spec.ts" target="_blank" rel="noopener noreferrer">MFA disable ↗</a></td></tr>
+<tr data-area="Users" data-projects="api" data-search="get /api/v1/users/me"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users/me</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/me.get.spec.ts" target="_blank" rel="noopener noreferrer">me ↗</a></td></tr>
+<tr data-area="Users" data-projects="api" data-search="get /api/v1/users"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/index.get.spec.ts" target="_blank" rel="noopener noreferrer">users ↗</a></td></tr>
+<tr data-area="Users" data-projects="api" data-search="get /api/v1/users/{username}"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users/{username}</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/username.get.spec.ts" target="_blank" rel="noopener noreferrer">username GET ↗</a></td></tr>
+<tr data-area="Users" data-projects="admin" data-search="put /api/v1/users/{username}"><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/users/{username}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/users/username.put.spec.ts" target="_blank" rel="noopener noreferrer">username PUT ↗</a></td></tr>
+<tr data-area="Users" data-projects="admin" data-search="delete /api/v1/users/{username}"><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/v1/users/{username}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/users/username.delete.spec.ts" target="_blank" rel="noopener noreferrer">username DELETE ↗</a></td></tr>
+<tr data-area="Users" data-projects="api" data-search="delete /api/v1/users/{username}/right-to-be-forgotten"><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/v1/users/{username}/right-to-be-forgotten</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/right-to-be-forgotten.delete.spec.ts" target="_blank" rel="noopener noreferrer">right-to-be-forgotten ↗</a></td></tr>
+<tr data-area="Users" data-projects="api" data-search="get /api/v1/users/me/email-events"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users/me/email-events</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/me.email-events.get.spec.ts" target="_blank" rel="noopener noreferrer">email events ↗</a><a href="../tests/api/email/index.post.spec.ts" target="_blank" rel="noopener noreferrer">email workflow ↗</a></td></tr>
+<tr data-area="User prompts" data-projects="api" data-search="get /api/v1/users/chat-system-prompt"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users/chat-system-prompt</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/chat-system-prompt.get.spec.ts" target="_blank" rel="noopener noreferrer">chat GET ↗</a></td></tr>
+<tr data-area="User prompts" data-projects="api" data-search="put /api/v1/users/chat-system-prompt"><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/users/chat-system-prompt</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/chat-system-prompt.put.spec.ts" target="_blank" rel="noopener noreferrer">chat PUT ↗</a></td></tr>
+<tr data-area="User prompts" data-projects="api" data-search="get /api/v1/users/tool-system-prompt"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/users/tool-system-prompt</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/tool-system-prompt.get.spec.ts" target="_blank" rel="noopener noreferrer">tool GET ↗</a></td></tr>
+<tr data-area="User prompts" data-projects="api" data-search="put /api/v1/users/tool-system-prompt"><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/users/tool-system-prompt</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/users/tool-system-prompt.put.spec.ts" target="_blank" rel="noopener noreferrer">tool PUT ↗</a></td></tr>
+<tr data-area="Products" data-projects="api" data-search="get /api/v1/products"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/products</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/products/index.get.spec.ts" target="_blank" rel="noopener noreferrer">products GET ↗</a></td></tr>
+<tr data-area="Products" data-projects="api" data-search="get /api/v1/products/{id}"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/products/{id}</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/products/id.get.spec.ts" target="_blank" rel="noopener noreferrer">product GET ↗</a></td></tr>
+<tr data-area="Products" data-projects="admin" data-search="post /api/v1/products"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/products</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/products/index.post.spec.ts" target="_blank" rel="noopener noreferrer">product POST ↗</a></td></tr>
+<tr data-area="Products" data-projects="admin" data-search="put /api/v1/products/{id}"><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/products/{id}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/products/id.put.spec.ts" target="_blank" rel="noopener noreferrer">product PUT ↗</a></td></tr>
+<tr data-area="Products" data-projects="admin" data-search="delete /api/v1/products/{id}"><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/v1/products/{id}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/products/id.delete.spec.ts" target="_blank" rel="noopener noreferrer">product DELETE ↗</a></td></tr>
+<tr data-area="Cart" data-projects="api admin" data-search="get /api/v1/cart"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/cart</td><td class="project-tag">api + admin</td><td class="evidence"><a href="../tests/api/cart/index.get.spec.ts" target="_blank" rel="noopener noreferrer">cart GET ↗</a><a href="../tests/admin/orders/index.post.spec.ts" target="_blank" rel="noopener noreferrer">checkout ↗</a></td></tr>
+<tr data-area="Cart" data-projects="api admin" data-search="delete /api/v1/cart"><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/v1/cart</td><td class="project-tag">api + admin</td><td class="evidence"><a href="../tests/api/cart/index.delete.spec.ts" target="_blank" rel="noopener noreferrer">clear ↗</a><a href="../tests/admin/cart/index.delete.spec.ts" target="_blank" rel="noopener noreferrer">staging clear ↗</a></td></tr>
+<tr data-area="Cart" data-projects="admin" data-search="post /api/v1/cart/items"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/cart/items</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/cart/items.post.spec.ts" target="_blank" rel="noopener noreferrer">item POST ↗</a></td></tr>
+<tr data-area="Cart" data-projects="admin" data-search="put /api/v1/cart/items/{productid}"><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/cart/items/{productId}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/cart/items.productId.put.spec.ts" target="_blank" rel="noopener noreferrer">item PUT ↗</a></td></tr>
+<tr data-area="Cart" data-projects="admin" data-search="delete /api/v1/cart/items/{productid}"><td><span class="method delete">DELETE</span></td><td class="endpoint">/api/v1/cart/items/{productId}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/cart/items.productId.delete.spec.ts" target="_blank" rel="noopener noreferrer">item DELETE ↗</a></td></tr>
+<tr data-area="Orders" data-projects="admin" data-search="post /api/v1/orders"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/orders</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/orders/index.post.spec.ts" target="_blank" rel="noopener noreferrer">checkout ↗</a></td></tr>
+<tr data-area="Orders" data-projects="admin" data-search="get /api/v1/orders"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/orders</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/orders/index.get.spec.ts" target="_blank" rel="noopener noreferrer">orders GET ↗</a></td></tr>
+<tr data-area="Orders" data-projects="admin" data-search="get /api/v1/orders/{id}"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/orders/{id}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/orders/id.get.spec.ts" target="_blank" rel="noopener noreferrer">order GET ↗</a><a href="../tests/admin/orders/index.post.spec.ts" target="_blank" rel="noopener noreferrer">checkout ↗</a></td></tr>
+<tr data-area="Orders" data-projects="admin" data-search="post /api/v1/orders/{id}/cancel"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/orders/{id}/cancel</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/orders/id.cancel.post.spec.ts" target="_blank" rel="noopener noreferrer">cancel ↗</a></td></tr>
+<tr data-area="Orders" data-projects="admin" data-search="get /api/v1/orders/admin"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/orders/admin</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/orders/admin.get.spec.ts" target="_blank" rel="noopener noreferrer">admin orders ↗</a></td></tr>
+<tr data-area="Orders" data-projects="admin" data-search="put /api/v1/orders/{id}/status"><td><span class="method put">PUT</span></td><td class="endpoint">/api/v1/orders/{id}/status</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/orders/id.status.put.spec.ts" target="_blank" rel="noopener noreferrer">status PUT ↗</a></td></tr>
+<tr data-area="Inventory" data-projects="admin" data-search="get /api/v1/admin/inventory"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/admin/inventory</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/inventory/index.get.spec.ts" target="_blank" rel="noopener noreferrer">inventory GET ↗</a></td></tr>
+<tr data-area="Inventory" data-projects="admin" data-search="get /api/v1/admin/inventory/{productid}"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/admin/inventory/{productId}</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/inventory/productId.get.spec.ts" target="_blank" rel="noopener noreferrer">inventory detail ↗</a></td></tr>
+<tr data-area="Inventory" data-projects="admin" data-search="post /api/v1/admin/inventory/{productid}/adjustments"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/admin/inventory/{productId}/adjustments</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/inventory/productId.adjustments.post.spec.ts" target="_blank" rel="noopener noreferrer">adjustment ↗</a></td></tr>
+<tr data-area="Inventory" data-projects="admin" data-search="get /api/v1/admin/inventory/{productid}/movements"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/admin/inventory/{productId}/movements</td><td class="project-tag">admin</td><td class="evidence"><a href="../tests/admin/inventory/productId.movements.get.spec.ts" target="_blank" rel="noopener noreferrer">movements ↗</a><a href="../tests/admin/orders/index.post.spec.ts" target="_blank" rel="noopener noreferrer">checkout ↗</a><a href="../tests/admin/orders/id.cancel.post.spec.ts" target="_blank" rel="noopener noreferrer">cancel ↗</a></td></tr>
+<tr data-area="Traffic" data-projects="api" data-search="get /api/v1/traffic/info"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/traffic/info</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/traffic/info.get.spec.ts" target="_blank" rel="noopener noreferrer">traffic info ↗</a></td></tr>
+<tr data-area="Traffic" data-projects="api" data-search="get /api/v1/traffic/logs"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/traffic/logs</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/traffic/logs.get.spec.ts" target="_blank" rel="noopener noreferrer">traffic logs ↗</a></td></tr>
+<tr data-area="Traffic" data-projects="api" data-search="get /api/v1/traffic/logs/{correlationid}"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/traffic/logs/{correlationId}</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/traffic/logs-correlation-id.get.spec.ts" target="_blank" rel="noopener noreferrer">traffic detail ↗</a></td></tr>
+<tr data-area="AI integration" data-projects="api" data-search="post /api/v1/ollama/generate"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/ollama/generate</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/ollama/generate.post.spec.ts" target="_blank" rel="noopener noreferrer">generate ↗</a></td></tr>
+<tr data-area="AI integration" data-projects="api" data-search="post /api/v1/ollama/chat"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/ollama/chat</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/ollama/chat.post.spec.ts" target="_blank" rel="noopener noreferrer">chat ↗</a></td></tr>
+<tr data-area="AI integration" data-projects="api" data-search="post /api/v1/ollama/chat/tools"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/ollama/chat/tools</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/ollama/chat-tools.post.spec.ts" target="_blank" rel="noopener noreferrer">chat tools ↗</a></td></tr>
+<tr data-area="AI integration" data-projects="api" data-search="get /api/v1/ollama/chat/tools/definitions"><td><span class="method get">GET</span></td><td class="endpoint">/api/v1/ollama/chat/tools/definitions</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/ollama/tools-definitions.get.spec.ts" target="_blank" rel="noopener noreferrer">definitions ↗</a></td></tr>
+<tr data-area="QR" data-projects="api" data-search="post /api/v1/qr/create"><td><span class="method post">POST</span></td><td class="endpoint">/api/v1/qr/create</td><td class="project-tag">api</td><td class="evidence"><a href="../tests/api/qr/create.post.spec.ts" target="_blank" rel="noopener noreferrer">QR ↗</a></td></tr></tbody></table><div class="empty-state" id="empty-state" hidden>No matching operations. Try another endpoint or clear the filters.</div></div>
+      <p class="table-footnote">An operation is an HTTP method + path. Setup requests and documentation assertions alone do not count. Project “admin” also includes ordinary staging shoppers.</p>
+      <details class="doc-section"><summary><span class="section-no">NEXT</span><h2>Remaining gaps and dependencies</h2></summary><div class="doc-body"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Important unverified behavior / dependency</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Password reset</td>
+<td>Successful reset, expiry/reuse and session effects need an observable reset token</td>
+</tr>
+<tr>
+<td>SSO</td>
+<td>Enabled exchange and verifier/provisioning behavior need an enabled API and trusted IdP</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>Acceptance/events are covered; SMTP delivery, final transitions and contents need a controlled sink</td>
+</tr>
+<tr>
+<td>Commerce</td>
+<td>Selected detail/history permissions and missing-resource cases; checkout&#39;s defensive product-disappeared 404 needs controlled backend setup</td>
+</tr>
+<tr>
+<td>Auth/account lifecycle</td>
+<td>Full deletion cascade, refresh-family replay revocation, immediate access-token revocation and specialized MFA timing/race boundaries</td>
+</tr>
+<tr>
+<td>AI</td>
+<td>Real-model quality, reliable final-answer grounding, upstream failures and incremental latency; exact mutable catalogue comparisons need isolated data</td>
+</tr>
+<tr>
+<td>Defect regressions</td>
+<td>Prompt parsing/types, incompatible QR Accept and deleted-account JWT errors; see BUG-002–004 in <a href="#bugs">Bug reports</a></td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td>Signup retains accounts; interrupted processes or API outages can prevent cleanup</td>
+</tr>
+</tbody></table>
+<p>The mock/prose inconsistency (BUG-001) remains a documented limitation. Traffic
+detail&#39;s historical 500 (BUG-005) did not reproduce on the 23 October recheck;
+root cause/fix is unconfirmed. Overflow, load/concurrency, GraphQL and gRPC are
+outside the measured scope.</p>
+<p>Prioritize observable reset/SSO/mail infrastructure, then selected permission,
+defect and cleanup gaps. Recount operation/spec links after contract or test
+changes; record actual run dates and settings. Follow the
+<a href="#guide">contributor guide</a> and <a href="#guide">README commands</a>.
+Older delivery results are preserved in the <a href="../README.md" target="_blank" rel="noopener noreferrer">history tag</a>.</p>
+</div></details>
+      <p class="source-line">Source: <a href="../api-coverage-report.md" target="_blank" rel="noopener noreferrer">api-coverage-report.md</a> · Full regression baseline: 24 October 2026</p>
+    </section>
+
+    <section id="bugs" class="report-panel" aria-labelledby="bugs-heading" hidden>
+      <div class="page-heading"><p class="eyebrow">INVESTIGATION / REPRODUCTION</p><h1 id="bugs-heading">Bug reports</h1><p>Dated observations with reproduction steps and expected behavior. Fixes are unconfirmed; traffic detail did not reproduce on its last recorded recheck.</p></div>
+      <div class="bug-summary"><span class="pill amber">4 fix statuses unconfirmed</span><span class="pill neutral">1 not reproduced on recheck</span></div>
+      <div class="details-list"><details class="bug" id="bug-001"><summary><span class="bug-id">BUG-001</span><h2>final mock answer disagrees with tool data</h2><span class="pill amber">Mock limitation</span></summary><div class="doc-body"><p><strong>Observed:</strong> 11 October 2026. <strong>Status:</strong> mock limitation; fix unconfirmed.</p>
+<p><strong>Reproduce:</strong> sign in, fetch <code>/api/v1/ollama/chat/tools/definitions</code>, then POST
+<code>/api/v1/ollama/chat/tools</code> with those tools, model <code>qwen3.5:2b</code>, <code>stream: true</code>
+and the user message <code>What iphones do we have available? Tell me the details about them</code>.
+Consume the complete SSE response and compare final prose with <code>get_product_snapshot</code>.</p>
+<p><strong>Expected:</strong> product facts match tool results. <strong>Actual:</strong> snapshot price/stock
+was 999.99/47; final prose stated $999/5. Mock final prose was a fixed string.
+<a href="../tests/api/ollama/chat-tools.post.spec.ts" target="_blank" rel="noopener noreferrer">Current test</a> checks tool payloads
+and mock prose separately; passing it does not establish answer grounding or a
+real-model defect.</p>
+</div></details>
+<details class="bug" id="bug-002"><summary><span class="bug-id">BUG-002</span><h2>a deleted account&#39;s JWT can produce 500</h2><span class="pill amber">Fix unconfirmed</span></summary><div class="doc-body"><p><strong>Observed:</strong> 23 October 2026. <strong>Status:</strong> fix unconfirmed.</p>
+<p><strong>Reproduce:</strong> register/sign in, retain the JWT, delete the account through
+<code>DELETE /api/v1/users/{username}/right-to-be-forgotten</code>, then repeat DELETE or
+GET <code>/api/v1/users/{username}</code> with that JWT.</p>
+<p><strong>Expected:</strong> a documented authentication/missing-resource error; precedence
+needs confirmation. <strong>Actual:</strong> 500. The
+<a href="../tests/api/users/right-to-be-forgotten.delete.spec.ts" target="_blank" rel="noopener noreferrer">lifecycle test</a> verifies
+absence through an independent observer; it does not accept 500 as cleanup success
+or assert immediate access-JWT revocation.</p>
+</div></details>
+<details class="bug" id="bug-003"><summary><span class="bug-id">BUG-003</span><h2>prompt request parsing and type validation</h2><span class="pill amber">Fix unconfirmed</span></summary><div class="doc-body"><p><strong>Observed:</strong> 6 October 2026. <strong>Status:</strong> fixes unconfirmed; intended-behavior
+regressions are not automated.</p>
+<p><strong>Reproduce:</strong> with a valid JWT, PUT <code>/api/v1/users/chat-system-prompt</code> using
+malformed JSON, no body or <code>{&quot;chatSystemPrompt&quot;:{}}</code>; repeat with
+<code>{&quot;chatSystemPrompt&quot;:123}</code>. The tool-prompt endpoint behaves similarly with
+<code>toolSystemPrompt</code>.</p>
+<p><strong>Expected:</strong> 400 validation errors, preserving the previous value.
+<strong>Actual:</strong> malformed/object requests return 401 although subsequent GET works;
+numeric input returns 200 and persists <code>&quot;123&quot;</code>. See the
+<a href="../tests/api/users/chat-system-prompt.put.spec.ts" target="_blank" rel="noopener noreferrer">chat-prompt spec</a> for current scope.</p>
+</div></details>
+<details class="bug" id="bug-004"><summary><span class="bug-id">BUG-004</span><h2>QR Accept negotiation returns 401</h2><span class="pill amber">Fix unconfirmed</span></summary><div class="doc-body"><p><strong>Observed:</strong> 20 October 2026. <strong>Status:</strong> fix unconfirmed; incompatible-Accept
+regression is not automated.</p>
+<p><strong>Reproduce:</strong> with a valid JWT, POST <code>/api/v1/qr/create</code> with JSON
+<code>{&quot;text&quot;:&quot;https://example.invalid/qr-core&quot;}</code> and <code>Accept: application/json</code>.
+Repeat with <code>Accept: image/png, application/json</code>.</p>
+<p><strong>Expected:</strong> a media-negotiation rejection for JSON-only Accept and 200 PNG
+for compatible Accept. <strong>Actual:</strong> 401 for JSON-only, 200 for compatible headers.
+<a href="../tests/api/qr/create.post.spec.ts" target="_blank" rel="noopener noreferrer">Current QR tests</a> use compatible Accept.</p>
+</div></details>
+<details class="bug" id="bug-005"><summary><span class="bug-id">BUG-005</span><h2>existing traffic detail returned 500</h2><span class="pill neutral">Not reproduced on recheck</span></summary><div class="doc-body"><p><strong>Observed:</strong> 20 October 2026. <strong>Status:</strong> did not reproduce on 23 October;
+root cause/fix unconfirmed.</p>
+<p><strong>Reproduce:</strong> generate a unique <code>api_&lt;UUID&gt;</code> session header, GET
+<code>/api/v1/traffic/info</code>, find that request in the session-scoped
+<code>/api/v1/traffic/logs?page=0&amp;size=10</code>, then GET
+<code>/api/v1/traffic/logs/{correlationId}</code> with the same <code>X-Client-Session-Id</code>.</p>
+<p><strong>Expected:</strong> 200 with the captured entry. <strong>Actual:</strong> 500 for found entries;
+fresh unknown IDs returned empty 404. The
+<a href="../tests/api/traffic/logs-correlation-id.get.spec.ts" target="_blank" rel="noopener noreferrer">regression test</a> retains
+the 200 assertion and passed on the last recorded recheck. This covers legacy
+public traffic mode, not protected mode.</p>
+</div></details></div>
+      <p class="source-line">Source: <a href="bug-reports.md" target="_blank" rel="noopener noreferrer">bug-reports.md</a> · Observations apply to awesome.byst.re · Use owned data for reproduction.</p>
+    </section>
+
+    <footer class="footer"><span>Awesome AI API · Documentation snapshot · 25 October 2026</span><span>Generated from four maintained documents · <a href="https://github.com/MarcinWadek/awesome-ai-api" target="_blank" rel="noopener noreferrer">Source repository ↗</a></span></footer>
+    <p class="print-only">This is a documentation report, not a new test execution. Recorded results retain their original verification dates.</p>
+    <div id="interaction-status" class="visually-hidden" aria-live="polite"></div>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      const pages = ['overview', 'guide', 'coverage', 'bugs'];
+      const labels = { overview: 'Overview', guide: 'Contributor guide', coverage: 'Endpoint coverage', bugs: 'Bug reports' };
+      const status = document.getElementById('interaction-status');
+      function showPage(requested, updateHash = false) {
+        let page = pages.includes(requested) ? requested : 'overview';
+        if (requested.startsWith('bug-')) page = 'bugs';
+        for (const id of pages) document.getElementById(id).hidden = id !== page;
+        for (const link of document.querySelectorAll('.nav-item')) {
+          if (link.hash === '#' + page) link.setAttribute('aria-current', 'page');
+          else link.removeAttribute('aria-current');
+        }
+        document.getElementById('page-label').textContent = labels[page];
+        document.title = labels[page] + ' · Awesome AI API report';
+        if (requested.startsWith('bug-')) {
+          const bug = document.getElementById(requested);
+          if (bug) bug.open = true;
+        }
+        if (updateHash) history.replaceState(null, '', '#' + requested);
+        status.textContent = labels[page] + ' selected';
+      }
+      document.addEventListener('click', event => {
+        const link = event.target.closest('a[href^="#"]');
+        if (!link || link.hash === '#main') return;
+        const requested = link.hash.slice(1);
+        if (!pages.includes(requested) && !requested.startsWith('bug-')) return;
+        event.preventDefault();
+        showPage(requested, true);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      });
+      window.addEventListener('hashchange', () => { if (location.hash !== '#main') showPage(location.hash.slice(1)); });
+      showPage(location.hash.slice(1));
+
+      const search = document.getElementById('endpoint-search');
+      const area = document.getElementById('area-filter');
+      const project = document.getElementById('project-filter');
+      const rows = [...document.querySelectorAll('#endpoint-rows tr')];
+      function filterRows() {
+        const query = search.value.toLowerCase().trim();
+        let count = 0;
+        for (const row of rows) {
+          const match = (!query || row.dataset.search.includes(query)) && (area.value === 'all' || row.dataset.area === area.value) && (project.value === 'all' || row.dataset.projects.split(' ').includes(project.value));
+          row.hidden = !match;
+          if (match) count++;
+        }
+        document.getElementById('result-count').textContent = count + ' of ' + rows.length + ' operations';
+        document.getElementById('empty-state').hidden = count !== 0;
+      }
+      search.addEventListener('input', filterRows);
+      area.addEventListener('change', filterRows);
+      project.addEventListener('change', filterRows);
+      document.getElementById('clear-filters').addEventListener('click', () => { search.value = ''; area.value = 'all'; project.value = 'all'; filterRows(); search.focus(); });
+      document.getElementById('copy-install').addEventListener('click', async event => {
+        const button = event.currentTarget;
+        try { await navigator.clipboard.writeText('npm ci'); button.textContent = 'Copied'; status.textContent = 'npm ci copied'; }
+        catch { button.textContent = 'Run: npm ci'; status.textContent = 'Copy unavailable. Run npm ci in the repository.'; }
+      });
+      let printState = null;
+      window.addEventListener('beforeprint', () => {
+        if (printState) return;
+        printState = { search: search.value, area: area.value, project: project.value, details: [...document.querySelectorAll('details')].map(element => [element, element.open]) };
+        for (const [element] of printState.details) element.open = true;
+        search.value = ''; area.value = 'all'; project.value = 'all'; filterRows();
+      });
+      window.addEventListener('afterprint', () => {
+        if (!printState) return;
+        search.value = printState.search; area.value = printState.area; project.value = printState.project;
+        for (const [element, open] of printState.details) element.open = open;
+        printState = null;
+        filterRows();
+      });
+      document.getElementById('print-report').addEventListener('click', () => window.print());
+    })();
+  </script>
+  <noscript><style>.report-panel[hidden]{display:block!important}.toolbar,.quickstart button{display:none}.report-panel{margin-bottom:40px}</style></noscript>
+</body>
+</html>
